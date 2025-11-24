@@ -1,20 +1,25 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import Background from './Background';
-import BottomNav from '@/components/BottomNav';
-import { AppState } from '@/hooks/useGameState';
+import { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Background from "./Background";
+import BottomNav from "@/components/BottomNav";
+import { AppState } from "@/hooks/useGameState";
+import Image from "next/image";
 
 interface GameLayoutProps {
   children: ReactNode;
   appState: AppState;
   onNavigate: (screen: AppState) => void;
+  showNav?: boolean;
 }
 
-import Image from 'next/image';
-
-export default function GameLayout({ children, appState, onNavigate }: GameLayoutProps) {
+export default function GameLayout({
+  children,
+  appState,
+  onNavigate,
+  showNav = true,
+}: GameLayoutProps) {
   return (
     <div className="flex flex-col h-screen justify-center items-center overflow-hidden bg-[#1a1a1a]">
       {/* Desktop Background */}
@@ -38,9 +43,9 @@ export default function GameLayout({ children, appState, onNavigate }: GameLayou
           <AnimatePresence mode="wait">
             <motion.div
               key={appState}
-              initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+              initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
               transition={{ duration: 0.4, ease: "circOut" }}
               className="w-full h-full"
             >
@@ -50,7 +55,7 @@ export default function GameLayout({ children, appState, onNavigate }: GameLayou
         </div>
 
         {/* Persistent Bottom Navigation */}
-        {appState !== 'loading' && (
+        {appState !== "loading" && showNav && (
           <BottomNav activeTab={appState} onNavigate={onNavigate} />
         )}
       </main>
