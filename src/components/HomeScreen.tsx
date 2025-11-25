@@ -14,7 +14,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
       <Image
-        src="/assets/background/home_bg.png"
+        src="/assets/background/home_bg3.webp"
         alt="Background"
         fill
         className="object-cover opacity-80"

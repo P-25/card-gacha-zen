@@ -28,11 +28,6 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
       icon: "/assets/store2.svg",
     },
     {
-      id: "social",
-      label: "SOCIAL",
-      icon: "/assets/social.svg",
-    },
-    {
       id: "quests",
       label: "QUESTS",
       icon: "/assets/sword.svg", // Using existing quest icon
@@ -42,7 +37,7 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-50">
       {/* Background Bar */}
-      <div className="relative h-20 bg-[#F8E6D5] flex items-center justify-around px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] rounded-t-3xl">
+      <div className="relative h-20 bg-[#ECEEFB] flex items-center justify-around px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] rounded-t-3xl">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (

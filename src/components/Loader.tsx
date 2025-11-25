@@ -2,20 +2,38 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+
+// Array of Zen/Spiritual loading messages
+const LOADING_MESSAGES = [
+  "Finding Peace...",
+  "Consulting the stars...",
+  "Manifesting destiny...",
+  "Shuffling the cosmic deck...",
+  "Connecting to the spirit realm...",
+  "Breathing in starlight...",
+  "Gathering celestial energy...",
+  "Aligning the constellations...",
+  "Weaving your fate...",
+  "Seeking clarity...",
+];
 
 export default function Loader({ onComplete }: { onComplete?: () => void }) {
+  // Initialize with a default to prevent hydration mismatch
+  const [message, setMessage] = useState(LOADING_MESSAGES[0]);
+
+  useEffect(() => {
+    // Select a random message once the component mounts in the browser
+    const randomIndex = Math.floor(Math.random() * LOADING_MESSAGES.length);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMessage(LOADING_MESSAGES[randomIndex]);
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
-      <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="relative w-32 h-32"
-      >
+      <motion.div className="relative w-64 h-64">
         <Image
-          src="/assets/zen-icon-home-clean.png"
+          src="/assets/summon_gold_game2.png"
           alt="Loading"
           fill
           className="object-contain opacity-80"
@@ -24,12 +42,13 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="mt-8 text-[#8FA89B] font-bold text-xl tracking-widest uppercase font-display"
+        key={message}
+        // initial={{ opacity: 0 }}
+        // animate={{ opacity: [0.5, 1, 0.5] }}
+        // transition={{ duration: 2, repeat: Infinity }}
+        className="mt-8 text-[#fff] font-bold text-xl tracking-widest uppercase font-display text-center px-4"
       >
-        Finding Peace...
+        {message}
       </motion.div>
     </div>
   );
