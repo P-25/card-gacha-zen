@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 
-export type AppState = "loading" | "home" | "gacha" | "quests" | "collection";
+export type AppState =
+  | "loading"
+  | "home"
+  | "gacha"
+  | "quests"
+  | "collection"
+  | "battle"
+  | "deck"
+  | "shop"
+  | "social";
 
 export interface GameResources {
   gold: number;

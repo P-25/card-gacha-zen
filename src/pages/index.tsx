@@ -4,6 +4,7 @@ import GameLayout from "@/components/layout/GameLayout";
 import Loader from "@/components/Loader";
 import HomeScreen from "@/components/HomeScreen";
 import GachaScreen from "@/components/GachaScreen";
+import BattleScreen from "@/components/BattleScreen";
 import { PlaceholderScreen } from "@/components/PlaceholderScreens";
 
 export default function GamePage() {
@@ -23,10 +24,14 @@ export default function GamePage() {
           onSelectionModeChange={setIsGachaSelectionMode}
         />
       )}
+      {appState === "battle" && <BattleScreen onNavigate={navigateTo} />}
       {appState === "quests" && <PlaceholderScreen title="Quests" icon="📜" />}
       {appState === "collection" && (
         <PlaceholderScreen title="Collection" icon="📚" />
       )}
+      {appState === "deck" && <PlaceholderScreen title="Deck" icon="🃏" />}
+      {appState === "shop" && <PlaceholderScreen title="Shop" icon="🏪" />}
+      {appState === "social" && <PlaceholderScreen title="Social" icon="👥" />}
     </GameLayout>
   );
 }

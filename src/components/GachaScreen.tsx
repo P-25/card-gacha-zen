@@ -6,6 +6,7 @@ import GachaDetail from "@/components/features/gacha/GachaDetail";
 import GachaOpeningView from "@/components/features/gacha/GachaOpeningView";
 import GachaRevealView from "@/components/features/gacha/GachaRevealView";
 import CurrencyHeader from "@/components/features/gacha/CurrencyHeader";
+import GoldSummonRevel from "@/components/features/gacha/GoldSummonRevel";
 import { GameResources } from "@/hooks/useGameState";
 
 interface GachaScreenProps {
@@ -21,14 +22,37 @@ export default function GachaScreen({
   const [isOpening, setIsOpening] = useState(false);
   const [isOpened, setIsOpened] = useState(false);
   const [showCard, setShowCard] = useState(false);
+  const [isGoldReveal, setIsGoldReveal] = useState(false);
 
   // Notify parent of navigation state changes
   useEffect(() => {
     if (onSelectionModeChange) {
-      const isSelection = !selectedBox && !isOpening && !isOpened && !showCard;
+      const isSelection =
+        !selectedBox && !isOpening && !isOpened && !showCard && !isGoldReveal;
       onSelectionModeChange(isSelection);
     }
-  }, [selectedBox, isOpening, isOpened, showCard, onSelectionModeChange]);
+  }, [
+    selectedBox,
+    isOpening,
+    isOpened,
+    showCard,
+    isGoldReveal,
+    onSelectionModeChange,
+  ]);
+
+  const handleSummon = (type: "gem" | "gold", count: number) => {
+    if (type === "gold" && count === 1) {
+      handleGoldRevealComplete();
+    } else {
+      // Default behavior for now (or handle other types)
+      setSelectedBox(type);
+    }
+  };
+
+  const handleGoldRevealComplete = () => {
+    setIsGoldReveal(false);
+    setShowCard(true);
+  };
 
   const handleOpen = () => {
     if (isOpening || isOpened) return;
@@ -46,6 +70,7 @@ export default function GachaScreen({
     setShowCard(false);
     setIsOpened(false);
     setIsOpening(false);
+    setIsGoldReveal(false);
     // Optional: Return to selection or stay on detail?
     // Usually stay on detail to pull again, but let's keep it simple for now.
   };
@@ -54,28 +79,35 @@ export default function GachaScreen({
     setSelectedBox(null);
   };
 
-  // 1. Card Reveal Overlay (Highest Priority)
+  // 1. Gold Reveal Animation (Special Case)
+  if (isGoldReveal) {
+    return (
+      <GoldSummonRevel autoStart={true} onComplete={handleGoldRevealComplete} />
+    );
+  }
+
+  // 2. Card Reveal Overlay (Highest Priority)
   if (showCard) {
     return <GachaRevealView onReset={handleReset} />;
   }
 
-  // 2. Chest Opening Animation
+  // 3. Chest Opening Animation (Legacy/Gem)
   if (isOpening || isOpened) {
     return <GachaOpeningView isOpening={isOpening} isOpened={isOpened} />;
   }
 
-  // 3. Detail View (Selected Box)
+  // 4. Detail View (Selected Box)
   if (selectedBox) {
     return (
       <GachaDetail type={selectedBox} onBack={handleBack} onOpen={handleOpen} />
     );
   }
 
-  // 4. Selection View (Default)
+  // 5. Selection View (Default)
   return (
     <>
       <CurrencyHeader gold={resources.gold} gems={resources.gems} />
-      <GachaSelection onSelect={setSelectedBox} />
+      <GachaSelection onSummon={handleSummon} />
     </>
   );
 }

@@ -1,78 +1,86 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface BottomNavProps {
-  activeTab: 'home' | 'gacha' | 'quests' | 'collection';
-  onNavigate: (tab: 'home' | 'gacha' | 'quests' | 'collection') => void;
+  activeTab: "home" | "collection" | "shop" | "social" | "quests" | string;
+  onNavigate: (
+    tab: "home" | "collection" | "shop" | "social" | "quests"
+  ) => void;
 }
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   const navItems = [
-    { id: 'quests', label: 'Quests', icon: '/assets/scroll_icon.svg', isMain: false },
-    { id: 'home', label: 'Home', icon: '/assets/zen-icon-home-clean.png', isMain: true },
-    { id: 'collection', label: 'Collection', icon: '/assets/zen-icon-collection-clean.png', isMain: false },
+    {
+      id: "home",
+      label: "HOME",
+      icon: "/assets/home.svg",
+    },
+    {
+      id: "collection",
+      label: "COLLECTION",
+      icon: "/assets/cards.svg",
+    },
+    {
+      id: "shop",
+      label: "SHOP",
+      icon: "/assets/store2.svg",
+    },
+    {
+      id: "social",
+      label: "SOCIAL",
+      icon: "/assets/social.svg",
+    },
+    {
+      id: "quests",
+      label: "QUESTS",
+      icon: "/assets/sword.svg", // Using existing quest icon
+    },
   ] as const;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-6 pt-4 z-50 pointer-events-none">
-      <div className="relative flex items-center justify-around px-6 h-20 min-w-[320px] w-[90%] max-w-md bg-[#E8F3E8]/90 backdrop-blur-2xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.15)] border border-white/20 pointer-events-auto">
+    <div className="absolute bottom-0 left-0 right-0 z-50">
+      {/* Background Bar */}
+      <div className="relative h-20 bg-[#F8E6D5] flex items-center justify-around px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] rounded-t-3xl">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
-            <motion.button
+            <button
               key={item.id}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onClick={() => onNavigate(item.id as any)}
-              className={`relative flex flex-col items-center justify-center ${item.isMain ? '-mt-12' : ''} cursor-pointer`}
-              whileTap={{ scale: 0.95 }}
+              className="relative flex flex-col items-center justify-center w-16 h-full gap-1 cursor-pointer"
             >
-              {/* Main Icon Background Glow */}
-              {item.isMain && (
-                <div className="absolute inset-0 bg-gradient-to-b from-[#E8F3E8] to-transparent opacity-60 blur-2xl rounded-full transform scale-150" />
-              )}
-
-              <motion.div
-                animate={{
-                  y: isActive ? (item.isMain ? -5 : -2) : 0,
-                  scale: isActive ? 1.1 : 1,
-                }}
-                className={`relative flex items-center justify-center ${
-                  item.isMain 
-                    ? 'w-20 h-20 bg-[#F0F7F4] rounded-full shadow-xl border-4 border-[#E8F3E8] backdrop-blur-sm' 
-                    : 'w-12 h-12'
+              <div
+                className={`relative w-8 h-8 transition-all duration-300 ${
+                  isActive ? "scale-110" : "opacity-50 grayscale"
                 }`}
               >
-                <div className={`relative ${item.isMain ? 'w-12 h-12' : 'w-8 h-8'}`}>
-                  <Image
-                    src={item.icon}
-                    alt={item.label}
-                    fill
-                    className={`object-contain transition-all duration-300 ${
-                      isActive 
-                        ? 'brightness-0 opacity-100 drop-shadow-sm' 
-                        : 'brightness-0 opacity-60 hover:opacity-80'
-                    }`}
-                  />
-                </div>
-              </motion.div>
-              
-              {!item.isMain && (
-                <span className={`text-[10px] font-bold tracking-widest mt-1 transition-colors duration-300 ${
-                  isActive ? 'text-[#1A2F23]' : 'text-[#2C4A3B]/70'
-                }`}>
-                  {item.label}
-                </span>
-              )}
-              
-              {isActive && !item.isMain && (
+                <Image
+                  src={item.icon}
+                  alt={item.label}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+
+              <span
+                className={`text-[10px] font-bold tracking-widest transition-colors duration-300 ${
+                  isActive ? "text-[#4A4A4A]" : "text-[#8C8C8C]"
+                }`}
+              >
+                {item.label}
+              </span>
+
+              {isActive && (
                 <motion.div
                   layoutId="activeTabIndicator"
-                  className="absolute -bottom-2 w-1 h-1 bg-[#1A2F23] rounded-full"
+                  className="absolute -bottom-0 w-8 h-1 bg-[#4A4A4A] rounded-t-full"
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
-            </motion.button>
+            </button>
           );
         })}
       </div>

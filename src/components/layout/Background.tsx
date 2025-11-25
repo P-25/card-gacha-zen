@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function Background() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none bg-[#F5F2EB]">
       <Image
-        src="/assets/bamboo-bg.png"
+        src="/assets/background/full_bg.png"
         alt="Background"
         fill
         className="object-cover opacity-80"
