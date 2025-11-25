@@ -6,6 +6,7 @@ import HomeScreen from "@/components/HomeScreen";
 import GachaScreen from "@/components/GachaScreen";
 import BattleScreen from "@/components/BattleScreen";
 import { PlaceholderScreen } from "@/components/PlaceholderScreens";
+import CollectionsPage from "@/pages/collections";
 
 export default function GamePage() {
   const { appState, navigateTo, resources } = useGameState();
@@ -26,9 +27,7 @@ export default function GamePage() {
       )}
       {appState === "battle" && <BattleScreen onNavigate={navigateTo} />}
       {appState === "quests" && <PlaceholderScreen title="Quests" icon="📜" />}
-      {appState === "collection" && (
-        <PlaceholderScreen title="Collection" icon="📚" />
-      )}
+      {appState === "collection" && <CollectionsPage />}
       {appState === "deck" && <PlaceholderScreen title="Deck" icon="🃏" />}
       {appState === "shop" && <PlaceholderScreen title="Shop" icon="🏪" />}
       {appState === "social" && <PlaceholderScreen title="Social" icon="👥" />}

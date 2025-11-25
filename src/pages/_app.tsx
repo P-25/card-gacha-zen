@@ -14,10 +14,14 @@ const manrope = Manrope({
   display: "swap",
 });
 
+import ReduxProvider from "@/components/ReduxProvider";
+
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className={`${cinzel.variable} ${manrope.variable} font-sans`}>
-      <Component {...pageProps} />
-    </div>
+    <ReduxProvider>
+      <div className={`${cinzel.variable} ${manrope.variable} font-sans`}>
+        <Component {...pageProps} />
+      </div>
+    </ReduxProvider>
   );
 }

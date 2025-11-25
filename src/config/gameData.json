@@ -1,0 +1,180 @@
+{
+    "rarityTypes": [
+        "COMMON",
+        "UNCOMMON",
+        "RARE",
+        "LEGENDARY"
+    ],
+    "summons": [
+        {
+            "id": "banner_standard",
+            "name": "Standard Summon",
+            "cost": 100,
+            "currency": "gems",
+            "rates": {
+                "COMMON": 0.70,
+                "UNCOMMON": 0.25,
+                "RARE": 0.05
+            },
+            "pity": {
+                "targetRarity": "RARE",
+                "hardPity": 10,
+                "softPity": 7,
+                "softPityIncrement": 0.1
+            },
+            "pool": [
+                {
+                    "id": "card_001",
+                    "weight": 10
+                },
+                {
+                    "id": "card_002",
+                    "weight": 10
+                },
+                {
+                    "id": "card_003",
+                    "weight": 10
+                },
+                {
+                    "id": "card_004",
+                    "weight": 5
+                },
+                {
+                    "id": "card_005",
+                    "weight": 2
+                },
+                {
+                    "id": "gold_pack_small",
+                    "weight": 5,
+                    "type": "RESOURCE"
+                }
+            ]
+        },
+        {
+            "id": "banner_rate_up",
+            "name": "Dragon Slayer Rate Up",
+            "cost": 100,
+            "currency": "gems",
+            "rates": {
+                "COMMON": 0.70,
+                "UNCOMMON": 0.25,
+                "RARE": 0.05
+            },
+            "pity": {
+                "targetRarity": "RARE",
+                "hardPity": 10,
+                "softPity": 7,
+                "softPityIncrement": 0.1
+            },
+            "pool": [
+                {
+                    "id": "card_005",
+                    "weight": 50
+                },
+                {
+                    "id": "card_001",
+                    "weight": 10
+                },
+                {
+                    "id": "card_002",
+                    "weight": 10
+                },
+                {
+                    "id": "card_003",
+                    "weight": 10
+                },
+                {
+                    "id": "card_004",
+                    "weight": 5
+                },
+                {
+                    "id": "gold_pack_small",
+                    "weight": 5,
+                    "type": "RESOURCE"
+                }
+            ]
+        }
+    ],
+    "cards": [
+        {
+            "id": "card_001",
+            "name": "Iron Guard",
+            "type": "CARD",
+            "rarity": "COMMON",
+            "setName": "Core Set",
+            "setId": "CS01",
+            "level": 1,
+            "releaseDate": "2023-01-01",
+            "description": "A sturdy defender.",
+            "hp": 150,
+            "atk": 30,
+            "image": "/assets/cards/card_001.png"
+        },
+        {
+            "id": "card_002",
+            "name": "Scout",
+            "type": "CARD",
+            "rarity": "COMMON",
+            "setName": "Core Set",
+            "setId": "CS02",
+            "level": 1,
+            "releaseDate": "2023-01-01",
+            "description": "Fast and agile.",
+            "hp": 80,
+            "atk": 60,
+            "image": "/assets/cards/card_002.jpg"
+        },
+        {
+            "id": "card_003",
+            "name": "Mage Apprentice",
+            "type": "CARD",
+            "rarity": "COMMON",
+            "setName": "Core Set",
+            "setId": "CS03",
+            "level": 1,
+            "releaseDate": "2023-01-01",
+            "description": "Learning the arcane arts.",
+            "hp": 60,
+            "atk": 80,
+            "image": "/assets/cards/card_003.jpg"
+        },
+        {
+            "id": "card_004",
+            "name": "Knight Captain",
+            "type": "CARD",
+            "rarity": "UNCOMMON",
+            "setName": "Core Set",
+            "setId": "CS04",
+            "level": 1,
+            "releaseDate": "2023-01-01",
+            "description": "Leads the charge.",
+            "hp": 200,
+            "atk": 100,
+            "image": "/assets/cards/card_004.jpg"
+        },
+        {
+            "id": "card_005",
+            "name": "Dragon Slayer",
+            "type": "CARD",
+            "rarity": "RARE",
+            "setName": "Core Set",
+            "setId": "CS05",
+            "level": 1,
+            "releaseDate": "2023-01-01",
+            "description": "Legendary hero.",
+            "hp": 400,
+            "atk": 350,
+            "image": "/assets/cards/card_005.jpg"
+        }
+    ],
+    "resources": [
+        {
+            "id": "gold_pack_small",
+            "name": "Small Gold Pack",
+            "type": "RESOURCE",
+            "rarity": "COMMON",
+            "value": 50,
+            "image": "/assets/items/gold_small.png"
+        }
+    ]
+}

@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import GoldSummonSection from "./GoldSummom/GoldSummonSection";
 import RateUpSummonSection from "./RateUpSummon/RateUpSummonSection";
 
+import { Card, Resource } from "@/types/game";
+
 interface GachaSelectionProps {
-  onSummon: (type: "gem" | "gold", count: number) => void;
+  onSummon: (
+    type: "gem" | "gold",
+    count: number,
+    results?: (Card | Resource)[]
+  ) => void;
 }
 
 export default function GachaSelection({ onSummon }: GachaSelectionProps) {

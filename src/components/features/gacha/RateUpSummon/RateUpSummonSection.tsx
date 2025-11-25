@@ -3,9 +3,23 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import {
+  spendGems,
+  addCardToInventory,
+  addGold,
+} from "@/store/slices/playerSlice";
+import { updatePity } from "@/store/slices/pitySlice";
+import { performSummon } from "@/lib/gameLogic";
+import { Card, Resource } from "@/types/game";
 
 interface RateUpSummonSectionProps {
-  onSummon: (type: "gem" | "gold", count: number) => void;
+  onSummon: (
+    type: "gem" | "gold",
+    count: number,
+    results?: (Card | Resource)[]
+  ) => void;
   onBannerChange: () => void;
 }
 
@@ -14,31 +28,80 @@ export default function RateUpSummonSection({
   onBannerChange,
 }: RateUpSummonSectionProps) {
   const [crystalState, setCrystalState] = useState("idle");
+  const dispatch = useDispatch();
+  const { gems } = useSelector((state: RootState) => state.player);
+  const pityState = useSelector((state: RootState) => state.pity);
 
   const banner = {
+    id: "banner_rate_up",
     bgClass: "bg-linear-to-b from-[#8E9EAB] to-[#eef2f3]",
     bgGradient: "bg-linear-to-b from-[#4A5568] to-[#2D3748]",
     portalImage: "/assets/summon_rate_gate.png",
     currencyIcon: "/assets/gem3.svg",
-    singlePrice: 1,
-    multiPrice: 10,
+    singlePrice: 10,
+    multiPrice: 100,
     featuredName: "Lunar Spirit",
     featuredIcon: "/assets/summon_rate_gem.png",
   };
 
-  const SummonStart = (count: number) => {
-    onSummon("gold", count);
+  const handleSummonLogic = (count: number) => {
+    const cost = count * banner.singlePrice;
+
+    if (gems < cost) {
+      alert("Not enough Gems!");
+      setCrystalState("idle");
+      return;
+    }
+
+    dispatch(spendGems(cost));
+
+    const currentPity = pityState[banner.id] || { pullsSinceLastRare: 0 };
+    let tempPity = { ...currentPity };
+
+    const results: (Card | Resource)[] = [];
+
+    for (let i = 0; i < count; i++) {
+      try {
+        const { item, newPityState } = performSummon(banner.id, tempPity);
+
+        console.log(`Debug - item`, item);
+        results.push(item);
+        tempPity = newPityState;
+
+        if (item.type === "CARD") {
+          dispatch(addCardToInventory(item as Card));
+        } else if (item.type === "RESOURCE") {
+          dispatch(addGold((item as Resource).value));
+        }
+      } catch (e) {
+        console.error("Summon error:", e);
+      }
+
+      dispatch(updatePity({ bannerId: banner.id, pityState: tempPity }));
+
+      console.log("Summon Results:", results);
+      // Here you would typically trigger the reveal screen with 'results'
+      onSummon("gem", count, results);
+    }
   };
 
   const handleSummonClick = (count: number) => {
     if (crystalState !== "idle") {
       return;
     }
+
+    const cost = count * banner.singlePrice;
+    if (gems < cost) {
+      alert("Not enough Gems!");
+      return;
+    }
+
     setCrystalState("charging");
     setTimeout(() => {
       setCrystalState("aftermath");
       setTimeout(() => {
-        SummonStart(count);
+        handleSummonLogic(count);
+        // setCrystalState("idle"); // Reset for now, usually handled by changing view
       }, 500);
     }, 1000);
   };
