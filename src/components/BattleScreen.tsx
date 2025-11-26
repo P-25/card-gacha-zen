@@ -34,6 +34,7 @@ export default function BattleScreen({ onNavigate }: BattleScreenProps) {
               src="/assets/magic-rune.png" // Using magic-rune as placeholder
               alt="Tarien Map"
               fill
+              priority
               className="object-contain opacity-90 drop-shadow-[0_0_30px_rgba(100,200,255,0.4)]"
             />
           </div>

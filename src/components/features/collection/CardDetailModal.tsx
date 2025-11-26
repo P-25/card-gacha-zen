@@ -63,6 +63,7 @@ export default function CardDetailModal({
                 alt={card.name}
                 fill
                 className="object-cover"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-transparent md:bg-gradient-to-r" />
             </div>

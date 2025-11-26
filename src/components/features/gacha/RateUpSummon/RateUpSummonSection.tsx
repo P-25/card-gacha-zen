@@ -221,6 +221,7 @@ export default function RateUpSummonSection({
                     alt="Currency"
                     fill
                     className="object-contain"
+                    priority
                   />
                 </div>
                 <span className="font-bold text-lg text-[#4A4A4A]">

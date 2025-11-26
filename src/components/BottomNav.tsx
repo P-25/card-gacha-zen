@@ -56,6 +56,7 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
                   src={item.icon}
                   alt={item.label}
                   fill
+                  priority
                   className="object-contain"
                 />
               </div>

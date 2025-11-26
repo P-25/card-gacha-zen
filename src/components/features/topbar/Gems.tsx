@@ -15,6 +15,7 @@ export default function Gems() {
           alt="Gems"
           fill
           className="object-contain drop-shadow-md"
+          priority
         />
       </div>
       <span className="flex-1 text-white font-bold font-display tracking-wide text-sm text-right px-2">

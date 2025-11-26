@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-quicksand);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,7 +22,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-quicksand), sans-serif;
   height: 100vh;
   width: 100vw;
   overflow: hidden; /* Prevent scrolling on mobile */
@@ -30,6 +30,11 @@ body {
   padding: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-cinzel), serif;
+/* Override font-display to use Quicksand */
+.font-display {
+  font-family: var(--font-quicksand) !important;
+}
+
+img:not(.no-global-filter) {
+  filter: contrast(130%) saturate(160%) !important;
 }

@@ -60,6 +60,7 @@ export default function HomeActions({ onNavigate }: HomeActionsProps) {
                   alt={action.label}
                   fill
                   className="object-contain"
+                  priority
                 />
               </div>
             </motion.button>

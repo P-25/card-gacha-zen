@@ -155,6 +155,7 @@ export default function GoldSummonSection({
                     alt="Currency"
                     fill
                     className="object-contain"
+                    priority
                   />
                 </div>
                 <span className="font-bold text-lg text-[#4A4A4A]">
@@ -176,6 +177,7 @@ export default function GoldSummonSection({
                   alt="Featured"
                   fill
                   className="object-contain"
+                  priority
                 />
               </div>
 

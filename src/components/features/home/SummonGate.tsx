@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface SummonGateProps {
   onSummon: () => void;
@@ -21,7 +21,7 @@ export default function SummonGate({ onSummon }: SummonGateProps) {
       >
         {/* Glow behind gate */}
         <div className="absolute inset-0 bg-[#8FA89B]/20 blur-[60px] rounded-full animate-pulse" />
-        
+
         <Image
           src="/assets/zen-summon-pond-clean.png"
           alt="Summon Pond"

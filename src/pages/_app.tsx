@@ -1,16 +1,10 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { Cinzel, Manrope } from "next/font/google";
+import { Quicksand } from "next/font/google";
 
-const cinzel = Cinzel({
+const quicksand = Quicksand({
   subsets: ["latin"],
-  variable: "--font-cinzel",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-quicksand",
   display: "swap",
 });
 
@@ -19,7 +13,7 @@ import ReduxProvider from "@/components/ReduxProvider";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ReduxProvider>
-      <div className={`${cinzel.variable} ${manrope.variable} font-sans`}>
+      <div className={`${quicksand.className} ${quicksand.variable}`}>
         <Component {...pageProps} />
       </div>
     </ReduxProvider>

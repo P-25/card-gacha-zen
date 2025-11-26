@@ -25,6 +25,7 @@ export default function CollectionCard({
         src={card.image}
         alt={card.name}
         fill
+        priority
         className="object-cover transition-transform duration-300 group-hover:scale-110"
       />
 

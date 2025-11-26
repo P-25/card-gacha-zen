@@ -85,7 +85,7 @@ export default function GoldSummonRevel({
   const hasErrors = Object.values(errors).some(Boolean);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-screen bg-transparent overflow-hidden relative font-sans z-50">
+    <div className="flex flex-col items-center justify-center w-full h-screen bg-transparent overflow-hidden relative z-50">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-black to-black pointer-events-none" />
 

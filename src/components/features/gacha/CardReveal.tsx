@@ -49,6 +49,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
             src={item.image}
             alt={item.name}
             fill
+            priority
             className="object-cover"
           />
         </div>
