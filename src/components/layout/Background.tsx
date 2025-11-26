@@ -9,7 +9,7 @@ export default function Background() {
         src="/assets/background/full_bg.png"
         alt="Background"
         fill
-        className="object-cover opacity-80"
+        className="no-global-filter object-cover opacity-80"
         priority
       />
       <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/60" />

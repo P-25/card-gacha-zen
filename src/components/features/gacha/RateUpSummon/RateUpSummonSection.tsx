@@ -13,6 +13,9 @@ import {
 import { updatePity } from "@/store/slices/pitySlice";
 import { performSummon } from "@/lib/gameLogic";
 import { Card, Resource } from "@/types/game";
+import CosmicButton from "@/components/summon/CosmicButton";
+import FloatingParticles from "@/components/summon/FloatingParticles";
+import ExplosionParticles from "@/components/summon/ExplosionParticles";
 
 interface RateUpSummonSectionProps {
   onSummon: (
@@ -102,7 +105,7 @@ export default function RateUpSummonSection({
       setTimeout(() => {
         handleSummonLogic(count);
         // setCrystalState("idle"); // Reset for now, usually handled by changing view
-      }, 500);
+      }, 700);
     }, 1000);
   };
 
@@ -110,69 +113,102 @@ export default function RateUpSummonSection({
   const gemPositionClass = "absolute left-1/2 top-[50%] z-20";
 
   return (
-    <div
-      className={`w-full h-full flex flex-col items-center relative overflow-hidden transition-colors duration-500`}
-    >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 pointer-events-none" />
+    <div className="w-full h-full flex flex-col items-center relative overflow-hidden">
+      <FloatingParticles />
 
-      {/* Top Title */}
-      <div className="w-full text-center mt-10">
-        <h1 className="text-3xl font-display font-bold text-white tracking-widest drop-shadow-md">
+      {/* Top Title - Fixed at Top */}
+      <div className="w-full text-center mt-12 relative z-30 shrink-0">
+        <h1 className="text-3xl font-display font-bold text-white tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
           SUMMON
         </h1>
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={"gold"}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="w-full h-full flex flex-col items-start justify-start pt-10 pb-4 px-6"
+          key={"content"}
+          // --- UPDATED LAYOUT CLASSES ---
+          // flex-1: Takes up all available vertical space
+          // justify-end: Pushes everything inside to the bottom
+          // pb-24: Adds padding at bottom so it doesn't hit the tab bar/screen edge
+          className="w-full flex-1 flex flex-col items-center justify-end mb-[180px] px-6 gap-6 relative z-20"
         >
-          {/* Central Portal Image */}
-          <div className="relative w-full max-w-md aspect-square flex items-center justify-center mb-4">
-            <div className="relative w-[110%] h-[110%]">
+          {/* Central Portal Container */}
+          <div className="relative w-full max-w-md aspect-square flex items-center justify-center">
+            <div className="relative w-[100%] h-[100%] flex justify-center items-center">
+              {/* --- REFLECTION --- */}
+              <div
+                className="absolute top-[80%] left-0 w-full h-full z-0 pointer-events-none opacity-40"
+                style={{
+                  transform: "scaleY(-1)",
+                  maskImage:
+                    "linear-gradient(to bottom, transparent 20%, black 80%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, transparent 20%, black 80%)",
+                }}
+              >
+                <motion.img
+                  src={banner.portalImage}
+                  alt="Reflection"
+                  className="w-full h-full object-contain"
+                  initial={{ opacity: 1, scale: 1 }}
+                />
+              </div>
+
+              {/* 1. THE HARD GROUND SHADOW (Your requested fix) */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 z-0"
+                style={{
+                  bottom: "-3%",
+                  width: "90%",
+                  height: "75px",
+                  background:
+                    "radial-gradient(rgb(0, 0, 0) 50%, rgba(0, 0, 0, 0) 70%)",
+                  opacity: 0.8,
+                }}
+              />
+
+              {/* Main Portal Image */}
               <motion.img
                 src={banner.portalImage}
                 alt="Summon Gate"
-                className="object-contain drop-shadow-2xl w-full h-full"
+                className="object-contain w-full h-full relative z-10 drop-shadow-[0_25px_8px_rgba(0,0,0,0.9)]"
                 initial={{ opacity: 1, scale: 1 }}
               />
 
-              {/* ALIVE CRYSTAL */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 z-0"
+                style={{
+                  bottom: "17%",
+                  width: "15%",
+                  height: "10px",
+                  background:
+                    "radial-gradient(rgb(0, 0, 0) 4%, rgba(0, 0, 0, 0) 70%)",
+                  opacity: 0.8,
+                  zIndex: 50,
+                }}
+              />
+              {/* CRYSTAL LOGIC */}
               {crystalState !== "aftermath" && (
                 <motion.img
                   key="crystal-full"
                   src={"/assets/summon_rate_gem.png"}
                   alt="Summon Crystal"
-                  // Using w-[18%] to scale with container
-                  className={`${gemPositionClass} w-[18%] cursor-pointer drop-shadow-[0_0_15px_rgba(255,215,0,0.3)]`}
-                  // Center the element on the anchor point (-50%, -50%)
+                  className="absolute left-1/2 top-[50%] z-20 w-[18%] cursor-pointer drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]"
                   initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
                   animate={crystalState}
-                  exit={{ opacity: 0, transition: { duration: 0 } }}
                   variants={{
                     idle: {
-                      scale: 1,
-                      x: "-50%",
-                      y: ["-50%", "-55%", "-50%"], // Hover up/down relative to center
+                      y: ["-50%", "-55%", "-50%"],
                       filter: "brightness(1)",
                       transition: {
-                        y: {
-                          repeat: Infinity,
-                          duration: 4,
-                          ease: "easeInOut",
-                        },
+                        y: { repeat: Infinity, duration: 4, ease: "easeInOut" },
                       },
                     },
                     charging: {
-                      scale: 1,
                       y: "-50%",
-                      x: ["-50%", "-52%", "-48%", "-50%"], // Shake left/right relative to center
-                      filter: "brightness(1.2)",
-                      transition: { duration: 0.8, ease: "linear" },
+                      x: ["-50%", "-52%", "-48%", "-50%"],
+                      filter: "brightness(1.5)",
+                      transition: { duration: 0.8 },
                     },
                   }}
                 />
@@ -180,55 +216,34 @@ export default function RateUpSummonSection({
 
               {/* DESTROYED CRYSTAL */}
               {crystalState === "aftermath" && (
-                <motion.img
-                  key="crystal-destroyed"
-                  src={"/assets/destroyed_rate_gem.png"}
-                  alt="Destroyed Crystal"
-                  // Using w-[32%] because your original code had this image much larger (140px vs 75px)
-                  className={`${gemPositionClass} w-[32%] object-contain z-30`}
-                  initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    y: "-50%",
-                    x: ["-50%", "-51%", "-49%", "-50%"],
-                    filter: "brightness(1.2)",
-                  }}
-                  exit={{ opacity: 0, transition: { duration: 0.5 } }}
-                  transition={{
-                    scale: { duration: 3, ease: "easeOut" },
-                    x: { duration: 0.5 },
-                  }}
-                />
+                <>
+                  <ExplosionParticles color="#99FFFF" />
+                  <motion.img
+                    key="crystal-destroyed"
+                    src={"/assets/destroyed_rate_gem.png"}
+                    alt="Destroyed Crystal"
+                    className="absolute left-1/2 top-[50%] z-30 w-[32%] object-contain"
+                    initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: "-50%",
+                      x: ["-50%", "-51%", "-49%", "-50%"],
+                      filter: "brightness(1.2)",
+                    }}
+                    exit={{ opacity: 0, transition: { duration: 0.5 } }}
+                    transition={{
+                      scale: { duration: 3, ease: "easeOut" },
+                      x: { duration: 0.5 },
+                    }}
+                  />
+                </>
               )}
             </div>
           </div>
 
-          {/* Summon Buttons */}
-          <div className="w-full flex gap-4 z-10 mt-4">
-            {/* Single Summon */}
-            <button
-              onClick={() => handleSummonClick(1)}
-              className="flex-1 bg-white rounded-xl py-3 px-2 shadow-lg active:scale-95 transition-transform flex flex-col items-center justify-center border-2 border-white/50 cursor-pointer"
-            >
-              <span className="text-xs font-bold text-[#4A4A4A] tracking-wider uppercase mb-1">
-                SINGLE SUMMON
-              </span>
-              <div className="flex items-center gap-1.5">
-                <div className="relative w-5 h-5">
-                  <Image
-                    src={banner.currencyIcon}
-                    alt="Currency"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <span className="font-bold text-lg text-[#4A4A4A]">
-                  x{banner.singlePrice}
-                </span>
-              </div>
-            </button>
+          <div className="w-full flex justify-center z-30">
+            <CosmicButton onClick={() => handleSummonClick(1)} />
           </div>
         </motion.div>
       </AnimatePresence>

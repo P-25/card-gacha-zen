@@ -32,6 +32,17 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
   return (
     <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
       <motion.div className="relative w-64 h-64">
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-0"
+          style={{
+            bottom: "-2%",
+            width: "70%",
+            height: "40px",
+            background:
+              "radial-gradient(rgb(0, 0, 0) 50%, rgba(0, 0, 0, 0) 70%)",
+            opacity: 0.8,
+          }}
+        />
         <Image
           src="/assets/summon_rate_gate2.png"
           alt="Loading"
