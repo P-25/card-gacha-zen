@@ -205,7 +205,7 @@ export default function RateUpSummonSection({
           </div>
 
           {/* Summon Buttons */}
-          <div className="w-full flex gap-4 z-10">
+          <div className="w-full flex gap-4 z-10 mt-4">
             {/* Single Summon */}
             <button
               onClick={() => handleSummonClick(1)}
@@ -228,35 +228,6 @@ export default function RateUpSummonSection({
                 </span>
               </div>
             </button>
-          </div>
-
-          {/* Featured Banner (Bottom) */}
-          <div onClick={onBannerChange} className="mt-6 w-full cursor-pointer">
-            <div className="relative bg-[#4A5568]/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 flex items-center gap-4 overflow-hidden">
-              {/* Featured Icon/Image */}
-              <div className="relative w-12 h-12 shrink-0">
-                {/* Placeholder for spirit image */}
-                <div className="absolute inset-0 rounded-full animate-pulse" />
-                <Image
-                  src={"/assets/summon_gold_gem.png"}
-                  alt="Featured"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-
-              <div className="flex-1 z-10 cursor-pointer">
-                <span className="block text-[10px] text-purple-200 uppercase tracking-widest font-bold">
-                  STANDARD SUMMON
-                </span>
-                <span className="text-lg text-white font-display font-bold tracking-wide">
-                  Use Gold Coins to summon
-                </span>
-              </div>
-
-              {/* Decorative Background Elements */}
-              <div className="absolute right-0 top-0 w-24 h-full bg-linear-to-l from-purple-500/20 to-transparent" />
-            </div>
           </div>
         </motion.div>
       </AnimatePresence>

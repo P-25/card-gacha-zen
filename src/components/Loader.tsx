@@ -33,7 +33,7 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
     <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
       <motion.div className="relative w-64 h-64">
         <Image
-          src="/assets/summon_gold_game2.png"
+          src="/assets/summon_rate_gate2.png"
           alt="Loading"
           fill
           className="object-contain opacity-80"
