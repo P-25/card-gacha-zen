@@ -95,7 +95,16 @@ export function performSummon(
   }
 
   // 3. Select Item from Pool based on Rarity
-  const poolItems = banner.pool.filter((item) => {
+  let poolToUse = banner.pool;
+
+  // Dynamic Pool: If pool is empty, use ALL cards and resources
+  if (!poolToUse || poolToUse.length === 0) {
+    const allCards = cards.map((c) => ({ id: c.id, weight: 10 }));
+    const allResources = resources.map((r) => ({ id: r.id, weight: 10 }));
+    poolToUse = [...allCards, ...allResources];
+  }
+
+  const poolItems = poolToUse.filter((item) => {
     // We need to resolve the item to check its rarity
     // The pool in config has IDs. We need to look them up in cards or resources.
     const card = cards.find((c) => c.id === item.id);

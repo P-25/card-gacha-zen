@@ -1,10 +1,26 @@
 [
     {
         "id": "gold_pack_small",
-        "name": "Small Gold Pack",
+        "name": "Spark of Fortune",
         "type": "RESOURCE",
         "rarity": "COMMON",
         "value": 50,
-        "image": "/assets/items/gold_small.png"
+        "image": "/assets/Card_Designs/resource/gold.png"
+    },
+    {
+        "id": "gold_pack_large",
+        "name": "Luminous Stash",
+        "type": "RESOURCE",
+        "rarity": "UNCOMMON",
+        "value": 100,
+        "image": "/assets/Card_Designs/resource/gold.png"
+    },
+    {
+        "id": "gold_pack_huge",
+        "name": "Astral Vault",
+        "type": "RESOURCE",
+        "rarity": "RARE",
+        "value": 1000,
+        "image": "/assets/Card_Designs/resource/gold.png"
     }
 ]
