@@ -1,0 +1,10 @@
+[
+    {
+        "id": "gold_pack_small",
+        "name": "Small Gold Pack",
+        "type": "RESOURCE",
+        "rarity": "COMMON",
+        "value": 50,
+        "image": "/assets/items/gold_small.png"
+    }
+]

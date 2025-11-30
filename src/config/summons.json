@@ -1,0 +1,90 @@
+[
+    {
+        "id": "banner_standard",
+        "name": "Standard Summon",
+        "cost": 100,
+        "currency": "gems",
+        "rates": {
+            "COMMON": 0.70,
+            "UNCOMMON": 0.25,
+            "RARE": 0.05
+        },
+        "pity": {
+            "targetRarity": "RARE",
+            "hardPity": 10,
+            "softPity": 7,
+            "softPityIncrement": 0.1
+        },
+        "pool": [
+            {
+                "id": "card_001",
+                "weight": 10
+            },
+            {
+                "id": "card_002",
+                "weight": 10
+            },
+            {
+                "id": "card_003",
+                "weight": 10
+            },
+            {
+                "id": "card_004",
+                "weight": 5
+            },
+            {
+                "id": "card_005",
+                "weight": 2
+            },
+            {
+                "id": "gold_pack_small",
+                "weight": 5,
+                "type": "RESOURCE"
+            }
+        ]
+    },
+    {
+        "id": "banner_rate_up",
+        "name": "Dragon Slayer Rate Up",
+        "cost": 100,
+        "currency": "gems",
+        "rates": {
+            "COMMON": 0.70,
+            "UNCOMMON": 0.25,
+            "RARE": 0.05
+        },
+        "pity": {
+            "targetRarity": "RARE",
+            "hardPity": 10,
+            "softPity": 7,
+            "softPityIncrement": 0.1
+        },
+        "pool": [
+            {
+                "id": "card_005",
+                "weight": 50
+            },
+            {
+                "id": "card_001",
+                "weight": 10
+            },
+            {
+                "id": "card_002",
+                "weight": 10
+            },
+            {
+                "id": "card_003",
+                "weight": 10
+            },
+            {
+                "id": "card_004",
+                "weight": 5
+            },
+            {
+                "id": "gold_pack_small",
+                "weight": 5,
+                "type": "RESOURCE"
+            }
+        ]
+    }
+]

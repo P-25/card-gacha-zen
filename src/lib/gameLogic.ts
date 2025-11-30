@@ -1,4 +1,6 @@
-import gameData from "../config/gameData.json";
+import summons from "../config/summons.json";
+import cards from "../config/cards.json";
+import resources from "../config/resources.json";
 import {
   Card,
   PlayerPityState,
@@ -30,9 +32,9 @@ export function performSummon(
   bannerId: string,
   currentPity: PlayerPityState
 ): SummonResult {
-  const banner = gameData.summons.find(
+  const banner = (summons as unknown as SummonBanner[]).find(
     (s) => s.id === bannerId
-  ) as unknown as SummonBanner;
+  );
   if (!banner) {
     throw new Error(`Banner with ID ${bannerId} not found.`);
   }
@@ -96,10 +98,10 @@ export function performSummon(
   const poolItems = banner.pool.filter((item) => {
     // We need to resolve the item to check its rarity
     // The pool in config has IDs. We need to look them up in cards or resources.
-    const card = gameData.cards.find((c) => c.id === item.id);
+    const card = cards.find((c) => c.id === item.id);
     if (card && card.rarity === selectedRarity) return true;
 
-    const resource = gameData.resources.find((r) => r.id === item.id);
+    const resource = resources.find((r) => r.id === item.id);
     if (resource && resource.rarity === selectedRarity) return true;
 
     return false;
@@ -132,16 +134,14 @@ export function performSummon(
 
   // Resolve full item object
   let finalItem: Card | Resource;
-  const card = gameData.cards.find((c) => c.id === selectedPoolItem.id);
+  const card = cards.find((c) => c.id === selectedPoolItem.id);
   if (card) {
     finalItem = {
       ...card,
       tp: calculateTotalPower(card as unknown as Card),
     } as unknown as Card;
   } else {
-    const resource = gameData.resources.find(
-      (r) => r.id === selectedPoolItem.id
-    );
+    const resource = resources.find((r) => r.id === selectedPoolItem.id);
     if (resource) {
       finalItem = resource as unknown as Resource;
     } else {
