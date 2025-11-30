@@ -3,6 +3,7 @@
 import TopBar from "@/components/features/home/TopBar";
 import HomeActions from "@/components/features/home/HomeActions";
 import Image from "next/image";
+import SummoningRitual from "./features/gacha/RateUpSummon/SummonCircle";
 
 interface HomeScreenProps {
   onNavigate: (
@@ -22,7 +23,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
       />
 
       <TopBar />
-
+      {/* <SummoningRitual /> */}
       {/* Main Actions Area */}
       <div className="flex-1 flex flex-col justify-end pb-24">
         <HomeActions onNavigate={onNavigate} />

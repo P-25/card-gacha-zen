@@ -13,7 +13,9 @@
         "atk": 30,
         "image": "/assets/Card_Designs/common/card_001.png",
         "experience": 20,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#FFCA4F",
+        "textColor": "#B05B02"
     },
     {
         "id": "common_card_002",
@@ -29,7 +31,9 @@
         "atk": 60,
         "image": "/assets/Card_Designs/common/card_002.png",
         "experience": 20,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#1D2377",
+        "textColor": "#ffffff"
     },
     {
         "id": "common_card_003",
@@ -45,7 +49,9 @@
         "atk": 80,
         "image": "/assets/Card_Designs/common/card_003.png",
         "experience": 20,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#B9A277",
+        "textColor": "#000000"
     },
     {
         "id": "common_card_004",
@@ -61,7 +67,9 @@
         "atk": 100,
         "image": "/assets/Card_Designs/common/card_004.png",
         "experience": 50,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#41536E",
+        "textColor": "#ffffff"
     },
     {
         "id": "common_card_005",
@@ -77,7 +85,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/common/card_005.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#12175B",
+        "textColor": "#ffffff"
     },
     {
         "id": "common_card_006",
@@ -93,7 +103,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/common/card_006.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#FFF8C4",
+        "textColor": "#A48757"
     },
     {
         "id": "uncommon_card_001",
@@ -109,7 +121,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_001.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#000032",
+        "textColor": "#ffffff"
     },
     {
         "id": "uncommon_card_002",
@@ -125,7 +139,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_002.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#00002E",
+        "textColor": "#ffffff"
     },
     {
         "id": "uncommon_card_003",
@@ -141,7 +157,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_003.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#574229",
+        "textColor": "#ffffff"
     },
     {
         "id": "uncommon_card_004",
@@ -157,7 +175,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_004.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#384D62",
+        "textColor": "#ffffff"
     },
     {
         "id": "uncommon_card_005",
@@ -173,7 +193,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_005.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#295D93",
+        "textColor": "#ffffff"
     },
     {
         "id": "uncommon_card_006",
@@ -189,7 +211,9 @@
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_006.png",
         "experience": 100,
-        "design_type": "Eternal"
+        "design_type": "Eternal",
+        "backgroundColor": "#C74229",
+        "textColor": "#ffffff"
     },
     {
         "id": "rare_card_001",
@@ -205,6 +229,8 @@
         "atk": 350,
         "image": "/assets/Card_Designs/rare/card_001.png",
         "experience": 100,
-        "design_type": "Landbound"
+        "design_type": "Landbound",
+        "backgroundColor": "#4a148c",
+        "textColor": "#e1bee7"
     }
 ]

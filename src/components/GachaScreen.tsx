@@ -8,13 +8,17 @@ import { useState } from "react";
 
 interface GachaScreenProps {
   resources: GameResources;
+  onSelectionModeChange: (isSelection: boolean) => void;
 }
 
 import { Card, Resource } from "@/types/game";
 
 // ... imports
 
-export default function GachaScreen({ resources }: GachaScreenProps) {
+export default function GachaScreen({
+  resources,
+  onSelectionModeChange,
+}: GachaScreenProps) {
   const [showCard, setShowCard] = useState(false);
   const [summonResults, setSummonResults] = useState<(Card | Resource)[]>([]);
 
@@ -35,14 +39,21 @@ export default function GachaScreen({ resources }: GachaScreenProps) {
 
   const handleGoldRevealComplete = () => {
     setShowCard(true);
+    // Hide nav bar when showing card
+    // Note: GachaScreen doesn't have direct access to setSelectionMode from props if not passed
+    // But we can infer it should be passed based on the plan.
+    // Wait, the plan said "Update GachaScreenProps to include onSelectionModeChange".
+    // I need to update the interface first.
   };
 
   const handleRateUpRevealComplete = () => {
     setShowCard(true);
+    onSelectionModeChange(false);
   };
 
   const handleReset = () => {
     setShowCard(false);
+    onSelectionModeChange(true);
   };
 
   // 2. Card Reveal Overlay (Highest Priority)

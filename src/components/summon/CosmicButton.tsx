@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 interface CosmicButtonProps {
   onClick?: () => void;
   disabled?: boolean;
+  text?: string;
+  showCost?: boolean;
 }
 
 // 1. Define the particle shape
@@ -22,6 +24,8 @@ interface Particle {
 export default function CosmicButton({
   onClick,
   disabled = false,
+  text = "Single Summon",
+  showCost = true,
 }: CosmicButtonProps) {
   // 2. State for particles
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -110,25 +114,27 @@ export default function CosmicButton({
         {/* Button Content */}
         <div className="relative z-20 flex flex-col items-center justify-center text-white drop-shadow-lg">
           <span className="font-display font-bold text-xl tracking-wider uppercase text-white filter drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
-            Single Summon
+            {text}
           </span>
-          <div className="w-full flex flex-row justify-center gap-1 items-center mt-0.5">
-            <Image
-              src="/assets/gem3.svg"
-              alt="Currency"
-              className="object-contain"
-              priority
-              width={20}
-              height={20}
-            />
-            <span className="text-sm font-bold text-white shadow-black drop-shadow-md">
-              x10
-            </span>
-          </div>
+          {showCost && (
+            <div className="w-full flex flex-row justify-center gap-1 items-center mt-0.5">
+              <Image
+                src="/assets/gem3.svg"
+                alt="Currency"
+                className="object-contain"
+                priority
+                width={20}
+                height={20}
+              />
+              <span className="text-sm font-bold text-white shadow-black drop-shadow-md">
+                x10
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Shine effect overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-30"></div>
+        <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-30"></div>
       </motion.button>
     </div>
   );

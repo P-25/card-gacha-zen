@@ -153,10 +153,27 @@ export default function RateUpSummonSection({
                   initial={{ opacity: 1, scale: 1 }}
                 />
               </div>
-
-              {/* 1. THE HARD GROUND SHADOW (Your requested fix) */}
               <div
                 className="absolute left-1/2 -translate-x-1/2 z-0"
+                style={{
+                  bottom: "-5%",
+                  width: "90%",
+                  height: "110px",
+                  // background:
+                  //   "radial-gradient(rgb(0, 0, 0) 50%, rgba(0, 0, 0, 0) 70%)",
+                  // opacity: 0.8,
+                }}
+              >
+                <Image
+                  src={"/assets/summon-circle-new5.png"}
+                  alt="Summon Gate"
+                  className="no-global-filter w-full h-full relative z-10 scale-[1.2]  brightness(1.3) contrast(1.2) drop-shadow(0 0 20px rgba(6,182,212,0.6))"
+                  fill
+                />
+              </div>
+              {/* 1. THE HARD GROUND SHADOW (Your requested fix) */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 z-1"
                 style={{
                   bottom: "-3%",
                   width: "90%",

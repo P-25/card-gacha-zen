@@ -21,6 +21,8 @@ export interface Card extends GameItem {
   tp?: number; // Total Power (calculated)
   experience: number;
   design_type: "Eternal" | "Hero" | "Landbound";
+  backgroundColor: string;
+  textColor: string;
 }
 
 export interface Resource extends GameItem {
