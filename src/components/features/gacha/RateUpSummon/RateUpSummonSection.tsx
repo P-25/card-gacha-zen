@@ -16,6 +16,8 @@ import { Card, Resource } from "@/types/game";
 import CosmicButton from "@/components/summon/CosmicButton";
 import FloatingParticles from "@/components/summon/FloatingParticles";
 import ExplosionParticles from "@/components/summon/ExplosionParticles";
+import SummoningRitual from "./SummonCircle";
+import CardsCarousel from "./CardsCarousel";
 
 interface RateUpSummonSectionProps {
   onSummon: (
@@ -153,7 +155,7 @@ export default function RateUpSummonSection({
                   initial={{ opacity: 1, scale: 1 }}
                 />
               </div>
-              <div
+              {/* <div
                 className="absolute left-1/2 -translate-x-1/2 z-0"
                 style={{
                   bottom: "-5%",
@@ -167,10 +169,12 @@ export default function RateUpSummonSection({
                 <Image
                   src={"/assets/summon-circle-new5.png"}
                   alt="Summon Gate"
-                  className="no-global-filter w-full h-full relative z-10 scale-[1.2]  brightness(1.3) contrast(1.2) drop-shadow(0 0 20px rgba(6,182,212,0.6))"
+                  className="no-global-filter w-full h-full relative z-10 scale-[1.2]  brightness(1.3) contrast(1.2) drop-shadow-[0_0_15px_#957D91]"
                   fill
                 />
-              </div>
+              </div> */}
+              <SummoningRitual isSummoning={crystalState !== "idle"} />
+              {/* <SummoningRitual isSummoning={true} /> */}
               {/* 1. THE HARD GROUND SHADOW (Your requested fix) */}
               <div
                 className="absolute left-1/2 -translate-x-1/2 z-1"
@@ -184,6 +188,7 @@ export default function RateUpSummonSection({
                 }}
               />
 
+              <CardsCarousel />
               {/* Main Portal Image */}
               <motion.img
                 src={banner.portalImage}
@@ -210,7 +215,7 @@ export default function RateUpSummonSection({
                   key="crystal-full"
                   src={"/assets/summon_rate_gem.png"}
                   alt="Summon Crystal"
-                  className="absolute left-1/2 top-[50%] z-20 w-[18%] cursor-pointer drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]"
+                  className="absolute left-1/2 top-[50%] z-50 w-[18%] cursor-pointer drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]"
                   initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
                   animate={crystalState}
                   variants={{
@@ -239,7 +244,7 @@ export default function RateUpSummonSection({
                     key="crystal-destroyed"
                     src={"/assets/destroyed_rate_gem.png"}
                     alt="Destroyed Crystal"
-                    className="absolute left-1/2 top-[50%] z-30 w-[32%] object-contain"
+                    className="absolute left-1/2 top-[50%] z-50 w-[32%] object-contain"
                     initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
                     animate={{
                       opacity: 1,
@@ -259,7 +264,7 @@ export default function RateUpSummonSection({
             </div>
           </div>
 
-          <div className="w-full flex justify-center z-30">
+          <div className="w-full flex justify-center z-60">
             <CosmicButton onClick={() => handleSummonClick(1)} />
           </div>
         </motion.div>
