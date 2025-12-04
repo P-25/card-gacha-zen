@@ -25,7 +25,7 @@ export default function GameLayout({
       {/* Desktop Background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video w-[1920px] hidden lg:block pointer-events-none">
         <Image
-          src="/assets/bamboo-bg.png"
+          src="/assets/background/full-background.png"
           alt="Desktop Background"
           fill
           className="object-cover opacity-50"

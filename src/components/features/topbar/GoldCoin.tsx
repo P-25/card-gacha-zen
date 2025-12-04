@@ -8,17 +8,16 @@ export default function GoldCoin() {
   const gold = useSelector((state: RootState) => state.player.gold);
 
   return (
-    <div className="relative flex items-center bg-[#0F172A]/60 backdrop-blur-md rounded-full border border-white/10 shadow-sm min-w-[120px] cursor-pointer">
-      <div className="relative w-8 h-8 -ml-2 shrink-0">
+    <div className="flex items-center gap-2">
+      <div className="w-6 h-6 relative">
         <Image
-          src="/assets/coin.svg"
+          src="/assets/icons/gold-coin.png"
           alt="Gold"
           fill
-          className="object-contain drop-shadow-md"
-          priority
+          className="object-contain"
         />
       </div>
-      <span className="flex-1 text-white font-bold font-display tracking-wide text-sm text-right px-2">
+      <span className="text-[#1a2e2e] font-medium text-lg">
         {gold.toLocaleString()}
       </span>
     </div>

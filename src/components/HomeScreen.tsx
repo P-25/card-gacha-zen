@@ -2,8 +2,7 @@
 
 import TopBar from "@/components/features/home/TopBar";
 import HomeActions from "@/components/features/home/HomeActions";
-import Image from "next/image";
-import SummoningRitual from "./features/gacha/RateUpSummon/SummonCircle";
+import HomeBanner from "./features/home/HomeBanner";
 
 interface HomeScreenProps {
   onNavigate: (
@@ -14,16 +13,8 @@ interface HomeScreenProps {
 export default function HomeScreen({ onNavigate }: HomeScreenProps) {
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
-      <Image
-        src="/assets/background/home_bg3.webp"
-        alt="Background"
-        fill
-        className="object-cover opacity-80"
-        priority
-      />
-
-      <TopBar />
-      {/* <SummoningRitual /> */}
+      <TopBar title="Home" />
+      <HomeBanner />
       {/* Main Actions Area */}
       <div className="flex-1 flex flex-col justify-end pb-24">
         <HomeActions onNavigate={onNavigate} />

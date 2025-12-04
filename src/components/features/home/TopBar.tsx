@@ -2,19 +2,22 @@
 
 import Gems from "../topbar/Gems";
 import GoldCoin from "../topbar/GoldCoin";
-import Profile from "../topbar/Profile";
 
-export default function TopBar() {
+interface TopBarProps {
+  title?: string;
+}
+
+export default function TopBar({ title = "Home" }: TopBarProps) {
   return (
-    <div className="relative z-20 pt-4 px-4 flex justify-between items-center">
-      {/* Player Info */}
-      <Profile />
-      {/* Currencies */}
-      <div className="flex items-center gap-4">
-        {/* Coin Currency */}
+    <div className="z-50 px-6 py-4 flex items-center justify-between bg-transparent pointer-events-none border-b border-[#1a2e2e]/20">
+      <h1 className="text-3xl font-bold text-[#1a2e2e] tracking-wide pointer-events-auto">
+        {title}
+      </h1>
+      <div className="flex items-center gap-4 pointer-events-auto">
+        {/* Gold Counter */}
         <GoldCoin />
 
-        {/* Gem Currency */}
+        {/* Gems Counter */}
         <Gems />
       </div>
     </div>

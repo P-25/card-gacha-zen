@@ -14,7 +14,7 @@ export default function BattleScreen({ onNavigate }: BattleScreenProps) {
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-[url('/assets/background/home_bg.png')] opacity-20 bg-cover bg-center mix-blend-overlay" />
 
-      <TopBar />
+      <TopBar title="Battle" />
 
       <div className="flex-1 flex flex-col items-center justify-center z-10 pb-20">
         {/* Title */}

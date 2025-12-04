@@ -61,7 +61,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Top Bar */}
-      <TopBar />
+      <TopBar title="Collections" />
 
       {/* Header */}
       <div className="relative z-40 px-4 py-3 flex flex-col gap-4">
