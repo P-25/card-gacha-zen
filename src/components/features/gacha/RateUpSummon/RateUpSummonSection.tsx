@@ -119,11 +119,11 @@ export default function RateUpSummonSection({
       <FloatingParticles />
 
       {/* Top Title - Fixed at Top */}
-      <div className="w-full text-center mt-12 relative z-30 shrink-0">
+      {/* <div className="w-full text-center mt-12 relative z-30 shrink-0">
         <h1 className="text-3xl font-display font-bold text-white tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
           SUMMON
         </h1>
-      </div>
+      </div> */}
 
       <AnimatePresence mode="wait">
         <motion.div

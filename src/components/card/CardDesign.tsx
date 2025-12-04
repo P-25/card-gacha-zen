@@ -3,43 +3,39 @@ import Image from "next/image";
 
 interface CardDesignProps {
   card: Card;
+  hideStates?: boolean;
   className?: string;
 }
 
-export default function CardDesign({ card, className = "" }: CardDesignProps) {
-  const {
-    name,
-    level,
-    hp,
-    atk,
-    image,
-    design_type,
-    backgroundColor,
-    textColor,
-  } = card;
+export default function CardDesign({
+  card,
+  hideStates = true,
+  className = "",
+}: CardDesignProps) {
+  const { name, level, hp, atk, image, design_type, textColor } = card;
 
-  // Define layout configurations based on design_type
+  // Optimized Layout Map
   const getLayout = () => {
     switch (design_type) {
       case "Eternal":
         return {
-          level: "top-3 left-3",
-          states: "bottom-8 inset-x-0 text-center",
+          level: "top-[2%] left-[2%]",
+          stats: "bottom-[5%] inset-x-0 justify-center",
         };
       case "Hero":
         return {
-          level: "top-3 left-3",
-          states: "bottom-10 left-4 text-left",
+          level: "top-[2%] left-[2%]",
+          stats: "bottom-[10%] left-[6%] justify-start",
         };
       case "Landbound":
         return {
-          level: "bottom-3 left-3",
-          states: "bottom-8 inset-x-0 text-center",
+          level: "bottom-[4%] left-[4%]",
+          stats: "bottom-[8%] inset-x-0 justify-center",
         };
       default:
         return {
-          level: "top-3 left-3",
-          states: "bottom-8 inset-x-0 text-center",
+          level: "top-[4%] left-[4%]",
+          stats: "bottom-[8%] inset-x-0 justify-center",
         };
     }
   };
@@ -47,58 +43,86 @@ export default function CardDesign({ card, className = "" }: CardDesignProps) {
   const layout = getLayout();
 
   return (
-    <div className={`relative aspect-2/3  overflow-hidden shadow-xl group`}>
+    <div
+      // PERF: Added transform-gpu and backface-hidden to prevent repaints during flip
+      className={`relative w-full h-full aspect-[2/3] overflow-hidden shadow-2xl group rounded-xl transform-gpu backface-hidden ${className}`}
+      // PERF: Only use container queries if absolutely necessary.
+      // 'inline-size' is lighter than 'size'.
+      style={{ containerType: "inline-size" }}
+    >
       {/* Card Image */}
-      <div className="absolute inset-0">
-        <Image
-          src={image}
-          alt={name}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+      <div className="absolute inset-0 bg-slate-800">
+        {image && (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-cover"
+            // PERF: Drastically reduce image size fetch.
+            // The card is rarely larger than 300px on screen.
+            sizes="(max-width: 768px) 50vw, 300px"
+            priority={true}
+            // PERF: Eager loading helps, but 'priority' already handles this.
+          />
+        )}
       </div>
 
       {/* Level Indicator */}
-      <div className={`absolute ${layout.level} z-10`}>
-        <div className="relative flex items-center justify-center w-10 h-10">
+      {card.type === "CARD" && !hideStates && (
+        <div className={`absolute ${layout.level} z-10 w-[15%]`}>
+          <div className="relative flex items-center justify-center w-full aspect-square">
+            <div
+              // PERF: Removed backdrop-blur-md. This causes massive lag on mobile GPUs.
+              // Replaced with static alpha background.
+              className="absolute inset-0 rotate-45 rounded-[15%] border bg-black/40"
+              style={{
+                color: textColor || "#fff",
+                borderColor: textColor || "#fff",
+                borderWidth: "1px", // Simplified border calc
+              }}
+            ></div>
+            <span
+              className="relative font-bold font-display leading-none"
+              style={{
+                color: textColor || "#fff",
+                // PERF: Fixed weird 666cqw value.
+                fontSize: "min(20cqw, 20px)",
+              }}
+            >
+              {level || 1}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Name / Stats */}
+      {card.type === "CARD" && !hideStates && (
+        <div
+          className={`absolute ${layout.stats} z-10 px-[2%] w-full flex items-center`}
+          style={{
+            color: textColor || "#fff",
+          }}
+        >
           <div
-            className="absolute inset-0 rotate-45 rounded-sm border backdrop-blur-md"
+            id="stats"
+            className={`flex items-center gap-[3cqw] w-full transition-opacity duration-200`}
             style={{
-              backgroundColor: backgroundColor,
-              color: textColor,
-              borderColor: textColor,
-            }}
-          ></div>
-          <span
-            className="relative text-white font-bold font-display text-lg"
-            style={{
-              color: textColor,
+              fontSize: "min(6cqw, 14px)",
+              justifyContent: design_type === "Hero" ? "flex-start" : "center",
+              textShadow: "0 1px 2px rgba(0,0,0,0.8)", // Cheaper than drop-shadow filter
             }}
           >
-            {level}
-          </span>
+            <span>•</span>
+            <span className="whitespace-nowrap">{hp || 100} HP</span>
+            <span>•</span>
+            <span className="whitespace-nowrap">{atk || 10} ATK</span>
+            <span>•</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Name */}
-      <div
-        className={`absolute ${layout.states} z-10 px-2`}
-        style={{
-          color: textColor,
-        }}
-      >
-        <div
-          id="stats"
-          className={`flex justify-center items-center gap-4 text-xs min-h-[16px] transition-opacity duration-200`}
-        >
-          <span>•</span>
-          <span>{hp} HP</span>
-          <span>•</span>
-          <span>{atk} ATK</span>
-          <span>•</span>
-        </div>
-      </div>
+      {/* Gloss Effect (Static, GPU friendly) */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
     </div>
   );
 }

@@ -68,7 +68,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
         initial={{ scale: 0, rotateY: 180, opacity: 0 }}
         animate={{ scale: 1, rotateY: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className="flex flex-col items-center gap-8 z-10"
+        className="flex flex-col items-center gap-8 z-10 w-[90%]"
       >
         {/* Card Container with 3D Tilt */}
         <motion.div
@@ -79,7 +79,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
           }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative perspective-1000 cursor-pointer"
+          className="relative perspective-1000 cursor-pointer w-[90%]"
         >
           {/* Floating Animation Wrapper */}
           <motion.div
@@ -105,8 +105,8 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
                 : item.rarity === "RARE"
                 ? "text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]"
                 : item.rarity === "UNCOMMON"
-                ? "text-emerald-400"
-                : "text-slate-200"
+                ? "text-gray-600"
+                : "text-gray-600"
             }`}
           >
             {item.name}
