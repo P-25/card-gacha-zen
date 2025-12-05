@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import React, { useState, useEffect } from "react";
 
 // Define the possible game states
@@ -77,6 +78,18 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
       () => {
         const id = Date.now() + Math.random();
         const angle = Math.random() * 360;
+
+        // Eruption Mode
+        if (flash) {
+          const speed = 15 + Math.random() * 15; // FAST OUTWARD
+          const size = 3 + Math.random() * 4;
+          setParticles((prev) => [
+            ...prev,
+            { id, angle, speed, size, distance: 10, opacity: 1 },
+          ]);
+          return;
+        }
+
         // Implosion: spawn far out, move in. Idle: spawn center, move out.
         const startDist = isImploding ? 250 : 0;
 
@@ -104,8 +117,8 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
           ];
         });
       },
-      isImploding ? 15 : 50
-    ); // Slightly slower spawn rate during implosion to prevent overcrowding
+      flash ? 5 : isImploding ? 15 : 50
+    ); // Super fast spawn for eruption
 
     // Animation Loop for particles
     const animFrame = setInterval(() => {
@@ -115,7 +128,17 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
             let newDist = p.distance;
             let newOp = p.opacity;
 
-            if (isImploding) {
+            if (flash) {
+              // ERUPTION: EXPLODE OUTWARD
+              // If it was an imploding particle, fade it out fast
+              if (p.speed < 10) {
+                newOp -= 0.1;
+              } else {
+                // Eruption particle
+                newDist += p.speed;
+                newOp -= 0.02;
+              }
+            } else if (isImploding) {
               // SUCK IN
               newDist -= p.speed;
 
@@ -145,10 +168,10 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
       clearInterval(spawnInterval);
       clearInterval(animFrame);
     };
-  }, [gameState]);
+  }, [gameState, flash]);
 
   // --- CONFIG VARIABLES ---
-  const isSummoning = gameState === "SUMMONING";
+  const isSummoning = gameState === "SUMMONING" || gameState === "RESULT";
   const runesOuter =
     "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛞ ᛟ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ";
   const runesInner = "ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛞ ᛟ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ";
@@ -184,7 +207,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   key={p.id}
                   className="absolute rounded-full blur-[1px]"
                   style={{
-                    backgroundColor: isSummoning ? "#fff" : "#FFD700",
+                    backgroundColor: isSummoning ? "darkgoldenrod" : "#FFD700",
                     width: `${p.size}px`,
                     height: `${p.size}px`,
                     opacity: p.opacity,
@@ -214,18 +237,9 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   x2="100%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor={isSummoning ? "#FFFFFF" : "#C5A059"}
-                  />
-                  <stop
-                    offset="50%"
-                    stopColor={isSummoning ? "#FFFACD" : "#E6D28F"}
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor={isSummoning ? "#FFFFFF" : "#8B7355"}
-                  />
+                  <stop offset="0%" stopColor={"#C5A059"} />
+                  <stop offset="50%" stopColor={"#E6D28F"} />
+                  <stop offset="100%" stopColor={"#8B7355"} />
                 </linearGradient>
 
                 <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
@@ -253,7 +267,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                 r="235"
                 fill="none"
                 stroke="url(#goldGradient)"
-                strokeWidth="2"
+                strokeWidth="4"
                 className="opacity-80"
               />
               <circle
@@ -262,8 +276,8 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                 r="225"
                 fill="none"
                 stroke="url(#goldGradient)"
-                strokeWidth="1"
-                className="opacity-50"
+                strokeWidth="2"
+                className="opacity-60"
               />
 
               {/* Layer 1: Outer Runes (Clockwise) - Accel on Summon */}
@@ -272,8 +286,12 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                 style={
                   {
                     animation: `spin ${
-                      isSummoning ? "2s" : "60s"
-                    } linear infinite`,
+                      isSummoning ? "10s" : "60s"
+                    } linear infinite, ${
+                      isSummoning
+                        ? "expand-implode 2.5s ease-in-out forwards"
+                        : "none"
+                    }`,
                   } as React.CSSProperties
                 }
               >
@@ -282,9 +300,9 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                     href="#textCirclePath"
                     startOffset="0%"
                     className={`font-bold tracking-[14px] transition-colors duration-300 ${
-                      isSummoning ? "fill-[#FFF]" : "fill-[#A89F91]"
+                      isSummoning ? "fill-[darkgoldenrod]" : "fill-[#A89F91]"
                     }`}
-                    style={{ fontFamily: "serif", fontSize: "24px" }}
+                    style={{ fontSize: "26px" }}
                   >
                     {runesOuter}
                   </textPath>
@@ -298,7 +316,11 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   {
                     animation: `spin ${
                       isSummoning ? "3s" : "40s"
-                    } linear infinite reverse`,
+                    } linear infinite reverse, ${
+                      isSummoning
+                        ? "expand-implode 2.5s ease-in-out forwards"
+                        : "none"
+                    }`,
                   } as React.CSSProperties
                 }
               >
@@ -309,7 +331,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   height="250"
                   fill="none"
                   stroke="url(#goldGradient)"
-                  strokeWidth="2"
+                  strokeWidth="4"
                   className="opacity-60"
                 />
                 <rect
@@ -319,7 +341,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   height="250"
                   fill="none"
                   stroke="url(#goldGradient)"
-                  strokeWidth="1"
+                  strokeWidth="4"
                   className="opacity-40 origin-center rotate-45"
                 />
 
@@ -329,7 +351,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                       cx="250"
                       cy="125"
                       r="5"
-                      fill={isSummoning ? "#FFF" : "#C5A059"}
+                      fill={isSummoning ? "darkgoldenrod" : "#C5A059"}
                       className="opacity-80"
                     />
                   </g>
@@ -343,7 +365,11 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   {
                     animation: `spin ${
                       isSummoning ? "1.5s" : "25s"
-                    } linear infinite`,
+                    } linear infinite, ${
+                      isSummoning
+                        ? "expand-implode 2.5s ease-in-out forwards"
+                        : "none"
+                    }`,
                   } as React.CSSProperties
                 }
               >
@@ -353,16 +379,16 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   r="145"
                   fill="none"
                   stroke="url(#goldGradient)"
-                  strokeWidth="1"
+                  strokeWidth="4"
                 />
                 <text width="500">
                   <textPath
                     href="#innerCirclePath"
                     startOffset="0%"
                     className={`font-bold tracking-[28px] transition-colors duration-300 ${
-                      isSummoning ? "fill-[#FFF]" : "fill-[#8B7E66]"
+                      isSummoning ? "fill-[darkgoldenrod]" : "fill-[#8B7E66]"
                     }`}
-                    style={{ fontFamily: "serif", fontSize: "16px" }}
+                    style={{ fontSize: "18px" }}
                   >
                     {runesInner}
                   </textPath>
@@ -376,7 +402,11 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   {
                     animation: `spin ${
                       isSummoning ? "1s" : "30s"
-                    } linear infinite reverse`,
+                    } linear infinite reverse, ${
+                      isSummoning
+                        ? "expand-implode 2.5s ease-in-out forwards"
+                        : "none"
+                    }`,
                   } as React.CSSProperties
                 }
               >
@@ -387,14 +417,14 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                     points="250,150 336.6,300 163.4,300"
                     fill="none"
                     stroke="url(#goldGradient)"
-                    strokeWidth="1.5"
+                    strokeWidth="4"
                     className="opacity-70"
                   />
                   <polygon
                     points="250,350 336.6,200 163.4,200"
                     fill="none"
                     stroke="url(#goldGradient)"
-                    strokeWidth="1.5"
+                    strokeWidth="4"
                     className="opacity-70"
                   />
                 </g>
@@ -411,7 +441,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                       y={y}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill={isSummoning ? "#FFF" : "#C5A059"}
+                      fill={isSummoning ? "darkgoldenrod" : "#C5A059"}
                       fontSize="14"
                       transform={`rotate(${angle}, ${x}, ${y})`}
                     >
@@ -428,7 +458,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   cx="250"
                   cy="250"
                   r={isSummoning ? "100" : "40"}
-                  fill={isSummoning ? "#FFFFFF" : "none"}
+                  fill={"none"}
                   stroke="url(#goldGradient)"
                   strokeWidth="2"
                   className="transition-all duration-1000"
@@ -437,7 +467,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   <animate
                     attributeName="opacity"
                     values="0.3;0.8;0.3"
-                    dur={isSummoning ? "0.1s" : "3s"}
+                    dur={isSummoning ? "3s" : "3s"}
                     repeatCount="indefinite"
                   />
                 </circle>
@@ -447,7 +477,7 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
                   cx="250"
                   cy="250"
                   r="10"
-                  fill={isSummoning ? "#FFF" : "#C5A059"}
+                  fill={isSummoning ? "darkgoldenrod" : "#C5A059"}
                   filter="url(#glow)"
                 >
                   <animate
@@ -490,6 +520,12 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes expand-implode {
+            0% { transform: scale(1); }
+            10% { transform: scale(1.2); }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(0); }
         }
       `}</style>
     </div>

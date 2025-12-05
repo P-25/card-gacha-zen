@@ -5,7 +5,6 @@ import { RootState } from "@/store/store";
 import { Card, Rarity } from "@/types/game";
 import CollectionGrid from "@/components/features/collection/CollectionGrid";
 import CardDetailModal from "@/components/features/collection/CardDetailModal";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Background from "@/components/layout/Background";
 import TopBar from "@/components/features/home/TopBar";
@@ -65,20 +64,6 @@ export default function CollectionsPage() {
 
       {/* Header */}
       <div className="relative z-40 px-4 py-3 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          {/* Spacer to center the title */}
-          <div className="w-12" />
-          <h1 className="text-xl font-display font-bold tracking-widest text-white/90 drop-shadow-md">
-            COLLECTION
-          </h1>
-          <Link
-            href="/"
-            className="text-xs font-bold text-white/60 hover:text-white transition-colors w-12 text-right"
-          >
-            CLOSE
-          </Link>
-        </div>
-
         {/* Search & Filter Bar */}
         <div className="relative w-full max-w-md mx-auto flex gap-2">
           <div className="flex-1 relative flex items-center bg-white rounded-lg overflow-hidden shadow-lg h-10">
@@ -225,7 +210,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 container mx-auto max-w-7xl px-2 pt-4 relative z-10 overflow-y-auto">
+      <div className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-32 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         <CollectionGrid cards={filteredCards} onCardClick={setSelectedCard} />
       </div>
 

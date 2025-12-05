@@ -1,13 +1,10 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { useState } from "react";
-import Image from "next/image";
-import { Card, Resource } from "@/types/game";
-import DivineRays from "./DivineRays";
 import FloatingParticles from "@/components/summon/FloatingParticles";
-import CosmicButton from "@/components/summon/CosmicButton";
-import CardDesign from "@/components/card/CardDesign";
+import { Card, Resource } from "@/types/game";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import Image from "next/image";
+import { useState } from "react";
 
 interface CardRevealProps {
   onReset: () => void;
@@ -58,101 +55,67 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
-      {/* Background Effects */}
-      <DivineRays rarity={item.rarity} />
+    <div className="relative w-full h-full flex flex-col items-center">
       <FloatingParticles />
 
-      <motion.div
-        key={currentIndex}
-        initial={{ scale: 0, rotateY: 180, opacity: 0 }}
-        animate={{ scale: 1, rotateY: 0, opacity: 1 }}
-        transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className="flex flex-col items-center gap-8 z-10 w-[90%]"
-      >
-        {/* Card Container with 3D Tilt */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full relative z-10 py-10">
         <motion.div
-          style={{
-            rotateX,
-            rotateY,
-            transformStyle: "preserve-3d",
-          }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="relative perspective-1000 cursor-pointer w-[90%]"
+          key={currentIndex}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 20, stiffness: 100 }}
+          className="flex flex-col items-center gap-6 w-full max-w-md px-6"
         >
-          {/* Floating Animation Wrapper */}
+          {/* Custom Card Container */}
           <motion.div
-            animate={{ y: [-10, 10, -10] }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
+            style={{
+              rotateX,
+              rotateY,
+              transformStyle: "preserve-3d",
             }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="relative perspective-1000 cursor-pointer w-full aspect-[3/4]"
           >
-            <CardDesign card={cardItem} />
+            <Image
+              src={cardItem.image}
+              alt={cardItem.name}
+              fill
+              sizes="(max-width: 768px) 80vw, 400px"
+              priority
+            />
           </motion.div>
-        </motion.div>
 
-        <div className="text-center relative z-20">
+          {/* Card Name */}
           <motion.h3
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`text-3xl font-display font-bold mb-2 tracking-wider ${
-              item.rarity === "LEGENDARY"
-                ? "text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]"
-                : item.rarity === "RARE"
-                ? "text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]"
-                : item.rarity === "UNCOMMON"
-                ? "text-gray-600"
-                : "text-gray-600"
-            }`}
+            className="text-3xl font-bold text-[#5F5A46] tracking-wide uppercase text-center"
           >
             {item.name}
           </motion.h3>
 
-          {!isCard && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-xl text-yellow-500 font-bold"
+          {/* Action Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="w-full"
+          >
+            <button
+              onClick={handleNext}
+              className="w-full bg-[#3E206D] text-[#FDB931] font-bold text-xl py-4 rounded-xl border-2 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer"
             >
-              x{resourceItem.value}
-            </motion.p>
-          )}
-
-          {isCard && (
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "3rem" }}
-              transition={{ delay: 0.4 }}
-              className={`h-1 mx-auto rounded-full mt-2 ${
-                item.rarity === "LEGENDARY"
-                  ? "bg-amber-500"
-                  : item.rarity === "RARE"
-                  ? "bg-blue-500"
-                  : item.rarity === "UNCOMMON"
-                  ? "bg-emerald-500"
-                  : "bg-slate-500"
-              }`}
-            />
-          )}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <CosmicButton
-            onClick={handleNext}
-            text={currentIndex < results.length - 1 ? "NEXT" : "CLAIM"}
-            showCost={false}
-          />
+              <span className="relative z-10">
+                {currentIndex < results.length - 1 ? "NEXT" : "CLAIM"}
+              </span>
+              {/* Sheen */}
+              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+            </button>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

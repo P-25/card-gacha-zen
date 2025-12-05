@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -13,8 +13,6 @@ import { updatePity } from "@/store/slices/pitySlice";
 import { performSummon } from "@/lib/gameLogic";
 import { Card, Resource } from "@/types/game";
 import FloatingParticles from "@/components/summon/FloatingParticles";
-import SummoningRitual from "./SummonCircle";
-import CardsCarousel from "./CardsCarousel";
 import MagicCircle from "./MagicCircle";
 
 interface RateUpSummonSectionProps {
@@ -28,7 +26,6 @@ interface RateUpSummonSectionProps {
 
 export default function RateUpSummonSection({
   onSummon,
-  onBannerChange,
 }: RateUpSummonSectionProps) {
   const [summonState, setSummonState] = useState<
     "idle" | "charging" | "summoning"
@@ -48,8 +45,6 @@ export default function RateUpSummonSection({
   const maxPity = 90; // Assuming 90 is hard pity
   const pityProgress = Math.min((pityCount / maxPity) * 100, 100);
   const pullsLeft = Math.max(maxPity - pityCount, 0);
-
-  const controls = useAnimation();
 
   const handleSummonLogic = (count: number) => {
     const cost = count === 1 ? banner.singlePrice : banner.multiPrice;
@@ -116,10 +111,6 @@ export default function RateUpSummonSection({
     }, 2500);
   };
 
-  useEffect(() => {
-    console.log(`Debug - summonState`, summonState);
-  }, [summonState]);
-
   return (
     <div className="w-full h-full flex flex-col items-center relative overflow-hidden">
       {/* BACKGROUND LAYERS */}
@@ -139,19 +130,42 @@ export default function RateUpSummonSection({
         <FloatingParticles />
       </div>
 
-      {/* WHITE FLASH OVERLAY - Radial Expansion */}
+      {/* Starburst Light Eruption (Rays) */}
       <motion.div
-        className="absolute left-1/2 top-1/2 bg-white rounded-full z-[100] pointer-events-none"
-        style={{ x: "-50%", y: "-50%" }}
-        initial={{ width: 0, height: 0, opacity: 0 }}
+        id="whiteRayFlash"
+        className="absolute left-1/2 top-[20%] z-[100] w-20 h-20 rounded-full pointer-events-none"
+        style={{
+          x: "-50%",
+          y: "-50%",
+          background:
+            "repeating-conic-gradient(from 0deg, #C5A059 0deg, #FFFFFF 10deg, transparent 10deg, transparent 20deg)",
+          boxShadow: "0 0 50px 20px rgba(255, 255, 255, 0.8)",
+          mixBlendMode: "screen",
+        }}
+        initial={{ scale: 0, opacity: 0, rotate: 0 }}
         animate={{
-          width: summonState === "summoning" ? "200vmax" : 0,
-          height: summonState === "summoning" ? "200vmax" : 0,
+          scale: summonState === "summoning" ? 30 : 0,
+          opacity: summonState === "summoning" ? [0, 1, 0] : 0,
+          rotate: summonState === "summoning" ? 180 : 0,
+        }}
+        transition={{
+          duration: summonState === "summoning" ? 2.0 : 0.5,
+          ease: "easeOut",
+          times: [0, 0.2, 1],
+        }}
+      />
+
+      {/* Solid White Flash Overlay (Screen Cover) */}
+      <motion.div
+        className="absolute inset-0 z-[101] bg-white pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{
           opacity: summonState === "summoning" ? 1 : 0,
         }}
         transition={{
-          duration: summonState === "summoning" ? 0.4 : 0.5,
-          ease: "easeOut",
+          duration: summonState === "summoning" ? 2.0 : 0.5,
+          ease: "easeInOut",
+          delay: summonState === "summoning" ? 0.5 : 0, // Delay slightly to let rays burst first
         }}
       />
 
@@ -183,6 +197,7 @@ export default function RateUpSummonSection({
                     summonState === "charging"
                       ? ["brightness(1)", "brightness(2)", "brightness(5)"]
                       : "brightness(1) drop-shadow(0 0 0px transparent)",
+                  mixBlendMode: "color-dodge",
                 }}
                 transition={{
                   scale: {
@@ -206,9 +221,9 @@ export default function RateUpSummonSection({
           </div>
 
           {/* PITY COUNTER */}
-          <div className="w-full max-w-sm bg-black/40 backdrop-blur-md rounded-xl p-3 border border-white/10 relative overflow-hidden">
-            <div className="flex flex-col gap-1 relative z-10">
-              <div className="flex justify-between items-center text-[#E6D28F] font-serif text-sm">
+          <div className="w-full max-w-sm bg-black/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 relative overflow-hidden shadow-xl">
+            <div className="flex flex-col gap-2 relative z-10">
+              <div className="flex justify-between items-center text-[#E6D28F] text-sm">
                 <span>Pity Counter</span>
                 <span>
                   {pityCount}/{maxPity}
@@ -230,7 +245,7 @@ export default function RateUpSummonSection({
                   />
                 )}
               </div>
-              <p className="text-center text-xs text-white/80 mt-1 font-light">
+              <p className="text-center text-xs text-white/60 mt-1 font-medium tracking-wide">
                 Guaranteed{" "}
                 <span className="text-[#FDB931] font-bold">EPIC</span> card in{" "}
                 {pullsLeft} more summons!
@@ -244,9 +259,13 @@ export default function RateUpSummonSection({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => handleSummonClick(1)}
-              className="flex-1 bg-[#F5F5F0] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-b-4 border-[#D1D1D1] active:border-b-0 active:translate-y-1 transition-all cursor-pointer"
+              className="flex-1 bg-[#FDF5E6] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+              style={{
+                boxShadow:
+                  "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+              }}
             >
-              <span className="text-lg font-serif font-bold tracking-wider">
+              <span className="text-lg font-bold tracking-wider">
                 SUMMON x1
               </span>
               <span className="text-xs opacity-70 font-medium">
@@ -258,12 +277,14 @@ export default function RateUpSummonSection({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => handleSummonClick(10)}
-              className="flex-1 bg-[#4A6fa5] text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-b-4 border-[#2c4a70] active:border-b-0 active:translate-y-1 transition-all relative overflow-hidden group"
+              className="flex-1 bg-[#6A0DAD] text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all relative overflow-hidden group cursor-pointer"
               style={{
-                background: "linear-gradient(135deg, #556B2F 0%, #3d4d22 100%)",
-              }} // Greenish tone from screenshot
+                background: "linear-gradient(180deg, #4c2a85 0%, #3a1e69 100%)",
+                boxShadow:
+                  "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+              }}
             >
-              <span className="text-lg font-serif font-bold tracking-wider relative z-10">
+              <span className="text-lg font-bold tracking-wider relative z-10">
                 SUMMON x10
               </span>
               <span className="text-xs opacity-90 font-medium relative z-10">

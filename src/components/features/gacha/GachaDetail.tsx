@@ -77,7 +77,7 @@ export default function GachaDetail({
 
         {/* Title & Rates */}
         <div className="text-center space-y-2">
-          <h2 className="text-4xl font-bold text-white font-serif tracking-wide drop-shadow-md">
+          <h2 className="text-4xl font-bold text-white tracking-wide drop-shadow-md">
             {config.title}
           </h2>
           <button

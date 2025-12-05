@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import CardDesign from "@/components/card/CardDesign";
 import cards from "@/config/cards.json";
 import { Card } from "@/types/game";
@@ -80,7 +81,7 @@ export default function CardsCarousel() {
   return (
     <div
       ref={containerRef}
-      className="absolute z-100 w-full h-full flex flex-col items-center justify-center font-sans touch-none select-none perspective-[800px] overflow-visible"
+      className="absolute z-100 w-full h-full flex flex-col items-center justify-center touch-none select-none perspective-[800px] overflow-visible"
       id="CardList"
     >
       <motion.div

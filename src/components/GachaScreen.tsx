@@ -12,6 +12,7 @@ interface GachaScreenProps {
 }
 
 import { Card, Resource } from "@/types/game";
+import TopBar from "./features/home/TopBar";
 
 // ... imports
 
@@ -58,13 +59,18 @@ export default function GachaScreen({
 
   // 2. Card Reveal Overlay (Highest Priority)
   if (showCard) {
-    return <GachaRevealView onReset={handleReset} results={summonResults} />;
+    return (
+      <>
+        <TopBar title="Card" />
+        <GachaRevealView onReset={handleReset} results={summonResults} />
+      </>
+    );
   }
 
   // 5. Selection View (Default)
   return (
     <>
-      <CurrencyHeader gold={resources.gold} gems={resources.gems} />
+      <TopBar title="Summon" />
       <GachaSelection onSummon={handleSummon} />
     </>
   );
