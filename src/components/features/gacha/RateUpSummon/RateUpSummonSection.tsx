@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
-import { useState } from "react";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import {
@@ -13,11 +12,10 @@ import {
 import { updatePity } from "@/store/slices/pitySlice";
 import { performSummon } from "@/lib/gameLogic";
 import { Card, Resource } from "@/types/game";
-import CosmicButton from "@/components/summon/CosmicButton";
 import FloatingParticles from "@/components/summon/FloatingParticles";
-import ExplosionParticles from "@/components/summon/ExplosionParticles";
 import SummoningRitual from "./SummonCircle";
 import CardsCarousel from "./CardsCarousel";
+import MagicCircle from "./MagicCircle";
 
 interface RateUpSummonSectionProps {
   onSummon: (
@@ -32,44 +30,47 @@ export default function RateUpSummonSection({
   onSummon,
   onBannerChange,
 }: RateUpSummonSectionProps) {
-  const [crystalState, setCrystalState] = useState("idle");
+  const [summonState, setSummonState] = useState<
+    "idle" | "charging" | "summoning"
+  >("idle");
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
 
   const banner = {
     id: "banner_rate_up",
-    bgClass: "bg-linear-to-b from-[#8E9EAB] to-[#eef2f3]",
-    bgGradient: "bg-linear-to-b from-[#4A5568] to-[#2D3748]",
-    portalImage: "/assets/summon_rate_gate.png",
-    currencyIcon: "/assets/gem3.svg",
     singlePrice: 10,
     multiPrice: 100,
-    featuredName: "Lunar Spirit",
-    featuredIcon: "/assets/summon_rate_gem.png",
   };
 
+  const currentPity = pityState[banner.id] || { pullsSinceLastRare: 0 };
+  const pityCount = currentPity.pullsSinceLastRare;
+  const maxPity = 90; // Assuming 90 is hard pity
+  const pityProgress = Math.min((pityCount / maxPity) * 100, 100);
+  const pullsLeft = Math.max(maxPity - pityCount, 0);
+
+  const controls = useAnimation();
+
   const handleSummonLogic = (count: number) => {
-    const cost = count * banner.singlePrice;
+    const cost = count === 1 ? banner.singlePrice : banner.multiPrice;
 
     if (gems < cost) {
       alert("Not enough Gems!");
-      setCrystalState("idle");
+      setSummonState("idle");
       return;
     }
 
     dispatch(spendGems(cost));
 
-    const currentPity = pityState[banner.id] || { pullsSinceLastRare: 0 };
     let tempPity = { ...currentPity };
-
     const results: (Card | Resource)[] = [];
 
-    for (let i = 0; i < count; i++) {
+    // Bonus logic for x10 could be added here if needed (e.g. guaranteed SR)
+    const actualCount = count === 10 ? 11 : count; // Example: 10 pulls + 1 bonus? User said "1 Bonus!"
+
+    for (let i = 0; i < actualCount; i++) {
       try {
         const { item, newPityState } = performSummon(banner.id, tempPity);
-
-        console.log(`Debug - item`, item);
         results.push(item);
         tempPity = newPityState;
 
@@ -81,191 +82,201 @@ export default function RateUpSummonSection({
       } catch (e) {
         console.error("Summon error:", e);
       }
-
       dispatch(updatePity({ bannerId: banner.id, pityState: tempPity }));
-
-      console.log("Summon Results:", results);
-      // Here you would typically trigger the reveal screen with 'results'
-      onSummon("gem", count, results);
     }
+
+    onSummon("gem", count, results);
   };
 
   const handleSummonClick = (count: number) => {
-    if (crystalState !== "idle") {
-      return;
-    }
+    if (summonState !== "idle") return;
 
-    const cost = count * banner.singlePrice;
+    const cost = count === 1 ? banner.singlePrice : banner.multiPrice;
     if (gems < cost) {
       alert("Not enough Gems!");
       return;
     }
 
-    setCrystalState("charging");
+    // Step 1: Input & Fade Out
+    setSummonState("charging");
+
+    // Step 2: Charge Up (200ms - 1500ms)
+    // We wait for the charge animation
     setTimeout(() => {
-      setCrystalState("aftermath");
+      // Step 3: Release (Flash & Shake)
+      setSummonState("summoning");
+
+      // Trigger actual logic after the flash covers the screen
       setTimeout(() => {
         handleSummonLogic(count);
-        // setCrystalState("idle"); // Reset for now, usually handled by changing view
-      }, 700);
-    }, 1000);
+        // Reset state will happen when component unmounts or parent changes view
+        // But if we stay here, we reset:
+        // setSummonState("idle");
+      }, 1000);
+    }, 2500);
   };
 
-  // Shared positioning: Center horizontal (left-1/2), slightly below vertical center (top-[47%])
-  const gemPositionClass = "absolute left-1/2 top-[50%] z-20";
+  useEffect(() => {
+    console.log(`Debug - summonState`, summonState);
+  }, [summonState]);
 
   return (
     <div className="w-full h-full flex flex-col items-center relative overflow-hidden">
-      <FloatingParticles />
+      {/* BACKGROUND LAYERS */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Parallax Clouds */}
+        {/* <motion.div
+          className="absolute inset-0 opacity-40"
+          animate={{ x: [-20, 20, -20] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        >
+          <img
+            src="/assets/watercolor_clouds.png"
+            className="w-full h-full object-cover scale-125"
+            alt="clouds"
+          />
+        </motion.div> */}
+        <FloatingParticles />
+      </div>
 
-      {/* Top Title - Fixed at Top */}
-      {/* <div className="w-full text-center mt-12 relative z-30 shrink-0">
-        <h1 className="text-3xl font-display font-bold text-white tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
-          SUMMON
-        </h1>
-      </div> */}
+      {/* WHITE FLASH OVERLAY - Radial Expansion */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 bg-white rounded-full z-[100] pointer-events-none"
+        style={{ x: "-50%", y: "-50%" }}
+        initial={{ width: 0, height: 0, opacity: 0 }}
+        animate={{
+          width: summonState === "summoning" ? "200vmax" : 0,
+          height: summonState === "summoning" ? "200vmax" : 0,
+          opacity: summonState === "summoning" ? 1 : 0,
+        }}
+        transition={{
+          duration: summonState === "summoning" ? 0.4 : 0.5,
+          ease: "easeOut",
+        }}
+      />
 
       <AnimatePresence mode="wait">
         <motion.div
           key={"content"}
-          // --- UPDATED LAYOUT CLASSES ---
-          // flex-1: Takes up all available vertical space
-          // justify-end: Pushes everything inside to the bottom
-          // pb-24: Adds padding at bottom so it doesn't hit the tab bar/screen edge
-          className="w-full flex-1 flex flex-col items-center justify-end mb-[180px] px-6 gap-6 relative z-20"
+          className="w-full flex flex-col items-center justify-end px-6 gap-4 relative z-20"
+          animate={{
+            opacity: summonState === "summoning" ? 0 : 1,
+          }}
+          transition={{ duration: 0.5 }}
         >
           {/* Central Portal Container */}
-          <div className="relative w-full max-w-md aspect-square flex items-center justify-center">
-            <div className="relative w-[100%] h-[100%] flex justify-center items-center">
-              {/* --- REFLECTION --- */}
-              <div
-                className="absolute top-[80%] left-0 w-full h-full z-0 pointer-events-none opacity-40"
-                style={{
-                  transform: "scaleY(-1)",
-                  maskImage:
-                    "linear-gradient(to bottom, transparent 20%, black 80%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to bottom, transparent 20%, black 80%)",
+          <div className="relative w-full max-w-md aspect-square flex items-center justify-center mb-4">
+            <div className="w-full h-full" id="MagicCircle">
+              <MagicCircle
+                summonStarted={summonState === "idle" ? false : true}
+              />
+            </div>
+            {/* DRAGON OVERLAY */}
+            <div className="absolute inset-0 flex items-center left-[20%] z-30 pointer-events-none">
+              <motion.div
+                className="relative w-[65%] h-[65%]"
+                animate={{
+                  scale:
+                    summonState === "charging" ? [1, 1.2, 0] : [1, 1.03, 1],
+                  opacity: summonState === "charging" ? [1, 1, 0] : 1,
+                  filter:
+                    summonState === "charging"
+                      ? ["brightness(1)", "brightness(2)", "brightness(5)"]
+                      : "brightness(1) drop-shadow(0 0 0px transparent)",
+                }}
+                transition={{
+                  scale: {
+                    duration: summonState === "charging" ? 2.4 : 3,
+                    times:
+                      summonState === "charging" ? [0, 0.6, 1] : [0, 0.5, 1],
+                    repeat: summonState === "charging" ? 0 : Infinity,
+                    ease: "easeInOut",
+                  },
+                  opacity: { duration: 2.4, times: [0, 0.8, 1] },
+                  filter: { duration: 2.4, times: [0, 0.5, 1] },
                 }}
               >
-                <motion.img
-                  src={banner.portalImage}
-                  alt="Reflection"
-                  className="w-full h-full object-contain"
-                  initial={{ opacity: 1, scale: 1 }}
+                <img
+                  src="/assets/dragon_silhouette.png"
+                  alt="Dragon"
+                  className="no-global-filter w-full h-full object-contain "
                 />
-              </div>
-              {/* <div
-                className="absolute left-1/2 -translate-x-1/2 z-0"
-                style={{
-                  bottom: "-5%",
-                  width: "90%",
-                  height: "110px",
-                  // background:
-                  //   "radial-gradient(rgb(0, 0, 0) 50%, rgba(0, 0, 0, 0) 70%)",
-                  // opacity: 0.8,
-                }}
-              >
-                <Image
-                  src={"/assets/summon-circle-new5.png"}
-                  alt="Summon Gate"
-                  className="no-global-filter w-full h-full relative z-10 scale-[1.2]  brightness(1.3) contrast(1.2) drop-shadow-[0_0_15px_#957D91]"
-                  fill
-                />
-              </div> */}
-              <SummoningRitual isSummoning={crystalState !== "idle"} />
-              {/* <SummoningRitual isSummoning={true} /> */}
-              {/* 1. THE HARD GROUND SHADOW (Your requested fix) */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 z-1"
-                style={{
-                  bottom: "-3%",
-                  width: "90%",
-                  height: "75px",
-                  background:
-                    "radial-gradient(rgb(0, 0, 0) 50%, rgba(0, 0, 0, 0) 70%)",
-                  opacity: 0.8,
-                }}
-              />
-
-              <CardsCarousel />
-              {/* Main Portal Image */}
-              <motion.img
-                src={banner.portalImage}
-                alt="Summon Gate"
-                className="object-contain w-full h-full relative z-10 drop-shadow-[0_25px_8px_rgba(0,0,0,0.9)]"
-                initial={{ opacity: 1, scale: 1 }}
-              />
-
-              <div
-                className="absolute left-1/2 -translate-x-1/2 z-0"
-                style={{
-                  bottom: "17%",
-                  width: "15%",
-                  height: "10px",
-                  background:
-                    "radial-gradient(rgb(0, 0, 0) 4%, rgba(0, 0, 0, 0) 70%)",
-                  opacity: 0.8,
-                  zIndex: 50,
-                }}
-              />
-              {/* CRYSTAL LOGIC */}
-              {crystalState !== "aftermath" && (
-                <motion.img
-                  key="crystal-full"
-                  src={"/assets/summon_rate_gem.png"}
-                  alt="Summon Crystal"
-                  className="absolute left-1/2 top-[50%] z-50 w-[18%] cursor-pointer drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]"
-                  initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-                  animate={crystalState}
-                  variants={{
-                    idle: {
-                      y: ["-50%", "-55%", "-50%"],
-                      filter: "brightness(1)",
-                      transition: {
-                        y: { repeat: Infinity, duration: 4, ease: "easeInOut" },
-                      },
-                    },
-                    charging: {
-                      y: "-50%",
-                      x: ["-50%", "-52%", "-48%", "-50%"],
-                      filter: "brightness(1.5)",
-                      transition: { duration: 0.8 },
-                    },
-                  }}
-                />
-              )}
-
-              {/* DESTROYED CRYSTAL */}
-              {crystalState === "aftermath" && (
-                <>
-                  <ExplosionParticles color="#99FFFF" />
-                  <motion.img
-                    key="crystal-destroyed"
-                    src={"/assets/destroyed_rate_gem.png"}
-                    alt="Destroyed Crystal"
-                    className="absolute left-1/2 top-[50%] z-50 w-[32%] object-contain"
-                    initial={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
-                    animate={{
-                      opacity: 1,
-                      scale: 1,
-                      y: "-50%",
-                      x: ["-50%", "-51%", "-49%", "-50%"],
-                      filter: "brightness(1.2)",
-                    }}
-                    exit={{ opacity: 0, transition: { duration: 0.5 } }}
-                    transition={{
-                      scale: { duration: 3, ease: "easeOut" },
-                      x: { duration: 0.5 },
-                    }}
-                  />
-                </>
-              )}
+              </motion.div>
             </div>
           </div>
 
-          <div className="w-full flex justify-center z-60">
-            <CosmicButton onClick={() => handleSummonClick(1)} />
+          {/* PITY COUNTER */}
+          <div className="w-full max-w-sm bg-black/40 backdrop-blur-md rounded-xl p-3 border border-white/10 relative overflow-hidden">
+            <div className="flex flex-col gap-1 relative z-10">
+              <div className="flex justify-between items-center text-[#E6D28F] font-serif text-sm">
+                <span>Pity Counter</span>
+                <span>
+                  {pityCount}/{maxPity}
+                </span>
+              </div>
+              <div className="w-full h-3 bg-black/50 rounded-full overflow-hidden border border-white/5 relative">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#C5A059] to-[#FDB931]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pityProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+                {/* Pulse if near full */}
+                {pityProgress > 80 && (
+                  <motion.div
+                    className="absolute inset-0 bg-white/20"
+                    animate={{ opacity: [0, 0.5, 0] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                )}
+              </div>
+              <p className="text-center text-xs text-white/80 mt-1 font-light">
+                Guaranteed{" "}
+                <span className="text-[#FDB931] font-bold">EPIC</span> card in{" "}
+                {pullsLeft} more summons!
+              </p>
+            </div>
+          </div>
+
+          {/* BUTTONS */}
+          <div className="flex gap-4 w-full max-w-md mt-2">
+            {/* Single Summon */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleSummonClick(1)}
+              className="flex-1 bg-[#F5F5F0] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-b-4 border-[#D1D1D1] active:border-b-0 active:translate-y-1 transition-all cursor-pointer"
+            >
+              <span className="text-lg font-serif font-bold tracking-wider">
+                SUMMON x1
+              </span>
+              <span className="text-xs opacity-70 font-medium">
+                ({banner.singlePrice} Gems)
+              </span>
+            </motion.button>
+
+            {/* Multi Summon */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleSummonClick(10)}
+              className="flex-1 bg-[#4A6fa5] text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-b-4 border-[#2c4a70] active:border-b-0 active:translate-y-1 transition-all relative overflow-hidden group"
+              style={{
+                background: "linear-gradient(135deg, #556B2F 0%, #3d4d22 100%)",
+              }} // Greenish tone from screenshot
+            >
+              <span className="text-lg font-serif font-bold tracking-wider relative z-10">
+                SUMMON x10
+              </span>
+              <span className="text-xs opacity-90 font-medium relative z-10">
+                ({banner.multiPrice} Gems - 1 Bonus!)
+              </span>
+
+              {/* Sheen Effect */}
+              <motion.div
+                className="absolute top-0 left-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                animate={{ x: ["-200%", "400%"] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              />
+            </motion.button>
           </div>
         </motion.div>
       </AnimatePresence>
