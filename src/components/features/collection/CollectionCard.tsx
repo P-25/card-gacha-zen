@@ -27,11 +27,7 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
       {/* Rarity Border/Glow */}
       <div
         className={`absolute inset-0 border-2 ${
-          card.rarity === "LEGENDARY"
-            ? "border-purple-500/50"
-            : card.rarity === "RARE"
-            ? "border-blue-500/50"
-            : "border-transparent"
+          card.rarity === "RARE" ? "border-blue-500/50" : "border-transparent"
         } rounded-xl pointer-events-none`}
       />
 

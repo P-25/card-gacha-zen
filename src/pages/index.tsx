@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import GameLayout from "@/components/layout/GameLayout";
 import Loader from "@/components/Loader";
@@ -6,7 +6,7 @@ import HomeScreen from "@/components/HomeScreen";
 import GachaScreen from "@/components/GachaScreen";
 import BattleScreen from "@/components/BattleScreen";
 import { PlaceholderScreen } from "@/components/PlaceholderScreens";
-import CollectionsPage from "@/pages/collections";
+import CollectionScreen from "@/components/CollectionScreen";
 
 export default function GamePage() {
   const { appState, navigateTo, resources } = useGameState();
@@ -14,6 +14,10 @@ export default function GamePage() {
 
   // Show nav if not in gacha, OR if in gacha but in selection mode
   const showNav = appState !== "gacha" || isGachaSelectionMode;
+
+  useEffect(() => {
+    console.log(`Debug - appState`, appState);
+  }, [appState]);
 
   return (
     <GameLayout appState={appState} onNavigate={navigateTo} showNav={showNav}>
@@ -27,7 +31,9 @@ export default function GamePage() {
       )}
       {appState === "battle" && <BattleScreen onNavigate={navigateTo} />}
       {appState === "quests" && <PlaceholderScreen title="Quests" icon="📜" />}
-      {appState === "collection" && <CollectionsPage />}
+      {appState === "collection" && (
+        <CollectionScreen onNavigate={navigateTo} />
+      )}
       {appState === "deck" && <PlaceholderScreen title="Deck" icon="🃏" />}
       {appState === "shop" && <PlaceholderScreen title="Shop" icon="🏪" />}
       {appState === "social" && <PlaceholderScreen title="Social" icon="👥" />}

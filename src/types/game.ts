@@ -1,4 +1,4 @@
-export type Rarity = "COMMON" | "UNCOMMON" | "RARE" | "LEGENDARY";
+export type Rarity = "COMMON" | "UNCOMMON" | "RARE";
 export type ItemType = "CARD" | "RESOURCE";
 
 export interface GameItem {
@@ -23,6 +23,7 @@ export interface Card extends GameItem {
   design_type: "Eternal" | "Hero" | "Landbound";
   backgroundColor: string;
   textColor: string;
+  instanceId?: string;
 }
 
 export interface Resource extends GameItem {

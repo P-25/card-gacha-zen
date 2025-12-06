@@ -1,6 +1,10 @@
 import { Card } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useState, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { consumeDuplicatesForLevelUp } from "@/store/slices/playerSlice";
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -12,16 +16,60 @@ export default function CardDetailModal({
   card,
   onClose,
 }: CardDetailModalProps) {
+  const dispatch = useDispatch();
+  const { inventory } = useSelector((state: RootState) => state.player);
+  const [isLevelingUp, setIsLevelingUp] = useState(false);
+  const [selectedDuplicates, setSelectedDuplicates] = useState<string[]>([]);
+
+  // Filter duplicates from inventory (same ID but different instanceId)
+  const duplicates = useMemo(() => {
+    if (!card) return [];
+    return inventory.filter(
+      (c) => c.id === card.id && c.instanceId !== card.instanceId
+    );
+  }, [inventory, card]);
+
   if (!card) return null;
 
-  // Placeholder logic for upgrade
-  const duplicates = 2;
-  const duplicatesNeeded = 5;
-  const progress = (duplicates / duplicatesNeeded) * 100;
+  const currentLevel = card.level;
+  const nextLevel = currentLevel + 1;
+  const isMaxLevel = currentLevel >= 10;
+  const cardsNeeded = nextLevel; // Cost = Target Level (e.g. Lvl 1->2 needs 2 cards)
+
+  const canLevelUp = selectedDuplicates.length === cardsNeeded;
+
+  const handleLevelUp = () => {
+    if (!canLevelUp) return;
+
+    dispatch(
+      consumeDuplicatesForLevelUp({
+        targetInstanceId: card.instanceId || "",
+        consumedInstanceIds: selectedDuplicates,
+        targetLevel: nextLevel,
+      })
+    );
+
+    // Reset selection or close modal?
+    // User said "update the level of the card...".
+    // We probably want to stay open to show the new level, or close.
+    // Let's reset selection and exit level up mode for now.
+    setSelectedDuplicates([]);
+    setIsLevelingUp(false);
+  };
+
+  const toggleDuplicateSelection = (instanceId: string) => {
+    if (selectedDuplicates.includes(instanceId)) {
+      setSelectedDuplicates((prev) => prev.filter((id) => id !== instanceId));
+    } else {
+      // Allow selecting more than needed? User said "if i choose 6... i can't confirm".
+      // So yes, allow selecting more, but validation fails.
+      setSelectedDuplicates((prev) => [...prev, instanceId]);
+    }
+  };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="fixed inset-0 z-[100] flex items-end justify-center">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -31,36 +79,31 @@ export default function CardDetailModal({
           className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
         />
 
-        {/* Modal Content Wrapper */}
+        {/* Bottom Sheet Container */}
         <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="relative w-full max-w-md flex flex-col gap-4 pointer-events-none" // pointer-events-none to prevent clicks on wrapper, enable on children
+          layout
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          drag={!isLevelingUp ? "y" : false} // Disable drag when leveling up to prevent accidental closes
+          dragConstraints={{ top: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(_, info) => {
+            if (!isLevelingUp && info.offset.y > 100) {
+              onClose();
+            }
+          }}
+          className="relative w-full max-w-md bg-[#Fdfcf8] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col gap-6 shadow-2xl z-10 overflow-hidden"
+          style={{ maxHeight: "90vh" }}
         >
-          {/* 1. TOP SECTION: Card Info */}
-          <div className="bg-[#Fdfcf8] rounded-3xl p-4 flex gap-4 shadow-xl pointer-events-auto relative overflow-hidden">
-            {/* Close Button (Absolute) */}
-            <button
-              onClick={onClose}
-              className="absolute top-2 right-2 z-20 p-1.5 bg-black/10 hover:bg-black/20 rounded-full text-black/40 hover:text-black/60 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+          {/* Drag Handle */}
+          {!isLevelingUp && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 rounded-full" />
+          )}
 
+          {/* 1. TOP SECTION: Card Info */}
+          <div className="flex gap-5 mt-2 shrink-0">
             {/* Left: Image */}
             <div className="w-1/3 aspect-3/4 relative rounded-xl overflow-hidden shadow-inner bg-slate-200 shrink-0">
               <Image
@@ -73,73 +116,141 @@ export default function CardDetailModal({
             </div>
 
             {/* Right: Details */}
-            <div className="flex-1 flex flex-col justify-center gap-1">
-              <h2 className="text-xl font-bold text-[#1a2e2e] leading-tight">
+            <div className="flex-1 flex flex-col gap-2">
+              <h2 className="text-2xl font-bold text-[#1a2e2e] leading-tight">
                 {card.name}
               </h2>
 
-              <div className="flex flex-col gap-0.5 text-sm text-[#5F5A46] font-medium mt-1">
+              <div className="flex flex-row justify-between gap-1 text-sm text-[#5F5A46] font-bold">
                 <span>ATK: {card.atk}</span>
                 <span>HP: {card.hp}</span>
+                <span></span>
+                <span></span>
               </div>
 
-              {/* Level Bar */}
-              <div className="mt-3 relative h-8 w-full bg-[#2a3b3b] rounded-full overflow-hidden flex items-center justify-center">
-                {/* Progress Fill (Static for now, implies current level progress) */}
-                <div className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-[#C5A059] to-[#FDB931] w-[40%]" />
-                <span className="relative z-10 text-xs font-bold text-white tracking-wide">
+              <div className="shrink-0 bg-[#2a3b3b] rounded-full p-1 flex items-center justify-between relative h-12">
+                {/* Level Text */}
+                <div className="px-4 text-white font-bold text-sm z-10">
                   Level {card.level} / 10
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. BOTTOM SECTION: Upgrade */}
-          <div className="bg-[#E8F0F0] rounded-3xl p-5 flex items-center justify-between shadow-xl pointer-events-auto border border-white/50">
-            {/* Left: Icon & Progress */}
-            <div className="flex items-center gap-4 flex-1">
-              {/* Icon Placeholder */}
-              <div className="w-12 h-12 rounded-xl border-2 border-[#5F7A7A] flex items-center justify-center text-[#5F7A7A]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-7 h-7"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                  />
-                </svg>
-              </div>
-
-              <div className="flex flex-col gap-1 w-full max-w-[140px]">
-                <span className="text-xs font-bold text-[#2F4F4F] uppercase tracking-wide">
-                  Upgrade
-                </span>
-                <div className="w-full h-2 bg-[#cad6d6] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#5F7A7A]"
-                    style={{ width: `${progress}%` }}
-                  />
                 </div>
-                <span className="text-[10px] font-bold text-[#5F7A7A]">
-                  Duplicates: {duplicates}/{duplicatesNeeded}
-                </span>
+
+                {/* Progress Bar Background */}
+                <div className="absolute inset-0 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#2a3b3b] to-[#3a4b4b] w-full" />
+                </div>
+
+                {/* Action Button */}
+                {!isMaxLevel && (
+                  <button
+                    onClick={() => setIsLevelingUp(!isLevelingUp)}
+                    className={`relative z-10 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                      isLevelingUp
+                        ? "bg-white/10 text-white hover:bg-white/20"
+                        : "bg-[#6A9A6A] text-white hover:bg-[#588558] shadow-md"
+                    }`}
+                  >
+                    {isLevelingUp ? "Cancel" : "Level Up"}
+                  </button>
+                )}
               </div>
             </div>
-
-            {/* Right: Button */}
-            <button className="bg-[#6A9A6A] hover:bg-[#588558] text-white text-xs font-bold py-3 px-6 rounded-xl shadow-md transition-colors uppercase tracking-wider">
-              Level Up
-              <span className="block text-[9px] opacity-80 font-normal normal-case">
-                (Needs {duplicatesNeeded - duplicates} more)
-              </span>
-            </button>
           </div>
+
+          {/* 2. LEVEL BAR & ACTION */}
+
+          {/* 3. EXPANDED LEVEL UP AREA */}
+          <AnimatePresence>
+            {isLevelingUp && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="flex flex-col gap-4 overflow-hidden"
+              >
+                <div className="h-px w-full bg-black/5" />
+
+                {/* Instructions */}
+                <div className="flex justify-between items-center text-xs font-bold text-[#5F5A46]">
+                  <span>Select {cardsNeeded} duplicates</span>
+                  <span
+                    className={
+                      selectedDuplicates.length === cardsNeeded
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }
+                  >
+                    {selectedDuplicates.length} / {cardsNeeded}
+                  </span>
+                </div>
+
+                {/* Duplicates Grid */}
+                <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto p-1">
+                  {duplicates.length === 0 ? (
+                    <div className="col-span-4 text-center py-8 text-sm text-black/40 italic">
+                      No duplicates available
+                    </div>
+                  ) : (
+                    duplicates.map((dup) => {
+                      const isSelected = selectedDuplicates.includes(
+                        dup.instanceId || ""
+                      );
+                      return (
+                        <button
+                          key={dup.instanceId}
+                          onClick={() =>
+                            toggleDuplicateSelection(dup.instanceId || "")
+                          }
+                          className={`aspect-[3/4] relative rounded-lg overflow-hidden border-2 transition-all ${
+                            isSelected
+                              ? "border-[#6A9A6A] scale-95 opacity-100"
+                              : "border-transparent opacity-60 hover:opacity-100"
+                          }`}
+                        >
+                          <Image
+                            src={dup.image}
+                            alt={dup.name}
+                            fill
+                            className="object-cover"
+                          />
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-[#6A9A6A]/20 flex items-center justify-center">
+                              <div className="w-4 h-4 bg-[#6A9A6A] rounded-full flex items-center justify-center">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                  className="w-3 h-3 text-white"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Confirm Button */}
+                <button
+                  disabled={!canLevelUp}
+                  onClick={handleLevelUp}
+                  className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all ${
+                    canLevelUp
+                      ? "bg-[#6A9A6A] text-white shadow-lg hover:bg-[#588558]"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  Confirm Level Up (to Lvl {nextLevel})
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </AnimatePresence>

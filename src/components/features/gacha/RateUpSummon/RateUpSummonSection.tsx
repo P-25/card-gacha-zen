@@ -16,12 +16,7 @@ import FloatingParticles from "@/components/summon/FloatingParticles";
 import MagicCircle from "./MagicCircle";
 
 interface RateUpSummonSectionProps {
-  onSummon: (
-    type: "gem" | "gold",
-    count: number,
-    results?: (Card | Resource)[]
-  ) => void;
-  onBannerChange: () => void;
+  onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
 }
 
 export default function RateUpSummonSection({
@@ -149,7 +144,7 @@ export default function RateUpSummonSection({
           rotate: summonState === "summoning" ? 180 : 0,
         }}
         transition={{
-          duration: summonState === "summoning" ? 2.0 : 0.5,
+          duration: summonState === "summoning" ? 2.0 : 0,
           ease: "easeOut",
           times: [0, 0.2, 1],
         }}

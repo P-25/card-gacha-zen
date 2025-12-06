@@ -7,38 +7,13 @@ import RateUpSummonSection from "./RateUpSummon/RateUpSummonSection";
 import { Card, Resource } from "@/types/game";
 
 interface GachaSelectionProps {
-  onSummon: (
-    type: "gem" | "gold",
-    count: number,
-    results?: (Card | Resource)[]
-  ) => void;
+  onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
 }
 
 export default function GachaSelection({ onSummon }: GachaSelectionProps) {
-  const [activeBanner, setActiveBanner] = useState<"gem" | "gold">("gold");
-
-  useEffect(() => {
-    console.log(`Debug - Active Banner: ${activeBanner}`);
-  }, [activeBanner]);
-
-  const onBannerChange = (banner: "gem" | "gold") => {
-    setActiveBanner(banner);
-  };
-
   return (
     <>
-      {activeBanner === "gem" && (
-        <GoldSummonSection
-          onSummon={onSummon}
-          onBannerChange={() => onBannerChange("gold")}
-        />
-      )}
-      {activeBanner === "gold" && (
-        <RateUpSummonSection
-          onSummon={onSummon}
-          onBannerChange={() => onBannerChange("gem")}
-        />
-      )}
+      <RateUpSummonSection onSummon={onSummon} />
     </>
   );
 }

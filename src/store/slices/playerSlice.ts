@@ -37,9 +37,36 @@ export const playerSlice = createSlice({
       }
     },
     addCardToInventory: (state, action: PayloadAction<Card>) => {
-      // We can add logic here to handle duplicates (e.g., convert to fragments)
-      // For now, just add to list
-      state.inventory.push(action.payload);
+      const newCard = {
+        ...action.payload,
+        instanceId:
+          action.payload.instanceId || Math.random().toString(36).substr(2, 9),
+      };
+      state.inventory.push(newCard);
+    },
+    consumeDuplicatesForLevelUp: (
+      state,
+      action: PayloadAction<{
+        targetInstanceId: string;
+        consumedInstanceIds: string[];
+        targetLevel: number;
+      }>
+    ) => {
+      const { targetInstanceId, consumedInstanceIds, targetLevel } =
+        action.payload;
+
+      // 1. Update target card level
+      const targetCard = state.inventory.find(
+        (c) => c.instanceId === targetInstanceId
+      );
+      if (targetCard) {
+        targetCard.level = targetLevel;
+      }
+
+      // 2. Remove consumed cards
+      state.inventory = state.inventory.filter(
+        (c) => !consumedInstanceIds.includes(c.instanceId || "")
+      );
     },
   },
 });
@@ -51,5 +78,6 @@ export const {
   addGold,
   spendGold,
   addCardToInventory,
+  consumeDuplicatesForLevelUp,
 } = playerSlice.actions;
 export default playerSlice.reducer;
