@@ -12,7 +12,7 @@
         "hp": 150,
         "atk": 30,
         "image": "/assets/Card_Designs/common/card_001.png",
-        "experience": 20,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#FFCA4F",
         "textColor": "#B05B02"
@@ -30,7 +30,7 @@
         "hp": 80,
         "atk": 60,
         "image": "/assets/Card_Designs/common/card_002.png",
-        "experience": 20,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#1D2377",
         "textColor": "#ffffff"
@@ -48,7 +48,7 @@
         "hp": 60,
         "atk": 80,
         "image": "/assets/Card_Designs/common/card_003.png",
-        "experience": 20,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#B9A277",
         "textColor": "#000000"
@@ -66,7 +66,7 @@
         "hp": 200,
         "atk": 100,
         "image": "/assets/Card_Designs/common/card_004.png",
-        "experience": 50,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#41536E",
         "textColor": "#ffffff"
@@ -84,7 +84,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/common/card_005.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#12175B",
         "textColor": "#ffffff"
@@ -102,7 +102,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/common/card_006.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#FFF8C4",
         "textColor": "#A48757"
@@ -120,7 +120,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_001.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#000032",
         "textColor": "#ffffff"
@@ -138,7 +138,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_002.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#00002E",
         "textColor": "#ffffff"
@@ -156,7 +156,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_003.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#574229",
         "textColor": "#ffffff"
@@ -174,7 +174,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_004.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#384D62",
         "textColor": "#ffffff"
@@ -192,7 +192,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_005.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#295D93",
         "textColor": "#ffffff"
@@ -210,7 +210,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/uncommon/card_006.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Eternal",
         "backgroundColor": "#C74229",
         "textColor": "#ffffff"
@@ -228,7 +228,7 @@
         "hp": 400,
         "atk": 350,
         "image": "/assets/Card_Designs/rare/card_001.png",
-        "experience": 100,
+        "experience": 0,
         "design_type": "Landbound",
         "backgroundColor": "#4a148c",
         "textColor": "#e1bee7"
