@@ -5,8 +5,10 @@ import Image from "next/image";
 import { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { consumeCardsForXp } from "@/store/slices/playerSlice";
+import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
 import LevelUpPopup from "./LevelUpPopup";
+import { EnsoCircle } from "@/components/ui/EnsoCircle";
+import CardInfoModal from "./CardInfoModal";
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -19,13 +21,17 @@ export default function CardDetailModal({
   onClose,
 }: CardDetailModalProps) {
   const dispatch = useDispatch();
-  const { inventory, level: playerLevel } = useSelector(
-    (state: RootState) => state.player
-  );
+  const {
+    inventory,
+    level: playerLevel,
+    gold,
+  } = useSelector((state: RootState) => state.player);
   const [isLevelingUp, setIsLevelingUp] = useState(false);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
+  const [showMaxLevelAlert, setShowMaxLevelAlert] = useState(false);
   const [showLevelUpPopup, setShowLevelUpPopup] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [levelUpStats, setLevelUpStats] = useState({
     oldLevel: 1,
     newLevel: 1,
@@ -127,27 +133,20 @@ export default function CardDetailModal({
     } else {
       // Check Cap
       if (isAtPlayerCap) {
-        alert("Max Level Reached! Increase Player Level to upgrade further.");
+        setShowMaxLevelAlert(true);
         return;
       }
       setSelectedInstanceIds((prev) => [...prev, id]);
     }
   };
 
+  const handleInitiateLevelUp = () => {
+    if (!activeCard) return;
+    setShowFinalConfirmation(true);
+  };
+
   const handleConfirmLevelUp = () => {
     if (!activeCard) return;
-
-    // Check for high rarity OR leveled cards
-    const needsWarning = inventory.some(
-      (c) =>
-        selectedInstanceIds.includes(c.instanceId || "") &&
-        (c.rarity === "RARE" || c.rarity === "UNCOMMON" || c.level > 1)
-    );
-
-    if (needsWarning && !showConfirmation) {
-      setShowConfirmation(true);
-      return;
-    }
 
     // Calculate stats for popup
     const currentLevel = activeCard.level;
@@ -155,13 +154,17 @@ export default function CardDetailModal({
     const currentHp = activeCard.hp;
 
     // Calculate expected new stats
-    // Logic must match playerSlice: +10% per level
     let tempLevel = currentLevel;
     let tempAtk = currentAtk;
     let tempHp = currentHp;
 
-    // We use the predictedLevel calculated earlier
     const levelsGained = predictedLevel - currentLevel;
+    const goldCost = levelsGained * 100;
+
+    if (gold < goldCost) {
+      // Should be handled by UI disabling, but safety check
+      return;
+    }
 
     for (let i = 0; i < levelsGained; i++) {
       tempLevel++;
@@ -178,6 +181,7 @@ export default function CardDetailModal({
       newHp: tempHp,
     });
 
+    dispatch(spendGold(goldCost));
     dispatch(
       consumeCardsForXp({
         targetInstanceId: activeCard.instanceId || "",
@@ -186,7 +190,7 @@ export default function CardDetailModal({
     );
     setSelectedInstanceIds([]);
     setIsLevelingUp(false);
-    setShowConfirmation(false);
+    setShowFinalConfirmation(false);
 
     if (levelsGained > 0) {
       setShowLevelUpPopup(true);
@@ -220,6 +224,19 @@ export default function CardDetailModal({
           {/* Drag Handle */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 rounded-full" />
 
+          {/* Info Icon */}
+          <button
+            onClick={() => setShowInfoModal(true)}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <Image
+              src="/assets/icons/info.png"
+              alt="Info"
+              width={24}
+              height={24}
+            />
+          </button>
+
           {/* 1. TOP SECTION: Card Info */}
           <motion.div layout className="flex gap-5 mt-2 shrink-0">
             {/* Left: Image */}
@@ -251,7 +268,10 @@ export default function CardDetailModal({
                   className="h-full bg-[#6A9A6A]"
                   style={{
                     width: `${
-                      (activeCard.experience / (activeCard.level * 100)) * 100
+                      !isAtPlayerCap
+                        ? (activeCard.experience / (activeCard.level * 100)) *
+                          100
+                        : 100
                     }%`,
                   }}
                 />
@@ -264,11 +284,19 @@ export default function CardDetailModal({
                     }} // Simplified preview
                   />
                 )}
-                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600 drop-shadow-sm z-10">
-                  {selectedInstanceIds.length > 0
-                    ? `${predictedXp} / ${predictedLevel * 100} XP`
-                    : `${activeCard.experience} / ${activeCard.level * 100} XP`}
-                </div>
+                {!isAtPlayerCap ? (
+                  <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600 drop-shadow-sm z-10">
+                    {selectedInstanceIds.length > 0
+                      ? `${predictedXp} / ${predictedLevel * 100} XP`
+                      : `${activeCard.experience} / ${
+                          activeCard.level * 100
+                        } XP`}
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-sm z-10">
+                    Max Level
+                  </div>
+                )}
               </div>
 
               <div className="shrink-0 bg-[#2a3b3b] rounded-full p-1 flex items-center justify-between relative h-12 mt-1">
@@ -380,21 +408,8 @@ export default function CardDetailModal({
                           </div>
 
                           {isSelected && (
-                            <div className="absolute inset-0 bg-[#6A9A6A]/40 flex items-center justify-center">
-                              <div className="w-6 h-6 bg-[#6A9A6A] rounded-full flex items-center justify-center shadow-lg">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  className="w-4 h-4 text-white"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
+                            <div className="absolute inset-0 bg-[#6A9A6A]/20 flex items-center justify-center backdrop-blur-[1px]">
+                              <EnsoCircle className="w-16 h-16 text-[#2a3b3b] drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" />
                             </div>
                           )}
                         </button>
@@ -406,10 +421,10 @@ export default function CardDetailModal({
                 {/* Confirm Button */}
                 <button
                   disabled={selectedInstanceIds.length === 0}
-                  onClick={handleConfirmLevelUp}
+                  onClick={handleInitiateLevelUp}
                   className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
                     selectedInstanceIds.length > 0
-                      ? "bg-[#6A9A6A] text-white shadow-lg hover:bg-[#588558]"
+                      ? "bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]"
                       : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
                 >
@@ -420,24 +435,159 @@ export default function CardDetailModal({
           </AnimatePresence>
         </motion.div>
 
-        {/* Confirmation Modal */}
+        {/* Final Confirmation Modal */}
         <AnimatePresence>
-          {showConfirmation && (
+          {showFinalConfirmation && activeCard && (
+            <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowFinalConfirmation(false)}
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-[#Fdfcf8] rounded-xl p-0 w-full max-w-xs relative z-10 text-center shadow-2xl overflow-hidden"
+              >
+                {/* Header */}
+                <div className="bg-[#Fdfcf8] pt-6 pb-2 px-4">
+                  <h3 className="text-lg font-bold text-[#1a2e2e] uppercase tracking-wide">
+                    Level Up Confirmation
+                  </h3>
+                </div>
+
+                <div className="p-4 flex flex-col gap-3">
+                  {/* Level Change */}
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="text-[#1a2e2e] text-lg">
+                      Lvl {activeCard.level}
+                    </span>
+                    <span className="text-[#1a2e2e] text-lg">›</span>
+                    <span className="text-[#588558] font-bold text-lg">
+                      Lvl {predictedLevel}
+                    </span>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* HP */}
+                    <div className="bg-[#Fdfcf8] border border-[#E0DCC0] rounded-lg p-2 shadow-sm">
+                      <div className="text-xs text-[#1a2e2e] uppercase font-bold mb-1">
+                        HP
+                      </div>
+                      <div className="flex items-center justify-center gap-1 text-sm">
+                        <span className="text-[#1a2e2e] font-medium">
+                          {activeCard.hp}
+                        </span>
+                        <span className="text-[#588558] text-xs">›</span>
+                        <span className="text-[#588558] font-bold">
+                          {Math.floor(
+                            activeCard.hp *
+                              Math.pow(1.1, predictedLevel - activeCard.level)
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    {/* ATK */}
+                    <div className="bg-[#Fdfcf8] border border-[#E0DCC0] rounded-lg p-2 shadow-sm">
+                      <div className="text-xs text-[#1a2e2e] uppercase font-bold mb-1">
+                        ATK
+                      </div>
+                      <div className="flex items-center justify-center gap-1 text-sm">
+                        <span className="text-[#1a2e2e] font-medium">
+                          {activeCard.atk}
+                        </span>
+                        <span className="text-[#588558] text-xs">›</span>
+                        <span className="text-[#588558] font-bold">
+                          {Math.floor(
+                            activeCard.atk *
+                              Math.pow(1.1, predictedLevel - activeCard.level)
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Warning for High Rarity */}
+                  {inventory.some(
+                    (c) =>
+                      selectedInstanceIds.includes(c.instanceId || "") &&
+                      (c.rarity === "RARE" ||
+                        c.rarity === "UNCOMMON" ||
+                        c.level > 1)
+                  ) && (
+                    <div className="bg-[#Fdfcf8] border border-[#C25E5E]/30 rounded-lg p-2 text-[#C25E5E] text-[10px] leading-tight">
+                      <strong className="block mb-0.5">WARNING:</strong>
+                      You are consuming Rare or Leveled cards. They will be lost
+                      forever.
+                    </div>
+                  )}
+
+                  {/* Cost */}
+                  <div className="flex items-center justify-center gap-1 text-center text-md font-bold text-[#1a2e2e] mt-1">
+                    <span>Required</span>
+                    <div className="w-6 h-6 relative">
+                      <Image
+                        src="/assets/icons/gold-coin.png"
+                        alt="Gold"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>{" "}
+                    <span>X{(predictedLevel - activeCard.level) * 100}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 mt-2">
+                    <button
+                      onClick={() => setShowFinalConfirmation(false)}
+                      className="flex-1 py-2.5 rounded-lg font-bold text-[#5F5A46] bg-[#EDE8D0] hover:bg-[#E0DCC0] transition-colors shadow-sm text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={
+                        gold < (predictedLevel - activeCard.level) * 100
+                      }
+                      onClick={handleConfirmLevelUp}
+                      className={`flex-1 py-2.5 rounded-lg font-bold text-white shadow-md transition-all text-sm ${
+                        gold < (predictedLevel - activeCard.level) * 100
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-[#3A4E48] hover:bg-[#2a3b3b]"
+                      }`}
+                    >
+                      {gold < (predictedLevel - activeCard.level) * 100
+                        ? "No Gold"
+                        : "Confirm"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Max Level Alert Modal */}
+        <AnimatePresence>
+          {showMaxLevelAlert && (
             <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                onClick={() => setShowConfirmation(false)}
+                onClick={() => setShowMaxLevelAlert(false)}
               />
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 text-center"
+                className="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 text-center shadow-2xl"
               >
-                <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -449,34 +599,35 @@ export default function CardDetailModal({
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                     />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  High Rarity Warning
+                  Max Level Reached
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  You have selected <strong>Rare+</strong> or{" "}
-                  <strong>Leveled</strong> cards to consume. These cards will be
-                  lost forever. Are you sure?
+                  Increase your <strong>Player Level</strong> to upgrade this
+                  card further.
                 </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowConfirmation(false)}
-                    className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmLevelUp}
-                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg"
-                  >
-                    Consume
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowMaxLevelAlert(false)}
+                  className="w-full py-3 rounded-xl font-bold text-white bg-[#2a3b3b] hover:bg-[#1a2e2e] shadow-lg transition-colors"
+                >
+                  OK
+                </button>
               </motion.div>
             </div>
+          )}
+        </AnimatePresence>
+
+        {/* Card Info Modal */}
+        <AnimatePresence>
+          {showInfoModal && activeCard && (
+            <CardInfoModal
+              card={activeCard}
+              onClose={() => setShowInfoModal(false)}
+            />
           )}
         </AnimatePresence>
       </div>

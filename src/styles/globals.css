@@ -38,3 +38,16 @@ body {
 img:not(.no-global-filter) {
   filter: contrast(130%) saturate(160%) !important;
 }
+
+button:not(.no-pointer) {
+  cursor: pointer;
+}
+
+/* Hide Scrollbar Utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
