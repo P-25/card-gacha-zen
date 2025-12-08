@@ -23,7 +23,7 @@ export default function GameLayout({
   return (
     <div className="flex flex-col h-dvh justify-center items-center overflow-hidden bg-[#1a1a1a]">
       {/* Desktop Background */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video w-[1920px] hidden lg:block pointer-events-none">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video w-full h-full hidden lg:block pointer-events-none">
         <Image
           src="/assets/background/full-background.png"
           alt="Desktop Background"

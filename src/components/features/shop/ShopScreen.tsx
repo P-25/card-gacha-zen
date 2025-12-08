@@ -11,12 +11,64 @@ import {
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShopItemCard from "./ShopItemCard";
-import BottomNav from "@/components/BottomNav";
 import { useRouter } from "next/router";
 import cardsData from "@/config/cards.json";
-import { Card, Rarity } from "@/types/game";
+import { Card } from "@/types/game";
 import Image from "next/image";
 import TopBar from "../home/TopBar";
+
+const InfoTooltip = ({
+  text,
+  placement = "top",
+}: {
+  text: string;
+  placement?: "top" | "bottom";
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className="relative inline-flex items-center ml-2">
+      <div
+        className="relative w-5 h-5 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        onClick={() => setIsVisible(!isVisible)}
+      >
+        <Image
+          src="/assets/icons/info.png"
+          alt="Info"
+          fill
+          className="object-contain"
+        />
+      </div>
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: placement === "top" ? 10 : -10,
+              scale: 0.9,
+            }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: placement === "top" ? 10 : -10, scale: 0.9 }}
+            className={`absolute left-1/2 -translate-x-1/2 w-48 p-3 bg-[#1a2e2e] text-[#Fdfcf8] text-xs rounded-lg shadow-xl z-50 text-center pointer-events-none ${
+              placement === "top" ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+          >
+            {text}
+            <div
+              className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent ${
+                placement === "top"
+                  ? "top-full border-t-[6px] border-t-[#1a2e2e]"
+                  : "bottom-full border-b-[6px] border-b-[#1a2e2e]"
+              }`}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function ShopScreen({ title }: { title: string }) {
   const dispatch = useDispatch();
@@ -109,9 +161,12 @@ export default function ShopScreen({ title }: { title: string }) {
       {/* <div className="flex-1 overflow-y-auto scrollbar-hide pb-24"> */}
       <div className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-[10rem] relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         <div className="p-6 space-y-8 max-w-4xl mx-auto" id="shop-content">
-          <h2 className="text-center text-[#1a2e2e] font-bold uppercase tracking-widest mb-4 text-md">
-            Cards
-          </h2>
+          <div className="flex items-center justify-center mb-4">
+            <h2 className="text-[#1a2e2e] font-bold uppercase tracking-widest text-md">
+              Cards
+            </h2>
+            <InfoTooltip text="Get the selected card" placement="bottom" />
+          </div>
 
           {/* Specific Cards */}
           <div className="grid grid-cols-2 gap-4">
@@ -126,9 +181,12 @@ export default function ShopScreen({ title }: { title: string }) {
           </div>
 
           {/* Random Packs */}
-          <h2 className="text-center text-[#1a2e2e] font-bold uppercase tracking-widest mb-4 text-md mt-8">
-            Random Packs
-          </h2>
+          <div className="flex items-center justify-center mb-4 mt-8">
+            <h2 className="text-[#1a2e2e] font-bold uppercase tracking-widest text-md">
+              Random Packs
+            </h2>
+            <InfoTooltip text="Get a random card of select rarity" />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             {randomPacks.map((item) => (
               <ShopItemCard
@@ -142,9 +200,12 @@ export default function ShopScreen({ title }: { title: string }) {
           </div>
 
           {/* Gem Packs */}
-          <h2 className="text-center text-[#1a2e2e] font-bold uppercase tracking-widest mb-4 text-md mt-8">
-            Gem Shop
-          </h2>
+          <div className="flex items-center justify-center mb-4 mt-8">
+            <h2 className="text-[#1a2e2e] font-bold uppercase tracking-widest text-md">
+              Gem Shop
+            </h2>
+            <InfoTooltip text="Purchase gems" />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             {gemPacks.map((item) => (
               <ShopItemCard

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Background from "@/components/layout/Background";
 import TopBar from "@/components/features/home/TopBar";
 import { AppState } from "@/hooks/useGameState";
+import cardsData from "@/config/cards.json";
 
 interface CollectionScreenProps {
   onNavigate: (screen: AppState) => void;
@@ -24,10 +25,15 @@ export default function CollectionScreen({
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [rarityFilter, setRarityFilter] = useState<Rarity | "ALL">("ALL");
-  const [typeFilter, setTypeFilter] = useState<string | "ALL">("ALL");
+  const [setFilter, setSetFilter] = useState<string | "ALL">("ALL");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Derived Data
+  const uniqueSets = useMemo(() => {
+    const sets = new Set(cardsData.map((card) => card.setName));
+    return ["ALL", ...Array.from(sets)];
+  }, []);
+
   const filteredCards = useMemo(() => {
     let result = [...inventory];
 
@@ -42,9 +48,9 @@ export default function CollectionScreen({
       result = result.filter((card) => card.rarity === rarityFilter);
     }
 
-    // 3. Design Type Filter
-    if (typeFilter !== "ALL") {
-      result = result.filter((card) => card.design_type === typeFilter);
+    // 3. Set Filter
+    if (setFilter !== "ALL") {
+      result = result.filter((card) => card.setName === setFilter);
     }
 
     // 4. Sort
@@ -57,7 +63,7 @@ export default function CollectionScreen({
     });
 
     return result;
-  }, [inventory, searchQuery, rarityFilter, typeFilter, sortOrder]);
+  }, [inventory, searchQuery, rarityFilter, setFilter, sortOrder]);
 
   return (
     <div className="h-dvh bg-[#1a1a1a] text-white flex flex-col relative overflow-hidden">
@@ -189,21 +195,21 @@ export default function CollectionScreen({
                   </div>
                 </div>
 
-                {/* Type Filter */}
+                {/* Set Filter */}
                 <div>
-                  <p className="text-xs text-white/50 mb-1 font-bold">TYPE</p>
+                  <p className="text-xs text-white/50 mb-1 font-bold">SET</p>
                   <div className="flex gap-2 flex-wrap">
-                    {["ALL", "Landbound", "Hero", "Eternal"].map((t) => (
+                    {uniqueSets.map((s) => (
                       <button
-                        key={t}
-                        onClick={() => setTypeFilter(t)}
+                        key={s}
+                        onClick={() => setSetFilter(s)}
                         className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-                          typeFilter === t
+                          setFilter === s
                             ? "bg-white text-black"
                             : "bg-white/10 text-white hover:bg-white/20"
                         }`}
                       >
-                        {t}
+                        {s}
                       </button>
                     ))}
                   </div>

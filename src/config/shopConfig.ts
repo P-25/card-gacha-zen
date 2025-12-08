@@ -23,28 +23,28 @@ export const shopItems: ShopItem[] = [
   {
     id: "shop_card_rare_001",
     type: "SPECIFIC_CARD",
-    name: "Specific Rare Card",
+    name: "Horizon Keeper",
     cost: 12000,
     currency: "GOLD",
-    image: "/assets/Card_Designs/rare/card_001.png", // Placeholder, will use card image
+    image: "/assets/Card_Art/rare/card_001.png", // Placeholder, will use card image
     cardId: "rare_card_001", // Horizon Keeper
   },
   {
     id: "shop_card_uncommon_001",
     type: "SPECIFIC_CARD",
-    name: "Specific Uncommon Card",
+    name: "Frost Guard",
     cost: 3000,
     currency: "GOLD",
-    image: "/assets/Card_Designs/uncommon/card_001.png",
+    image: "/assets/Card_Art/uncommon/card_005.png",
     cardId: "uncommon_card_001", // Celestial Serpent
   },
   {
     id: "shop_card_common_001",
     type: "SPECIFIC_CARD",
-    name: "Specific Common Card",
+    name: "Whisper",
     cost: 500,
     currency: "GOLD",
-    image: "/assets/Card_Designs/common/card_001.png",
+    image: "/assets/Card_Art/common/card_006.png",
     cardId: "common_card_001", // Clay Golem
   },
   // --- Shop Exclusive ---

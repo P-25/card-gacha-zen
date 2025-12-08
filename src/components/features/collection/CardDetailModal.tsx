@@ -9,6 +9,7 @@ import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
 import LevelUpPopup from "./LevelUpPopup";
 import { EnsoCircle } from "@/components/ui/EnsoCircle";
 import CardInfoModal from "./CardInfoModal";
+import { getRarityBorderColor } from "@/lib/rarityStyles";
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -218,7 +219,7 @@ export default function CardDetailModal({
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[#Fdfcf8] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden"
+          className="relative w-full max-w-md bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden"
           style={{ maxHeight: "90vh" }}
         >
           {/* Drag Handle */}
@@ -387,19 +388,24 @@ export default function CardDetailModal({
                         c.instanceId || ""
                       );
                       const xp = getXpValue(c);
+                      const borderColor = getRarityBorderColor(c.rarity);
+
                       return (
                         <button
                           key={c.instanceId}
                           onClick={() => handleToggleCard(c)}
-                          className={`aspect-3/4 relative rounded-lg border-2 transition-all cursor-pointer ${
+                          className={`aspect-3/4 relative rounded-lg border-4 transition-all cursor-pointer ${
                             isSelected
-                              ? "border-[#6A9A6A] scale-95 opacity-100"
-                              : "border-transparent opacity-100 hover:opacity-90"
+                              ? "scale-95 opacity-100"
+                              : "opacity-100 hover:opacity-90"
                           }`}
+                          style={{
+                            borderColor: isSelected ? "#6A9A6A" : borderColor,
+                          }}
                         >
                           <Image src={c.image} alt={c.name} fill />
                           {/* Level Badge */}
-                          <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                          <div className="absolute top-0 left-0 bg-[#404040] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-xs z-10">
                             Lvl {c.level}
                           </div>
                           {/* XP Badge */}

@@ -1,6 +1,7 @@
 import { Card } from "@/types/game";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { getRarityBorderColor } from "@/lib/rarityStyles";
 
 interface CollectionCardProps {
   card: Card;
@@ -8,12 +9,17 @@ interface CollectionCardProps {
 }
 
 export default function CollectionCard({ card, onClick }: CollectionCardProps) {
+  const borderColor = getRarityBorderColor(card.rarity);
+
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => onClick(card)}
       className="relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer shadow-lg group"
+      style={{
+        border: `4px solid ${borderColor}`,
+      }}
     >
       {/* Card Image */}
       <Image
@@ -24,15 +30,8 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
         className="object-cover transition-transform duration-300 group-hover:scale-110"
       />
 
-      {/* Rarity Border/Glow */}
-      <div
-        className={`absolute inset-0 border-2 ${
-          card.rarity === "RARE" ? "border-blue-500/50" : "border-transparent"
-        } rounded-xl pointer-events-none`}
-      />
-
       {/* Level Badge */}
-      <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-sm z-10">
+      <div className="absolute top-0 left-0 bg-[#404040] text-white text-[10px] font-bold px-2 py-1 rounded-br-lg rounded-tl-md z-10">
         Lv.{card.level}
       </div>
 
