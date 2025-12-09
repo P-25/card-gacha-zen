@@ -14,6 +14,10 @@ import { performSummon } from "@/lib/gameLogic";
 import { Card, Resource } from "@/types/game";
 import FloatingParticles from "@/components/summon/FloatingParticles";
 import MagicCircle from "./MagicCircle";
+import OfferingRateModal from "./OfferingRateModal";
+
+import summonsData from "@/config/summons.json";
+import Image from "next/image";
 
 interface RateUpSummonSectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
@@ -25,19 +29,16 @@ export default function RateUpSummonSection({
   const [summonState, setSummonState] = useState<
     "idle" | "charging" | "summoning"
   >("idle");
+  const [isOfferingModalOpen, setIsOfferingModalOpen] = useState(false);
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
 
-  const banner = {
-    id: "banner_rate_up",
-    singlePrice: 10,
-    multiPrice: 100,
-  };
+  const banner = summonsData[0];
 
   const currentPity = pityState[banner.id] || { pullsSinceLastRare: 0 };
   const pityCount = currentPity.pullsSinceLastRare;
-  const maxPity = 90; // Assuming 90 is hard pity
+  const maxPity = banner.pity.hardPity;
   const pityProgress = Math.min((pityCount / maxPity) * 100, 100);
   const pullsLeft = Math.max(maxPity - pityCount, 0);
 
@@ -110,18 +111,6 @@ export default function RateUpSummonSection({
     <div className="w-full h-full flex flex-col items-center relative overflow-hidden">
       {/* BACKGROUND LAYERS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {/* Parallax Clouds */}
-        {/* <motion.div
-          className="absolute inset-0 opacity-40"
-          animate={{ x: [-20, 20, -20] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        >
-          <img
-            src="/assets/watercolor_clouds.png"
-            className="w-full h-full object-cover scale-125"
-            alt="clouds"
-          />
-        </motion.div> */}
         <FloatingParticles />
       </div>
 
@@ -216,36 +205,51 @@ export default function RateUpSummonSection({
           </div>
 
           {/* PITY COUNTER */}
-          <div className="w-full max-w-sm bg-black/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 relative overflow-hidden shadow-xl">
-            <div className="flex flex-col gap-2 relative z-10">
-              <div className="flex justify-between items-center text-[#E6D28F] text-sm">
-                <span>Pity Counter</span>
-                <span>
-                  {pityCount}/{maxPity}
+          <div className="w-full max-w-sm bg-[#2D3748]/90 backdrop-blur-md rounded-xl p-4 border border-white/10 relative overflow-hidden shadow-2xl">
+            <div className="flex justify-between items-center mb-2 relative z-10">
+              <span className="text-[#E2E8F0] font-medium text-sm tracking-wide">
+                Pity Progress
+              </span>
+              <button
+                onClick={() => setIsOfferingModalOpen(true)}
+                className="text-xs text-[#E2E8F0] border border-[#C5A059] rounded-full px-3 py-1 hover:bg-[#C5A059]/20 transition-colors"
+              >
+                Drop Info
+              </button>
+            </div>
+
+            <div className="relative w-full h-5 bg-black/60 rounded-full overflow-hidden border border-white/5 mb-2">
+              <motion.div
+                className="h-full bg-gradient-to-r from-[#C5A059] via-[#FDB931] to-[#C5A059]"
+                initial={{ width: 0 }}
+                animate={{ width: `${pityProgress}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
+              {/* Text Overlay on Bar */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <span className="text-[10px] font-bold text-white drop-shadow-md tracking-wider">
+                  {pityCount} / {maxPity}
                 </span>
               </div>
-              <div className="w-full h-3 bg-black/50 rounded-full overflow-hidden border border-white/5 relative">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-[#C5A059] to-[#FDB931]"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${pityProgress}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
-                {/* Pulse if near full */}
-                {pityProgress > 80 && (
-                  <motion.div
-                    className="absolute inset-0 bg-white/20"
-                    animate={{ opacity: [0, 0.5, 0] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                )}
-              </div>
-              <p className="text-center text-xs text-white/60 mt-1 font-medium tracking-wide">
-                Guaranteed{" "}
-                <span className="text-[#FDB931] font-bold">EPIC</span> card in{" "}
-                {pullsLeft} more summons!
-              </p>
+
+              {/* Shine effect on bar */}
+              <motion.div
+                className="absolute top-0 bottom-0 w-2 bg-white/50 blur-sm"
+                animate={{ left: ["0%", "100%"] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: 1,
+                }}
+              />
             </div>
+
+            <p className="text-center text-xs text-[#A0AEC0] font-medium tracking-wide">
+              Guaranteed{" "}
+              <span className="text-[#6B7C93] font-bold text-sm">RARE</span>{" "}
+              card in {pullsLeft} more summons!
+            </p>
           </div>
 
           {/* BUTTONS */}
@@ -263,9 +267,19 @@ export default function RateUpSummonSection({
               <span className="text-lg font-bold tracking-wider">
                 SUMMON x1
               </span>
-              <span className="text-xs opacity-70 font-medium">
-                ({banner.singlePrice} Gems)
-              </span>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 relative">
+                  <Image
+                    src="/assets/icons/gem.png"
+                    alt="Gem"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-[#1a2e2e] font-bold text-md">
+                  x{banner.singlePrice.toLocaleString()}
+                </span>
+              </div>
             </motion.button>
 
             {/* Multi Summon */}
@@ -282,9 +296,27 @@ export default function RateUpSummonSection({
               <span className="text-lg font-bold tracking-wider relative z-10">
                 SUMMON x10
               </span>
-              <span className="text-xs opacity-90 font-medium relative z-10">
-                ({banner.multiPrice} Gems - 1 Bonus!)
-              </span>
+
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 relative">
+                  <Image
+                    src="/assets/icons/gem.png"
+                    alt="Gem"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-white font-bold text-md">
+                  x{banner.multiPrice.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Best Value Ribbon */}
+              <div className="absolute top-0 left-0 overflow-hidden w-24 h-24 pointer-events-none">
+                <div className="absolute top-[10px] left-[-28px] w-[100px] h-[20px] bg-gradient-to-r from-[#8B0000] to-[#A52A2A] text-white text-[8px] font-bold flex items-center justify-center -rotate-45 shadow-md border-y border-[#FFD700] tracking-wider z-20">
+                  BEST VALUE
+                </div>
+              </div>
 
               {/* Sheen Effect */}
               <motion.div
@@ -296,6 +328,10 @@ export default function RateUpSummonSection({
           </div>
         </motion.div>
       </AnimatePresence>
+      <OfferingRateModal
+        isOpen={isOfferingModalOpen}
+        onClose={() => setIsOfferingModalOpen(false)}
+      />
     </div>
   );
 }

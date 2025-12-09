@@ -2,18 +2,19 @@
     {
         "id": "banner_rate_up",
         "name": "Dragon Slayer Rate Up",
-        "cost": 100,
+        "singlePrice": 10,
+        "multiPrice": 90,
         "currency": "gems",
         "rates": {
-            "COMMON": 0.70,
+            "COMMON": 0.73,
             "UNCOMMON": 0.25,
-            "RARE": 0.05
+            "RARE": 0.02
         },
         "pity": {
             "targetRarity": "RARE",
-            "hardPity": 10,
-            "softPity": 7,
-            "softPityIncrement": 0.1
+            "hardPity": 50,
+            "softPity": 40,
+            "softPityIncrement": 0.05
         },
         "pool": []
     }
