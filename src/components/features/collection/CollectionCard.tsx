@@ -16,7 +16,7 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => onClick(card)}
-      className="relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer shadow-lg group"
+      className="relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer shadow-lg group bg-white/30"
       style={{
         border: `4px solid ${borderColor}`,
       }}
@@ -27,7 +27,7 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
         alt={card.name}
         fill
         priority
-        className="object-cover transition-transform duration-300 group-hover:scale-110"
+        className="z-5 object-cover transition-transform duration-300 group-hover:scale-110 no-global-filter"
       />
 
       {/* Level Badge */}
@@ -36,7 +36,7 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
       </div>
 
       {/* Name Overlay (Optional, maybe on hover) */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="z-10 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <p className="text-white text-sm font-bold truncate">{card.name}</p>
       </div>
     </motion.div>

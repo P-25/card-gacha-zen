@@ -73,12 +73,10 @@ const Rays = () => {
     []
   );
 
-  console.log(`Debug - rays`, rays);
   return (
     <>
       {rays.map((ray) => (
         <motion.div
-          id="yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
           key={ray.id}
           initial={{ height: 0, opacity: 0 }}
           animate={{

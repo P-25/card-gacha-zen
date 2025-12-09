@@ -34,7 +34,6 @@ export function useGameState() {
   }, [appState]);
 
   const navigateTo = (screen: AppState) => {
-    console.log(`Debug - cccccccccccccccccccccccccccccccccccccc`, screen);
     setAppState(screen);
   };
 

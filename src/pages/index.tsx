@@ -16,10 +16,6 @@ export default function GamePage() {
   // Show nav if not in gacha, OR if in gacha but in selection mode
   const showNav = appState !== "gacha" || isGachaSelectionMode;
 
-  useEffect(() => {
-    console.log(`Debug - appState`, appState);
-  }, [appState]);
-
   return (
     <GameLayout appState={appState} onNavigate={navigateTo} showNav={showNav}>
       {appState === "loading" && <Loader />}

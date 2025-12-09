@@ -83,6 +83,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
               fill
               sizes="(max-width: 768px) 80vw, 400px"
               priority
+              className="no-global-filter"
             />
           </motion.div>
 
