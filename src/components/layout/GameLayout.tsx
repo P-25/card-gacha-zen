@@ -25,7 +25,7 @@ export default function GameLayout({
       {/* Desktop Background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video w-full h-full hidden lg:block pointer-events-none">
         <Image
-          src="/assets/background/full-background.png"
+          src="/assets/background/full-background.webp"
           alt="Desktop Background"
           fill
           className="object-cover opacity-50"

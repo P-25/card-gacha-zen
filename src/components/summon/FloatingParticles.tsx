@@ -6,7 +6,11 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-const FloatingParticles = () => {
+interface FloatingParticlesProps {
+  theme?: "light" | "dark";
+}
+
+const FloatingParticles = ({ theme = "dark" }: FloatingParticlesProps) => {
   const [particles, setParticles] = useState<any[]>([]);
 
   useEffect(() => {
@@ -44,21 +48,30 @@ const FloatingParticles = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {particles.map((p) => (
-        <Particle key={p.id} {...p} />
+        <Particle key={p.id} {...p} theme={theme} />
       ))}
     </div>
   );
 };
 
-const Particle = ({ size, duration, delay, startX, endX }: any) => {
+const Particle = ({ size, duration, delay, startX, endX, theme }: any) => {
   const zIndex = Math.random() + 1 > 1.5 ? "z-0" : "z-50";
-  const colors = [
+
+  const darkColors = [
     "#99FFFF", // Cyan
     "#FFD700", // Gold
     "#FFFFFF", // White
   ];
 
+  const lightColors = [
+    "#008B8B", // Dark Cyan
+    "#B8860B", // Dark Goldenrod
+    "#808080", // Grey
+  ];
+
+  const colors = theme === "light" ? lightColors : darkColors;
   const color = colors[Math.floor(Math.random() * colors.length)];
+  const blendMode = theme === "light" ? "multiply" : "screen";
 
   return (
     <motion.div
@@ -73,7 +86,7 @@ const Particle = ({ size, duration, delay, startX, endX }: any) => {
           ${color} 60%, 
           ${color}00 100%
         )`,
-        mixBlendMode: "screen", // Key for the glowing effect
+        mixBlendMode: blendMode, // Key for the glowing effect
       }}
       initial={{
         x: `${startX}vw`,

@@ -36,7 +36,7 @@ body {
 }
 
 img:not(.no-global-filter) {
-  filter: contrast(130%) saturate(160%) !important;
+  filter: contrast(130%) saturate(110%) !important;
 }
 
 button:not(.no-pointer) {

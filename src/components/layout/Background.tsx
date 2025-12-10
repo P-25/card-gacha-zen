@@ -6,7 +6,7 @@ export default function Background() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none bg-[#F5F2EB]">
       <Image
-        src="/assets/background/light-bg.png"
+        src="/assets/background/light-bg.webp"
         alt="Background"
         fill
         className="no-global-filter object-cover opacity-80"

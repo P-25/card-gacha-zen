@@ -2,6 +2,7 @@ import { Card } from "@/types/game";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { getRarityBorderColor } from "@/lib/rarityStyles";
+import BrushStroke from "@/components/BrushStroke";
 
 interface CollectionCardProps {
   card: Card;
@@ -18,16 +19,27 @@ export default function CollectionCard({ card, onClick }: CollectionCardProps) {
       onClick={() => onClick(card)}
       className="relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer shadow-lg group bg-white/30"
       style={{
-        border: `4px solid ${borderColor}`,
+        boxShadow: `inset 0 0 0 4px ${borderColor}`,
       }}
     >
+      <div className="absolute inset-0 z-0 scale-125 opacity-70 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-150">
+        <BrushStroke
+          className="mt-8"
+          x="0px"
+          y="0px"
+          viewBox="0 0 750 750"
+          style={{
+            color: `${borderColor}`,
+          }}
+        />
+      </div>
       {/* Card Image */}
       <Image
         src={card.image}
         alt={card.name}
         fill
-        priority
-        className="z-5 object-cover transition-transform duration-300 group-hover:scale-110 no-global-filter"
+        loading="lazy"
+        className="z-5 object-cover transition-transform duration-300 group-hover:scale-110"
       />
 
       {/* Level Badge */}

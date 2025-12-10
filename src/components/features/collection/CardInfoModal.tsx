@@ -18,7 +18,7 @@ export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
         className="absolute inset-0 z-0 pointer-events-none bg-[#F5F2EB]"
       >
         <img
-          src="/assets/background/light-bg.png"
+          src="/assets/background/light-bg.webp"
           alt="Background"
           className="absolute inset-0 w-full h-full object-cover opacity-80"
         />
