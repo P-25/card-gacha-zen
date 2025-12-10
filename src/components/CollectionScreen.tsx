@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+import CardDetailModal from "@/components/features/collection/CardDetailModal";
+import CollectionGrid from "@/components/features/collection/CollectionGrid";
+import TopBar from "@/components/features/home/TopBar";
+import Background from "@/components/layout/Background";
+import { AppState } from "@/hooks/useGameState";
 import { RootState } from "@/store/store";
 import { Card, Rarity } from "@/types/game";
-import CollectionGrid from "@/components/features/collection/CollectionGrid";
-import CardDetailModal from "@/components/features/collection/CardDetailModal";
-import { motion, AnimatePresence } from "framer-motion";
-import Background from "@/components/layout/Background";
-import TopBar from "@/components/features/home/TopBar";
-import { AppState } from "@/hooks/useGameState";
-import cardsData from "@/config/cards.json";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 interface CollectionScreenProps {
   onNavigate: (screen: AppState) => void;
@@ -25,14 +24,11 @@ export default function CollectionScreen({
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [rarityFilter, setRarityFilter] = useState<Rarity | "ALL">("ALL");
-  const [setFilter, setSetFilter] = useState<string | "ALL">("ALL");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // Derived Data
-  const uniqueSets = useMemo(() => {
-    const sets = new Set(cardsData.map((card) => card.setName));
-    return ["ALL", ...Array.from(sets)];
-  }, []);
+  // Pagination
+  const [visibleCount, setVisibleCount] = useState(24);
+  const SCROLL_INCREMENT = 24;
 
   const filteredCards = useMemo(() => {
     let result = [...inventory];
@@ -48,22 +44,40 @@ export default function CollectionScreen({
       result = result.filter((card) => card.rarity === rarityFilter);
     }
 
-    // 3. Set Filter
-    if (setFilter !== "ALL") {
-      result = result.filter((card) => card.setName === setFilter);
-    }
-
     // 4. Sort
     result.sort((a, b) => {
+      const powerA = a.hp + a.atk;
+      const powerB = b.hp + b.atk;
       if (sortOrder === "desc") {
-        return b.level - a.level;
+        return powerB - powerA;
       } else {
-        return a.level - b.level;
+        return powerA - powerB;
       }
     });
 
     return result;
-  }, [inventory, searchQuery, rarityFilter, setFilter, sortOrder]);
+  }, [inventory, searchQuery, rarityFilter, sortOrder]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisibleCount(SCROLL_INCREMENT);
+  }, [filteredCards]);
+
+  const visibleCards = useMemo(() => {
+    return filteredCards.slice(0, visibleCount);
+  }, [filteredCards, visibleCount]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 100) {
+      if (visibleCount < filteredCards.length) {
+        setVisibleCount((prev) =>
+          Math.min(prev + SCROLL_INCREMENT, filteredCards.length)
+        );
+      }
+    }
+  };
 
   return (
     <div className="h-dvh bg-[#1a1a1a] text-white flex flex-col relative overflow-hidden">
@@ -194,26 +208,6 @@ export default function CollectionScreen({
                     ))}
                   </div>
                 </div>
-
-                {/* Set Filter */}
-                <div>
-                  <p className="text-xs text-white/50 mb-1 font-bold">SET</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {uniqueSets.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setSetFilter(s)}
-                        className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-                          setFilter === s
-                            ? "bg-white text-black"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </motion.div>
           )}
@@ -221,12 +215,20 @@ export default function CollectionScreen({
       </div>
 
       {/* Content */}
-      <div className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-32 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+      <div
+        className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-32 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+        onScroll={handleScroll}
+      >
         <CollectionGrid
-          cards={filteredCards}
+          cards={visibleCards}
           onCardClick={setSelectedCard}
           onNavigate={onNavigate}
         />
+        {visibleCount < filteredCards.length && (
+          <div className="w-full py-4 flex justify-center">
+            <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       {/* Modal */}

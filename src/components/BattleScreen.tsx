@@ -1,15 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import TopBar from "@/components/features/home/TopBar";
 import { AppState } from "@/hooks/useGameState";
+import BattleFlow from "./battle/BattleFlow";
 
 interface BattleScreenProps {
   onNavigate: (screen: AppState) => void;
 }
 
 export default function BattleScreen({ onNavigate }: BattleScreenProps) {
+  const [mode, setMode] = useState<"MENU" | "1V1">("MENU");
+
+  if (mode === "1V1") {
+    return (
+      <BattleFlow onNavigate={onNavigate} onBack={() => setMode("MENU")} />
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
       {/* Background Overlay */}
@@ -44,7 +54,7 @@ export default function BattleScreen({ onNavigate }: BattleScreenProps) {
 
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => console.log("1v1 Duel")}
+          onClick={() => setMode("1V1")}
           className="bg-[#FAF3E5] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#422462] active:border-b-2 active:translate-y-1 transition-all cursor-pointer relative overflow-hidden"
           style={{
             boxShadow: "0 4px 0 #422462, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",

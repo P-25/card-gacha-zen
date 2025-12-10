@@ -12,3 +12,14 @@ export const getRarityBorderColor = (rarity: Rarity): string => {
       return "transparent";
   }
 };
+
+export const getStrokeImage = (rarity: string) => {
+  switch (rarity) {
+    case "RARE":
+      return "/assets/icons/rare_stroke.webp";
+    case "UNCOMMON":
+      return "/assets/icons/uncommon_stroke.webp";
+    default:
+      return "/assets/icons/common_stroke.webp";
+  }
+};

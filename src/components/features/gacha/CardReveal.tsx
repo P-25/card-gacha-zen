@@ -1,6 +1,5 @@
 "use client";
 
-import BrushStroke from "@/components/BrushStroke";
 import { getRarityBorderColor } from "@/lib/rarityStyles";
 import { RootState } from "@/store/store";
 import { Card, Resource } from "@/types/game";
@@ -54,16 +53,24 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
           className="flex flex-col items-center gap-2 w-full max-w-md px-6"
         >
           {/* Card Container */}
-          <div className="relative w-full aspect-[3/4] max-h-[55vh] flex items-center justify-center">
+          <div className="relative w-full aspect-3/4 max-h-[55vh] flex items-center justify-center">
             {/* Ink Burst Halo */}
-            <div className="absolute inset-0 z-0 scale-150 opacity-40">
-              <BrushStroke
-                className="w-full h-full"
-                x="0px"
-                y="0px"
-                viewBox="0 0 750 750"
-                style={{ color: borderColor }}
-              />
+            <div className="absolute inset-0 z-0 scale-150 opacity-40 flex items-center justify-center">
+              <div className="relative w-full h-full">
+                <Image
+                  src={
+                    cardItem.rarity === "RARE"
+                      ? "/assets/icons/rare_stroke.webp"
+                      : cardItem.rarity === "UNCOMMON"
+                      ? "/assets/icons/uncommon_stroke.webp"
+                      : "/assets/icons/common_stroke.webp"
+                  }
+                  alt="brush stroke"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 500px"
+                />
+              </div>
             </div>
 
             <motion.div
@@ -131,7 +138,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
             {/* Flavor Text */}
             {isCard ? (
               <p className="text-sm font-semibold text-gray-600 italic text-center max-w-xs leading-relaxed line-clamp-2">
-                "{cardItem.description}"
+                &quot;{cardItem.description}&quot;
               </p>
             ) : (
               <div className="text-sm text-gray-600 italic text-center max-w-xs leading-relaxed">
@@ -167,13 +174,13 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
             {/* Claim/Next Button (Primary) */}
             <button
               onClick={handleNext}
-              className="flex-[2] bg-[#3E206D] text-[#FDB931] font-bold text-xl py-3 rounded-xl border-2 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer hover:brightness-110"
+              className="flex-2 bg-[#3E206D] text-[#FDB931] font-bold text-xl py-3 rounded-xl border-2 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer hover:brightness-110"
             >
               <span className="relative z-10">
                 {currentIndex < results.length - 1 ? "NEXT" : "CLAIM"}
               </span>
               {/* Sheen */}
-              <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+              <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
             </button>
           </motion.div>
         </motion.div>

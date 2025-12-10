@@ -1,3 +1,4 @@
+import { getRarityBorderColor } from "@/lib/rarityStyles";
 import { Card } from "@/types/game";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -8,6 +9,7 @@ interface CardInfoModalProps {
 }
 
 export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
+  const borderColor = getRarityBorderColor(card.rarity);
   return (
     <div className="fixed inset-0 z-120 flex items-center justify-center">
       {/* Lightweight Background for Performance */}
@@ -73,7 +75,12 @@ export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
         {/* Scrollable Content */}
         <div className="overflow-y-auto p-6 flex-1 scrollbar-hide">
           {/* Card Image */}
-          <div className="w-2/3 mx-auto aspect-3/4 relative rounded-2xl overflow-hidden shadow-xl mb-6">
+          <div
+            className="w-2/3 mx-auto aspect-3/4 relative rounded-2xl overflow-hidden shadow-xl mb-6"
+            style={{
+              boxShadow: `inset 0 0 0 4px ${borderColor}`,
+            }}
+          >
             <Image src={card.image} alt={card.name} fill />
           </div>
 

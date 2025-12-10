@@ -2,14 +2,26 @@
 import { Card, Rarity } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
 import LevelUpPopup from "./LevelUpPopup";
 import { EnsoCircle } from "@/components/ui/EnsoCircle";
 import CardInfoModal from "./CardInfoModal";
-import { getRarityBorderColor } from "@/lib/rarityStyles";
+import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
+
+// Helper for XP calculation
+const getXpValue = (c: Card) => {
+  let base = 100;
+  if (c.rarity === "COMMON") base = 100;
+  else if (c.rarity === "UNCOMMON") base = 250;
+  else if (c.rarity === "RARE") base = 500;
+
+  const final = base * (c.level || 1);
+
+  return final > 5000 ? 5000 : final;
+};
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -42,6 +54,10 @@ export default function CardDetailModal({
     newHp: 0,
   });
 
+  // Pagination for Fodder
+  const [visibleFodderCount, setVisibleFodderCount] = useState(21);
+  const FODDER_INCREMENT = 21;
+
   // 1. Get Active Card (Reactive State)
   const activeCard = useMemo(() => {
     if (!card) return null;
@@ -64,15 +80,6 @@ export default function CardDetailModal({
       result = result.filter((c) => c.rarity === rarityFilter);
     }
 
-    // Sort by XP Value (Rarity)
-    // Common=100, Uncommon=300, Rare=1000
-    const getXpValue = (c: Card) => {
-      if (c.rarity === "COMMON") return 100;
-      if (c.rarity === "UNCOMMON") return 300;
-      if (c.rarity === "RARE") return 1000;
-      return 0;
-    };
-
     result.sort((a, b) => {
       const xpA = getXpValue(a);
       const xpB = getXpValue(b);
@@ -82,15 +89,10 @@ export default function CardDetailModal({
     return result;
   }, [inventory, activeCard, rarityFilter, sortOrder]);
 
-  // 3. XP Calculations
-  const getXpValue = (c: Card) => {
-    let base = 100;
-    if (c.rarity === "COMMON") base = 100;
-    else if (c.rarity === "UNCOMMON") base = 300;
-    else if (c.rarity === "RARE") base = 1000;
-
-    return base * (c.level || 1);
-  };
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setVisibleFodderCount(FODDER_INCREMENT);
+  }, [availableCards]);
 
   const selectedXp = useMemo(() => {
     let total = 0;
@@ -200,251 +202,266 @@ export default function CardDetailModal({
 
   if (!activeCard) return null;
 
+  const borderColor = getRarityBorderColor(activeCard.rarity);
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-100 flex items-end justify-center">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-        />
-
-        {/* Bottom Sheet Container */}
-        <motion.div
-          layout
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden"
-          style={{ maxHeight: "90vh" }}
-        >
-          {/* Drag Handle */}
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 rounded-full" />
-
-          {/* Info Icon */}
-          <button
-            onClick={() => setShowInfoModal(true)}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <Image
-              src="/assets/icons/info.png"
-              alt="Info"
-              width={24}
-              height={24}
+      <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none">
+        {/* Backdrop & Bottom Sheet - Hide when Info Modal is open */}
+        {!showInfoModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer pointer-events-auto"
             />
-          </button>
 
-          {/* 1. TOP SECTION: Card Info */}
-          <motion.div layout className="flex gap-5 mt-2 shrink-0">
-            {/* Left: Image */}
-            <div className="w-1/3 aspect-3/4 relative rounded-xl overflow-hidden shadow-inner bg-slate-200 shrink-0">
-              <Image
-                src={activeCard.image}
-                alt={activeCard.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
+            {/* Bottom Sheet Container */}
+            <motion.div
+              layout
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative w-full max-w-md bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden pointer-events-auto"
+              style={{ maxHeight: "90vh" }}
+            >
+              {/* Drag Handle */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 rounded-full" />
 
-            {/* Right: Details */}
-            <div className="flex-1 flex flex-col gap-2">
-              <h2 className="text-2xl font-bold text-[#1a2e2e] leading-tight">
-                {activeCard.name}
-              </h2>
-
-              <div className="flex flex-row justify-between gap-1 text-sm text-[#5F5A46] font-bold">
-                <span>ATK: {activeCard.atk}</span>
-                <span>HP: {activeCard.hp}</span>
-              </div>
-
-              {/* XP Bar */}
-              <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden relative mt-2">
-                {/* Current XP */}
-                <div
-                  className="h-full bg-[#6A9A6A]"
-                  style={{
-                    width: `${
-                      !isAtPlayerCap
-                        ? (activeCard.experience / (activeCard.level * 100)) *
-                          100
-                        : 100
-                    }%`,
-                  }}
+              {/* Info Icon */}
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <Image
+                  src="/assets/icons/info.png"
+                  alt="Info"
+                  width={24}
+                  height={24}
                 />
-                {/* Predicted XP Preview (Overlay) */}
-                {selectedXp > 0 && (
-                  <div
-                    className="h-full bg-[#6A9A6A]/50 absolute top-0 left-0 animate-pulse"
-                    style={{
-                      width: `${(predictedXp / (predictedLevel * 100)) * 100}%`,
-                    }} // Simplified preview
-                  />
-                )}
-                {!isAtPlayerCap ? (
-                  <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600 drop-shadow-sm z-10">
-                    {selectedInstanceIds.length > 0
-                      ? `${predictedXp} / ${predictedLevel * 100} XP`
-                      : `${activeCard.experience} / ${
-                          activeCard.level * 100
-                        } XP`}
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-sm z-10">
-                    Max Level
-                  </div>
-                )}
-              </div>
+              </button>
 
-              <div className="shrink-0 bg-[#2a3b3b] rounded-full p-1 flex items-center justify-between relative h-12 mt-1">
-                {/* Level Text */}
-                <div className="px-4 text-white font-bold text-sm z-10 flex flex-row gap-1 leading-none justify-center items-center h-full min-w-[80px]">
-                  <span>Lvl {activeCard.level}</span>
-                  {predictedLevel > activeCard.level && (
-                    <span className="text-[#6A9A6A]">➜ {predictedLevel}</span>
-                  )}
+              {/* 1. TOP SECTION: Card Info */}
+              <motion.div layout className="flex gap-5 mt-2 shrink-0">
+                {/* Left: Image */}
+                <div
+                  className="w-1/3 relative rounded-xl overflow-hidden shrink-0"
+                  style={{ aspectRatio: "2/3" }}
+                >
+                  <Image
+                    src={activeCard.image}
+                    alt={activeCard.name}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
 
-                {/* Action Button */}
-                {!isAtPlayerCap ? (
-                  <button
-                    onClick={() => {
-                      if (isLevelingUp) {
-                        // Cancel: Reset selection
-                        setSelectedInstanceIds([]);
-                        setIsLevelingUp(false);
-                      } else {
-                        // Open
-                        setIsLevelingUp(true);
-                      }
-                    }}
-                    className={`relative z-10 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                      isLevelingUp
-                        ? "bg-white/10 text-white hover:bg-white/20"
-                        : "bg-[#6A9A6A] text-white hover:bg-[#588558] shadow-md"
-                    }`}
-                  >
-                    {isLevelingUp ? "Cancel" : "Level Up"}
-                  </button>
-                ) : (
-                  <div className="relative z-10 px-6 py-2 text-xs font-bold text-white/40 uppercase tracking-wider cursor-not-allowed">
-                    Max Level
+                {/* Right: Details */}
+                <div className="flex-1 flex flex-col gap-2">
+                  <h2 className="text-2xl font-bold text-[#1a2e2e] leading-tight">
+                    {activeCard.name}
+                  </h2>
+
+                  <div className="flex flex-row justify-between gap-1 text-sm text-[#5F5A46] font-bold">
+                    <span>ATK: {activeCard.atk}</span>
+                    <span>HP: {activeCard.hp}</span>
+                    <span style={{ color: borderColor }}>
+                      {activeCard.rarity}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
 
-          {/* 2. EXPANDED LEVEL UP AREA */}
-          <AnimatePresence>
-            {isLevelingUp && (
-              <motion.div
-                initial={{ height: 0, opacity: 0, marginTop: 0 }}
-                animate={{ height: "auto", opacity: 1, marginTop: 24 }}
-                exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-                className="flex flex-col gap-4 overflow-hidden w-full"
-              >
-                <div className="h-px w-full bg-black/5" />
+                  {/* XP Bar */}
+                  <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden relative mt-2">
+                    {/* Current XP */}
+                    <div
+                      className="h-full bg-[#6A9A6A]"
+                      style={{
+                        width: `${
+                          !isAtPlayerCap
+                            ? (activeCard.experience /
+                                (activeCard.level * 100)) *
+                              100
+                            : 100
+                        }%`,
+                      }}
+                    />
+                    {/* Predicted XP Preview (Overlay) */}
+                    {selectedXp > 0 && (
+                      <div
+                        className="h-full bg-[#6A9A6A]/50 absolute top-0 left-0 animate-pulse"
+                        style={{
+                          width: `${
+                            (predictedXp / (predictedLevel * 100)) * 100
+                          }%`,
+                        }} // Simplified preview
+                      />
+                    )}
+                    {!isAtPlayerCap ? (
+                      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600 drop-shadow-sm z-10">
+                        {selectedInstanceIds.length > 0
+                          ? `${predictedXp} / ${predictedLevel * 100} XP`
+                          : `${activeCard.experience} / ${
+                              activeCard.level * 100
+                            } XP`}
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-sm z-10">
+                        Max Level
+                      </div>
+                    )}
+                  </div>
 
-                {/* Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
+                  <div className="shrink-0 bg-[#2a3b3b] rounded-full p-1 flex items-center justify-between relative h-12 mt-1">
+                    {/* Level Text */}
+                    <div className="px-4 text-white font-bold text-sm z-10 flex flex-row gap-1 leading-none justify-center items-center h-full min-w-[80px]">
+                      <span>Lvl {activeCard.level}</span>
+                      {predictedLevel > activeCard.level && (
+                        <span className="text-[#6A9A6A]">
+                          ➜ {predictedLevel}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action Button */}
+                    {!isAtPlayerCap ? (
+                      <button
+                        onClick={() => {
+                          if (isLevelingUp) {
+                            // Cancel: Reset selection
+                            setSelectedInstanceIds([]);
+                            setIsLevelingUp(false);
+                          } else {
+                            // Open
+                            setIsLevelingUp(true);
+                          }
+                        }}
+                        className={`relative z-10 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                          isLevelingUp
+                            ? "bg-white/10 text-white hover:bg-white/20"
+                            : "bg-[#6A9A6A] text-white hover:bg-[#588558] shadow-md"
+                        }`}
+                      >
+                        {isLevelingUp ? "Cancel" : "Level Up"}
+                      </button>
+                    ) : (
+                      <div className="relative z-10 px-6 py-2 text-xs font-bold text-white/40 uppercase tracking-wider cursor-not-allowed">
+                        Max Level
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 2. EXPANDED LEVEL UP AREA */}
+              <AnimatePresence>
+                {isLevelingUp && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                    animate={{ height: "auto", opacity: 1, marginTop: 24 }}
+                    exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                    className="flex flex-col gap-4 overflow-hidden w-full"
+                  >
+                    <div className="h-px w-full bg-black/5" />
+
+                    {/* Filters */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                      {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => setRarityFilter(r as any)}
+                          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                            rarityFilter === r
+                              ? "bg-[#2a3b3b] text-white"
+                              : "bg-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {r}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() =>
+                          setSortOrder((prev) =>
+                            prev === "asc" ? "desc" : "asc"
+                          )
+                        }
+                        className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 ml-auto"
+                      >
+                        XP {sortOrder === "asc" ? "↑" : "↓"}
+                      </button>
+                    </div>
+
+                    {/* Fodder Grid */}
+                    <div
+                      className="grid grid-cols-3 gap-3 overflow-y-auto p-2 h-[350px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                      onScroll={(e) => {
+                        const { scrollTop, clientHeight, scrollHeight } =
+                          e.currentTarget;
+                        if (scrollHeight - scrollTop <= clientHeight + 50) {
+                          if (visibleFodderCount < availableCards.length) {
+                            setVisibleFodderCount((prev) =>
+                              Math.min(
+                                prev + FODDER_INCREMENT,
+                                availableCards.length
+                              )
+                            );
+                          }
+                        }
+                      }}
+                    >
+                      {availableCards.length === 0 ? (
+                        <div className="col-span-3 text-center py-8 text-sm text-black/40 italic">
+                          No cards available
+                        </div>
+                      ) : (
+                        availableCards
+                          .slice(0, visibleFodderCount)
+                          .map((c) => (
+                            <FodderCard
+                              key={c.instanceId}
+                              card={c}
+                              isSelected={selectedInstanceIds.includes(
+                                c.instanceId || ""
+                              )}
+                              onToggle={() => handleToggleCard(c)}
+                            />
+                          ))
+                      )}
+                      {visibleFodderCount < availableCards.length && (
+                        <div className="col-span-3 py-2 flex justify-center">
+                          <div className="w-4 h-4 border-2 border-black/20 border-t-black/60 rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Confirm Button */}
                     <button
-                      key={r}
-                      onClick={() => setRarityFilter(r as any)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                        rarityFilter === r
-                          ? "bg-[#2a3b3b] text-white"
-                          : "bg-gray-200 text-gray-600"
+                      disabled={selectedInstanceIds.length === 0}
+                      onClick={handleInitiateLevelUp}
+                      className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
+                        selectedInstanceIds.length > 0
+                          ? "bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
                       }`}
                     >
-                      {r}
+                      Confirm Level Up (+{selectedXp} XP)
                     </button>
-                  ))}
-                  <button
-                    onClick={() =>
-                      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-                    }
-                    className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 ml-auto"
-                  >
-                    XP {sortOrder === "asc" ? "↑" : "↓"}
-                  </button>
-                </div>
-
-                {/* Fodder Grid */}
-                <div className="grid grid-cols-3 gap-3 overflow-y-auto p-2 h-[350px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                  {availableCards.length === 0 ? (
-                    <div className="col-span-4 text-center py-8 text-sm text-black/40 italic">
-                      No cards available
-                    </div>
-                  ) : (
-                    availableCards.map((c) => {
-                      const isSelected = selectedInstanceIds.includes(
-                        c.instanceId || ""
-                      );
-                      const xp = getXpValue(c);
-                      const borderColor = getRarityBorderColor(c.rarity);
-
-                      return (
-                        <button
-                          key={c.instanceId}
-                          onClick={() => handleToggleCard(c)}
-                          className={`aspect-3/4 relative rounded-lg border-4 transition-all cursor-pointer ${
-                            isSelected
-                              ? "scale-95 opacity-100"
-                              : "opacity-100 hover:opacity-90"
-                          }`}
-                          style={{
-                            borderColor: isSelected ? "#6A9A6A" : borderColor,
-                          }}
-                        >
-                          <Image src={c.image} alt={c.name} fill />
-                          {/* Level Badge */}
-                          <div className="absolute top-0 left-0 bg-[#404040] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-xs z-10">
-                            Lvl {c.level}
-                          </div>
-                          {/* XP Badge */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] font-bold py-0.5 text-center">
-                            +{xp} XP
-                          </div>
-
-                          {isSelected && (
-                            <div className="absolute inset-0 bg-[#6A9A6A]/20 flex items-center justify-center backdrop-blur-[1px]">
-                              <EnsoCircle className="w-16 h-16 text-[#2a3b3b] drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Confirm Button */}
-                <button
-                  disabled={selectedInstanceIds.length === 0}
-                  onClick={handleInitiateLevelUp}
-                  className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
-                    selectedInstanceIds.length > 0
-                      ? "bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  Confirm Level Up (+{selectedXp} XP)
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </>
+        )}
 
         {/* Final Confirmation Modal */}
         <AnimatePresence>
           {showFinalConfirmation && activeCard && (
-            <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -566,7 +583,7 @@ export default function CardDetailModal({
                       }`}
                     >
                       {gold < (predictedLevel - activeCard.level) * 100
-                        ? "No Gold"
+                        ? "Not Enough Gold"
                         : "Confirm"}
                     </button>
                   </div>
@@ -579,7 +596,7 @@ export default function CardDetailModal({
         {/* Max Level Alert Modal */}
         <AnimatePresence>
           {showMaxLevelAlert && (
-            <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -630,10 +647,12 @@ export default function CardDetailModal({
         {/* Card Info Modal */}
         <AnimatePresence>
           {showInfoModal && activeCard && (
-            <CardInfoModal
-              card={activeCard}
-              onClose={() => setShowInfoModal(false)}
-            />
+            <div className="relative z-120 pointer-events-auto">
+              <CardInfoModal
+                card={activeCard}
+                onClose={() => setShowInfoModal(false)}
+              />
+            </div>
           )}
         </AnimatePresence>
       </div>
@@ -650,3 +669,90 @@ export default function CardDetailModal({
     </AnimatePresence>
   );
 }
+
+// Memoized Fodder Card Component
+// Memoized Fodder Card Component
+const FodderCardComponent = ({
+  card,
+  isSelected,
+  onToggle,
+}: {
+  card: Card;
+  isSelected: boolean;
+  onToggle: () => void;
+}) => {
+  const xp = getXpValue(card);
+  const borderColor = getRarityBorderColor(card.rarity);
+
+  return (
+    <motion.div
+      whileHover={{ scale: isSelected ? 1 : 1.05 }}
+      whileTap={{ scale: isSelected ? 1 : 0.95 }}
+      onClick={onToggle}
+      className="relative aspect-[2/3] rounded-xl cursor-pointer shadow-lg group bg-white/10"
+      style={{
+        boxShadow: isSelected
+          ? `inset 0 0 0 8px #3A4E48`
+          : `inset 0 0 0 4px ${borderColor}`,
+        transform: isSelected ? "scale(0.95)" : "scale(1)",
+        transition: "all 0.2s ease-in-out",
+      }}
+    >
+      {/* Brush Stroke Background */}
+      <div
+        className={`absolute inset-0 z-0 opacity-80 transition-transform duration-500 flex items-center justify-center ${
+          isSelected ? "" : "group-hover:rotate-12 group-hover:scale-110"
+        }`}
+      >
+        <div className="relative w-full h-full scale-[1.1] opacity-60">
+          <Image
+            src={getStrokeImage(card.rarity)}
+            alt="brush stroke"
+            fill
+            className="object-contain no-global-filter"
+            sizes="(max-width: 768px) 50vw, 300px"
+          />
+        </div>
+      </div>
+
+      {/* Card Image */}
+      <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
+        <Image
+          src={card.image}
+          alt={card.name}
+          fill
+          sizes="(max-width: 768px) 33vw, 200px"
+          loading="lazy"
+          className={`object-cover transition-transform duration-300 ${
+            isSelected ? "" : "group-hover:scale-110"
+          }`}
+        />
+      </div>
+
+      {/* Level Badge */}
+      <div className="absolute top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
+        Lv.{card.level}
+      </div>
+
+      {/* XP Badge */}
+      <div className="absolute top-0 right-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-1 rounded-bl-lg z-20 border-r border-b border-white/10">
+        +{getXpValue(card)} XP
+      </div>
+
+      {/* Name Overlay */}
+      <div className="z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-2 opacity-100 rounded-b-2xl">
+        <p className="text-white text-xs font-bold truncate text-center">
+          {card.name}
+        </p>
+      </div>
+
+      {/* {isSelected && (
+        <div className="absolute inset-0 bg-[#6A9A6A]/20 flex items-center justify-center backdrop-blur-[1px] z-20">
+          <EnsoCircle className="w-12 h-12 text-[#2a3b3b] drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" />
+        </div>
+      )} */}
+    </motion.div>
+  );
+};
+
+const FodderCard = React.memo(FodderCardComponent);
