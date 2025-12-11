@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
+import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
+import { RootState } from "@/store/store";
 import { Card, Rarity } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
-import LevelUpPopup from "./LevelUpPopup";
-import { EnsoCircle } from "@/components/ui/EnsoCircle";
 import CardInfoModal from "./CardInfoModal";
-import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
+import LevelUpPopup from "./LevelUpPopup";
 
 // Helper for XP calculation
 const getXpValue = (c: Card) => {
@@ -206,7 +205,10 @@ export default function CardDetailModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none">
+      <div
+        className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none"
+        key={activeCard.instanceId}
+      >
         {/* Backdrop & Bottom Sheet - Hide when Info Modal is open */}
         {!showInfoModal && (
           <>
@@ -421,9 +423,9 @@ export default function CardDetailModal({
                       ) : (
                         availableCards
                           .slice(0, visibleFodderCount)
-                          .map((c) => (
+                          .map((c, index) => (
                             <FodderCard
-                              key={c.instanceId}
+                              key={`${c.instanceId}-${index}`}
                               card={c}
                               isSelected={selectedInstanceIds.includes(
                                 c.instanceId || ""

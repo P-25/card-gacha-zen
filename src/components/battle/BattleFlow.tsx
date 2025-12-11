@@ -6,10 +6,10 @@ import { Card } from "@/types/game";
 import { AppState } from "@/hooks/useGameState";
 import SelectCardsPhase from "./SelectCardsPhase";
 import MatchmakingPhase from "./MatchmakingPhase";
-import VersusPhase from "./VersusPhase";
 import BattlePhase from "./BattlePhase";
 import ResultPhase from "./ResultPhase";
 import RewardsPhase from "./RewardsPhase";
+import VersusPhase from "./VersusPhaseNew";
 
 export type BattlePhaseType =
   | "SELECT"
@@ -22,10 +22,23 @@ export type BattlePhaseType =
 interface BattleFlowProps {
   onNavigate: (screen: AppState) => void;
   onBack: () => void;
+  setBattleNavVisible: (visible: boolean) => void;
 }
 
-export default function BattleFlow({ onNavigate, onBack }: BattleFlowProps) {
-  const [phase, setPhase] = useState<BattlePhaseType>("SELECT");
+export default function BattleFlow({
+  onNavigate,
+  onBack,
+  setBattleNavVisible,
+}: BattleFlowProps) {
+  const [phase, setPhase] = useState<BattlePhaseType>("VERSUS");
+
+  useEffect(() => {
+    if (phase === "SELECT") {
+      setBattleNavVisible(true);
+    } else {
+      setBattleNavVisible(false);
+    }
+  }, [phase, setBattleNavVisible]);
   const [playerDeck, setPlayerDeck] = useState<Card[]>([]);
   const [opponentDeck, setOpponentDeck] = useState<Card[]>([]);
   const [battleResult, setBattleResult] = useState<
@@ -80,7 +93,7 @@ export default function BattleFlow({ onNavigate, onBack }: BattleFlowProps) {
   };
 
   return (
-    <div className="w-full h-full relative overflow-hidden bg-[#F5EEDF]">
+    <div className="w-full h-full relative overflow-hidden">
       <AnimatePresence mode="wait">
         {phase === "SELECT" && (
           <SelectCardsPhase

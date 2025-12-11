@@ -12,9 +12,13 @@ import ShopScreen from "@/components/features/shop/ShopScreen";
 export default function GamePage() {
   const { appState, navigateTo, resources } = useGameState();
   const [isGachaSelectionMode, setIsGachaSelectionMode] = useState(true);
+  const [isBattleNavVisible, setBattleNavVisible] = useState(true);
 
   // Show nav if not in gacha, OR if in gacha but in selection mode
-  const showNav = appState !== "gacha" || isGachaSelectionMode;
+  // AND if not in battle OR if in battle but nav is explicitly visible
+  const showNav =
+    (appState !== "gacha" || isGachaSelectionMode) &&
+    (appState !== "battle" || isBattleNavVisible);
 
   return (
     <GameLayout appState={appState} onNavigate={navigateTo} showNav={showNav}>
@@ -26,7 +30,12 @@ export default function GamePage() {
           onSelectionModeChange={setIsGachaSelectionMode}
         />
       )}
-      {appState === "battle" && <BattleScreen onNavigate={navigateTo} />}
+      {appState === "battle" && (
+        <BattleScreen
+          onNavigate={navigateTo}
+          setBattleNavVisible={setBattleNavVisible}
+        />
+      )}
       {appState === "quests" && <PlaceholderScreen title="Quests" icon="📜" />}
       {appState === "collection" && (
         <CollectionScreen onNavigate={navigateTo} />

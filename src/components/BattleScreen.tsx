@@ -9,22 +9,30 @@ import BattleFlow from "./battle/BattleFlow";
 
 interface BattleScreenProps {
   onNavigate: (screen: AppState) => void;
+  setBattleNavVisible: (visible: boolean) => void;
 }
 
-export default function BattleScreen({ onNavigate }: BattleScreenProps) {
+export default function BattleScreen({
+  onNavigate,
+  setBattleNavVisible,
+}: BattleScreenProps) {
   const [mode, setMode] = useState<"MENU" | "1V1">("MENU");
 
   if (mode === "1V1") {
     return (
-      <BattleFlow onNavigate={onNavigate} onBack={() => setMode("MENU")} />
+      <BattleFlow
+        onNavigate={onNavigate}
+        onBack={() => {
+          setMode("MENU");
+          setBattleNavVisible(true);
+        }}
+        setBattleNavVisible={setBattleNavVisible}
+      />
     );
   }
 
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-[url('/assets/background/home_bg.png')] opacity-5 bg-cover bg-center" />
-
       <TopBar title="BATTLE" />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-5 pb-24 z-10">

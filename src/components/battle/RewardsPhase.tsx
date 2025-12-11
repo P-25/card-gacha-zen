@@ -17,8 +17,6 @@ export default function RewardsPhase({ onClaim }: RewardsPhaseProps) {
       animate={{ opacity: 1 }}
       className="w-full h-full flex flex-col items-center justify-center bg-[#F5EEDF] relative"
     >
-      <div className="absolute inset-0 bg-[url('/assets/background/home_bg.png')] opacity-10 bg-cover bg-center" />
-
       <motion.div className="z-10 flex flex-col items-center gap-8">
         <h2 className="text-[#2D3748] text-3xl font-bold uppercase tracking-widest">
           Rewards
