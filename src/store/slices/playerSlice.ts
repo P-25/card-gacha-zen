@@ -1,12 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Card, Resource } from "../../types/game";
 
-interface PlayerState {
+export interface PlayerState {
   gems: number;
   gold: number;
   inventory: Card[];
   level: number;
   experience: number;
+  // Profile Info
+  name: string;
+  tag: string;
+  activeProfilePicId: string;
+  unlockedProfilePicIds: string[];
 }
 
 const initialState: PlayerState = {
@@ -15,6 +20,11 @@ const initialState: PlayerState = {
   inventory: [],
   level: 10,
   experience: 0,
+  // Default Profile
+  name: "Trainer",
+  tag: "#1234",
+  activeProfilePicId: "default_1",
+  unlockedProfilePicIds: ["default_1"],
 };
 
 export const playerSlice = createSlice({
@@ -46,6 +56,14 @@ export const playerSlice = createSlice({
       // Ensure level and experience exist (migration for old saves)
       if (newState.level === undefined) newState.level = 1;
       if (newState.experience === undefined) newState.experience = 0;
+
+      // Ensure Profile Info exists (migration)
+      if (!newState.name) newState.name = "Trainer";
+      if (!newState.tag) newState.tag = "#1234";
+      if (!newState.activeProfilePicId)
+        newState.activeProfilePicId = "default_1";
+      if (!newState.unlockedProfilePicIds)
+        newState.unlockedProfilePicIds = ["default_1"];
 
       return newState;
     },
@@ -144,6 +162,21 @@ export const playerSlice = createSlice({
       updatedTarget.level = currentLevel;
       updatedTarget.experience = currentXp;
     },
+    setProfileInfo: (
+      state,
+      action: PayloadAction<{ name: string; tag: string }>
+    ) => {
+      state.name = action.payload.name;
+      state.tag = action.payload.tag;
+    },
+    setActiveProfilePic: (state, action: PayloadAction<string>) => {
+      state.activeProfilePicId = action.payload;
+    },
+    unlockProfilePic: (state, action: PayloadAction<string>) => {
+      if (!state.unlockedProfilePicIds.includes(action.payload)) {
+        state.unlockedProfilePicIds.push(action.payload);
+      }
+    },
   },
 });
 
@@ -155,5 +188,8 @@ export const {
   spendGold,
   addCardToInventory,
   consumeCardsForXp,
+  setProfileInfo,
+  setActiveProfilePic,
+  unlockProfilePic,
 } = playerSlice.actions;
 export default playerSlice.reducer;

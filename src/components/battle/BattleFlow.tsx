@@ -9,7 +9,10 @@ import MatchmakingPhase from "./MatchmakingPhase";
 import BattlePhase from "./BattlePhase";
 import ResultPhase from "./ResultPhase";
 import RewardsPhase from "./RewardsPhase";
-import VersusPhase from "./VersusPhaseNew";
+import VersusPhase from "./VersusPhase";
+import { generateRandomPlayerInfo } from "@/lib/rarityStyles";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export type BattlePhaseType =
   | "SELECT"
@@ -30,7 +33,7 @@ export default function BattleFlow({
   onBack,
   setBattleNavVisible,
 }: BattleFlowProps) {
-  const [phase, setPhase] = useState<BattlePhaseType>("VERSUS");
+  const [phase, setPhase] = useState<BattlePhaseType>("SELECT");
 
   useEffect(() => {
     if (phase === "SELECT") {
@@ -92,6 +95,10 @@ export default function BattleFlow({
     }
   };
 
+  const { level } = useSelector((state: RootState) => state.player);
+
+  const opponentInfo = generateRandomPlayerInfo(level || 1);
+
   return (
     <div className="w-full h-full relative overflow-hidden">
       <AnimatePresence mode="wait">
@@ -109,6 +116,7 @@ export default function BattleFlow({
           <VersusPhase
             key="versus"
             playerDeck={playerDeck}
+            opponentInfo={opponentInfo}
             opponentDeck={opponentDeck}
             onComplete={handleVersusComplete}
           />
@@ -117,6 +125,7 @@ export default function BattleFlow({
           <BattlePhase
             key="battle"
             playerDeck={playerDeck}
+            opponentInfo={opponentInfo}
             opponentDeck={opponentDeck}
             onComplete={handleBattleComplete}
           />
@@ -125,6 +134,7 @@ export default function BattleFlow({
           <ResultPhase
             key="result"
             result={battleResult}
+            opponentInfo={opponentInfo}
             score={finalScore}
             playerDeck={playerDeck}
             onContinue={() => setPhase("REWARDS")}

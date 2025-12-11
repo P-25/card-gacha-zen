@@ -1,13 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { PlayerState } from "@/store/slices/playerSlice";
 import { Card } from "@/types/game";
+import { motion } from "framer-motion";
 import Image from "next/image";
+import profileIcons from "../../config/profileIcons.json";
 
 interface ResultPhaseProps {
   result: "VICTORY" | "DEFEAT" | "DRAW";
   score: { player: number; opponent: number };
   playerDeck: Card[];
+  opponentInfo: PlayerState;
   onContinue: () => void;
   onTryAgain: () => void;
   onHome: () => void;
@@ -17,11 +20,16 @@ export default function ResultPhase({
   result,
   score,
   playerDeck,
+  opponentInfo,
   onContinue,
   onTryAgain,
   onHome,
 }: ResultPhaseProps) {
   const isVictory = result === "VICTORY";
+
+  const opponentIcon =
+    profileIcons.find((icon) => icon.id === opponentInfo.activeProfilePicId) ||
+    profileIcons[0];
 
   return (
     <motion.div
@@ -47,8 +55,36 @@ export default function ResultPhase({
           {result}!
         </h1>
 
-        <div className="text-white text-2xl font-bold tracking-widest">
-          {score.player} - {score.opponent}
+        {/* Score & Avatars */}
+        <div className="flex items-center gap-6">
+          {/* Player (Placeholder for now, or use Redux if needed, but keeping simple) */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="w-16 h-16 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white font-bold text-xl">
+              P
+            </div>
+            <span className="text-white text-xs font-bold tracking-wider">
+              YOU
+            </span>
+          </div>
+
+          <div className="text-white text-4xl font-black tracking-widest">
+            {score.player} - {score.opponent}
+          </div>
+
+          {/* Opponent */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="w-16 h-16 rounded-full bg-red-500 border-2 border-white flex items-center justify-center text-white font-bold overflow-hidden relative">
+              <Image
+                src={opponentIcon.imagePath}
+                alt="Opponent"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <span className="text-white text-xs font-bold tracking-wider uppercase">
+              {opponentInfo.name}
+            </span>
+          </div>
         </div>
 
         {/* Deck Display */}

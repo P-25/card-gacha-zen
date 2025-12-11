@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { PlayerState } from "@/store/slices/playerSlice";
+import { RootState } from "@/store/store";
 import { Card } from "@/types/game";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import profileIcons from "../../config/profileIcons.json";
 
 interface BattlePhaseProps {
   playerDeck: Card[];
+  opponentInfo: PlayerState;
   opponentDeck: Card[];
   onComplete: (
     result: "VICTORY" | "DEFEAT" | "DRAW",
@@ -25,12 +30,25 @@ type RoundState =
 
 export default function BattlePhase({
   playerDeck,
+  opponentInfo,
   opponentDeck,
   onComplete,
 }: BattlePhaseProps) {
   const [currentRound, setCurrentRound] = useState(1);
   const [roundState, setRoundState] = useState<RoundState>("START");
   const [currentStat, setCurrentStat] = useState<StatType>("ATK");
+
+  const { name: playerName, activeProfilePicId } = useSelector(
+    (state: RootState) => state.player
+  );
+
+  const playerIcon =
+    profileIcons.find((icon) => icon.id === activeProfilePicId) ||
+    profileIcons[0];
+
+  const opponentIcon =
+    profileIcons.find((icon) => icon.id === opponentInfo.activeProfilePicId) ||
+    profileIcons[0];
 
   const [playerHand, setPlayerHand] = useState<Card[]>(playerDeck);
   const [opponentHand, setOpponentHand] = useState<Card[]>(opponentDeck);
@@ -178,17 +196,28 @@ export default function BattlePhase({
   return (
     <div className="w-full h-full flex flex-col bg-[#F5EEDF] relative overflow-hidden">
       {/* Top Bar: Round & Score */}
+      {/* Top Bar: Round & Score */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-20">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white font-bold">
-            P
+          <div className="w-12 h-12 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white font-bold overflow-hidden relative shadow-md">
+            <Image
+              src={playerIcon.imagePath}
+              alt="Player"
+              fill
+              className="object-cover"
+            />
           </div>
-          <div className="text-2xl font-black text-[#2D3748]">
-            {score.player}
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-[#4A5568] uppercase tracking-wider">
+              {playerName}
+            </span>
+            <div className="text-2xl font-black text-[#2D3748] leading-none">
+              {score.player}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mt-2">
           <div className="bg-white/80 px-4 py-1 rounded-full text-xs font-bold tracking-widest text-[#4A5568] shadow-sm">
             ROUND {currentRound}/3
           </div>
@@ -210,12 +239,22 @@ export default function BattlePhase({
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="text-2xl font-black text-[#2D3748]">
-            {score.opponent}
+        <div className="flex items-center gap-2 text-right">
+          <div className="flex flex-col items-end">
+            <span className="text-xs font-bold text-[#4A5568] uppercase tracking-wider">
+              {opponentInfo.name}
+            </span>
+            <div className="text-2xl font-black text-[#2D3748] leading-none">
+              {score.opponent}
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-red-500 border-2 border-white flex items-center justify-center text-white font-bold">
-            O
+          <div className="w-12 h-12 rounded-full bg-red-500 border-2 border-white flex items-center justify-center text-white font-bold overflow-hidden relative shadow-md">
+            <Image
+              src={opponentIcon.imagePath}
+              alt="Opponent"
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       </div>
