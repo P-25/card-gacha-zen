@@ -28,6 +28,8 @@ type RoundState =
   | "REVEAL"
   | "ROUND_RESULT";
 
+type AnimPhase = "IDLE" | "ZOOM" | "CLASH" | "HIT" | "DESTROY";
+
 export default function BattlePhase({
   playerDeck,
   opponentInfo,
@@ -37,6 +39,7 @@ export default function BattlePhase({
   const [currentRound, setCurrentRound] = useState(1);
   const [roundState, setRoundState] = useState<RoundState>("START");
   const [currentStat, setCurrentStat] = useState<StatType>("ATK");
+  const [animPhase, setAnimPhase] = useState<AnimPhase>("IDLE");
 
   const { name: playerName, activeProfilePicId } = useSelector(
     (state: RootState) => state.player
@@ -64,6 +67,10 @@ export default function BattlePhase({
   // Timer State
   const [timeLeft, setTimeLeft] = useState(10);
   const TOTAL_TIME = 10;
+
+  // Helper to check if we are in the battle/reveal phase
+  const isBattleActive =
+    roundState === "REVEAL" || roundState === "ROUND_RESULT";
 
   // --- Round Logic Flow ---
 
@@ -122,6 +129,60 @@ export default function BattlePhase({
     }
   }, [roundState, playerSelection, opponentSelection, currentStat]);
 
+  // 5. Reveal & Battle Logic (Cinematic Sequence)
+  useEffect(() => {
+    if (roundState === "REVEAL" && playerSelection && opponentSelection) {
+      // Calculate winner
+      const playerVal =
+        currentStat === "ATK" ? playerSelection.atk : playerSelection.hp;
+      const opponentVal =
+        currentStat === "ATK" ? opponentSelection.atk : opponentSelection.hp;
+
+      let winner: "PLAYER" | "OPPONENT" | "DRAW" = "DRAW";
+      if (playerVal > opponentVal) winner = "PLAYER";
+      else if (opponentVal > playerVal) winner = "OPPONENT";
+
+      setRoundWinner(winner);
+
+      // --- Animation Sequence ---
+      // 1. ZOOM (Start)
+      setAnimPhase("ZOOM");
+
+      // 2. CLASH (Move to center)
+      const t1 = setTimeout(() => {
+        setAnimPhase("CLASH");
+      }, 800);
+
+      // 3. HIT (Attack/Impact)
+      const t2 = setTimeout(() => {
+        setAnimPhase("HIT");
+      }, 1600);
+
+      // 4. DESTROY (Resolve)
+      const t3 = setTimeout(() => {
+        setAnimPhase("DESTROY");
+        // Update Score
+        if (winner === "PLAYER") {
+          setScore((s) => ({ ...s, player: s.player + 1 }));
+        } else if (winner === "OPPONENT") {
+          setScore((s) => ({ ...s, opponent: s.opponent + 1 }));
+        }
+      }, 2400);
+
+      // 5. End Round
+      const t4 = setTimeout(() => {
+        setRoundState("ROUND_RESULT");
+      }, 4000);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
+      };
+    }
+  }, [roundState, playerSelection, opponentSelection, currentStat]);
+
   // 6. Round Result -> Next Round or Finish
   useEffect(() => {
     if (roundState === "ROUND_RESULT") {
@@ -137,6 +198,7 @@ export default function BattlePhase({
         setPlayerSelection(null);
         setOpponentSelection(null);
         setRoundWinner(null);
+        setAnimPhase("IDLE");
 
         if (currentRound < 3) {
           setCurrentRound((r) => r + 1);
@@ -150,7 +212,7 @@ export default function BattlePhase({
 
           onComplete(finalResult, score);
         }
-      }, 2500);
+      }, 1000); // Short delay before next round
       return () => clearTimeout(timer);
     }
   }, [
@@ -174,10 +236,185 @@ export default function BattlePhase({
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80 pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
 
+      {/* --- BATTLE OVERLAY (Cinematic) --- */}
+      {isBattleActive && playerSelection && opponentSelection && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+          {/* Spotlight / Dim Background */}
+          <div className="absolute inset-0 bg-black/80 animate-fadeIn" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white opacity-5 blur-[100px] rounded-full" />
+
+          {/* VS Text */}
+          <div
+            className={`
+             absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+             flex flex-col items-center z-0 transition-all duration-300
+             ${
+               animPhase === "CLASH"
+                 ? "opacity-100 scale-100"
+                 : "opacity-0 scale-50"
+             }
+          `}
+          >
+            <span className="text-6xl font-black text-white italic drop-shadow-lg">
+              VS
+            </span>
+            <span className="text-xl font-bold text-yellow-500 mt-2">
+              {currentStat}
+            </span>
+          </div>
+
+          {/* --- OPPONENT CARD (Top) --- */}
+          <div
+            className={`
+              absolute transition-all duration-500 ease-out
+              ${animPhase === "IDLE" ? "top-[-20%] scale-50 opacity-0" : ""}
+              ${animPhase === "ZOOM" ? "top-[15%] scale-100 opacity-100" : ""}
+              ${
+                animPhase === "CLASH" ||
+                animPhase === "HIT" ||
+                animPhase === "DESTROY"
+                  ? "top-[20%] scale-125"
+                  : ""
+              }
+              
+              /* Hit Reactions */
+              ${
+                animPhase === "HIT" && roundWinner === "PLAYER"
+                  ? "animate-shake opacity-50"
+                  : ""
+              }
+              ${
+                animPhase === "HIT" && roundWinner === "OPPONENT"
+                  ? "scale-150 z-20"
+                  : ""
+              } /* Winner lunges */
+
+              /* Destroy Animation */
+              ${
+                animPhase === "DESTROY" && roundWinner === "PLAYER"
+                  ? "opacity-0 scale-150 filter blur-xl grayscale"
+                  : ""
+              }
+            `}
+          >
+            <div className="w-32 h-44 rounded-lg border-2 border-red-500 bg-slate-800 shadow-[0_0_30px_rgba(239,68,68,0.3)] overflow-hidden relative">
+              <Image
+                src={opponentSelection.image}
+                alt=""
+                fill
+                priority
+                className="object-cover"
+              />
+              {/* Stat Pop-up */}
+              <div
+                className={`
+               absolute -right-12 top-10 bg-slate-900 text-white font-black text-2xl p-2 rounded-lg border-2 border-red-500 shadow-xl
+               transition-all duration-300 transform
+               ${
+                 animPhase === "CLASH" || animPhase === "HIT"
+                   ? "opacity-100 translate-x-0"
+                   : "opacity-0 -translate-x-10"
+               }
+             `}
+              >
+                {currentStat === "ATK"
+                  ? opponentSelection.atk
+                  : opponentSelection.hp}
+              </div>
+            </div>
+
+            {/* Damage Text */}
+            {animPhase === "HIT" && roundWinner === "PLAYER" && (
+              <div className="absolute inset-0 flex items-center justify-center z-50">
+                <div className="text-6xl font-black text-red-500 animate-ping">
+                  CRUSH!
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* --- PLAYER CARD (Bottom) --- */}
+          <div
+            className={`
+              absolute transition-all duration-500 ease-out
+              ${animPhase === "IDLE" ? "bottom-[-20%] scale-50 opacity-0" : ""}
+              ${
+                animPhase === "ZOOM" ? "bottom-[15%] scale-100 opacity-100" : ""
+              }
+              ${
+                animPhase === "CLASH" ||
+                animPhase === "HIT" ||
+                animPhase === "DESTROY"
+                  ? "bottom-[20%] scale-125"
+                  : ""
+              }
+
+              /* Hit Reactions */
+              ${
+                animPhase === "HIT" && roundWinner === "OPPONENT"
+                  ? "animate-shake opacity-50"
+                  : ""
+              }
+              ${
+                animPhase === "HIT" && roundWinner === "PLAYER"
+                  ? "scale-150 z-20"
+                  : ""
+              } /* Winner lunges */
+
+              /* Destroy Animation */
+              ${
+                animPhase === "DESTROY" && roundWinner === "OPPONENT"
+                  ? "opacity-0 scale-150 filter blur-xl grayscale"
+                  : ""
+              }
+             `}
+          >
+            <div className="w-36 h-52 rounded-lg border-2 border-cyan-400 bg-slate-800 shadow-[0_0_30px_rgba(34,211,238,0.3)] overflow-hidden relative">
+              <Image
+                src={playerSelection.image}
+                alt=""
+                fill
+                priority
+                className="object-cover"
+              />
+              {/* Stat Pop-up */}
+              <div
+                className={`
+               absolute -left-12 top-10 bg-slate-900 text-white font-black text-2xl p-2 rounded-lg border-2 border-cyan-400 shadow-xl
+               transition-all duration-300 transform
+               ${
+                 animPhase === "CLASH" || animPhase === "HIT"
+                   ? "opacity-100 translate-x-0"
+                   : "opacity-0 translate-x-10"
+               }
+             `}
+              >
+                {currentStat === "ATK"
+                  ? playerSelection.atk
+                  : playerSelection.hp}
+              </div>
+            </div>
+
+            {/* Damage Text */}
+            {animPhase === "HIT" && roundWinner === "OPPONENT" && (
+              <div className="absolute inset-0 flex items-center justify-center z-50">
+                <div className="text-6xl font-black text-red-500 animate-ping">
+                  CRUSH!
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* --- OPPONENT SECTION (TOP) --- */}
-      <div className="relative z-10 w-full flex flex-col items-center pt-4">
+      <div className="relative z-10 w-full flex flex-col items-center pt-4 min-h-[120px]">
         {/* Opponent Hand (Fanned) */}
-        <div className="flex items-center justify-center -space-x-4 mb-2">
+        <div
+          className={`flex items-center justify-center -space-x-4 mb-2 transition-opacity duration-500 ${
+            isBattleActive ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
           {opponentHand.map((card, index) => (
             <motion.div
               key={card.id}
@@ -199,7 +436,11 @@ export default function BattlePhase({
         </div>
 
         {/* Opponent Profile */}
-        <div className="flex flex-col items-center">
+        <div
+          className={`flex flex-col items-center transition-opacity duration-500 ${
+            isBattleActive ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
           <div className="relative">
             <div className="w-16 h-16 rounded-full border-4 border-red-500 overflow-hidden shadow-[0_0_15px_rgba(239,68,68,0.5)] z-10 relative bg-slate-800">
               <Image
@@ -248,138 +489,42 @@ export default function BattlePhase({
           </span>
         </div>
 
-        {/* Drop Zone / Active Cards */}
-        <div className="relative w-full h-64 flex items-center justify-center">
-          {/* Placeholder Box */}
-          {roundState === "PLAYER_TURN" && !playerSelection && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="w-40 h-56 border-2 border-dashed border-cyan-500/50 rounded-lg flex flex-col items-center justify-center bg-cyan-900/10 backdrop-blur-sm"
-            >
-              <span className="text-cyan-400 font-bold text-sm animate-pulse">
-                PICK A CARD
-              </span>
-              {/* Timer Bar */}
-              <div className="w-32 h-1 bg-slate-700 rounded-full mt-4 overflow-hidden">
-                <motion.div
-                  initial={{ width: "100%" }}
-                  animate={{ width: "0%" }}
-                  transition={{ duration: TOTAL_TIME, ease: "linear" }}
-                  className="h-full bg-red-500"
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Opponent Card Reveal */}
-          <AnimatePresence>
-            {opponentSelection && (
+        {/* Drop Zone (Only visible during selection) */}
+        {!isBattleActive && (
+          <div className="relative w-full h-64 flex items-center justify-center">
+            {/* Placeholder Box */}
+            {roundState === "PLAYER_TURN" && !playerSelection && (
               <motion.div
-                initial={{ y: -100, opacity: 0, scale: 0.5 }}
-                animate={{ y: -60, opacity: 1, scale: 0.9 }}
-                className="absolute z-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="w-40 h-56 border-2 border-dashed border-cyan-500/50 rounded-lg flex flex-col items-center justify-center bg-cyan-900/10 backdrop-blur-sm"
               >
-                <div
-                  className={`w-32 h-44 rounded-lg border-2 bg-slate-800 shadow-2xl overflow-hidden relative ${
-                    roundState === "REVEAL" || roundState === "ROUND_RESULT"
-                      ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]"
-                      : "border-slate-600"
-                  }`}
-                >
-                  {roundState === "REVEAL" || roundState === "ROUND_RESULT" ? (
-                    <>
-                      <Image
-                        src={opponentSelection.image}
-                        alt=""
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute bottom-0 w-full bg-black/80 text-white text-center font-black py-1 text-sm border-t border-red-500">
-                        {currentStat === "ATK"
-                          ? opponentSelection.atk
-                          : opponentSelection.hp}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-700 relative overflow-hidden">
-                      {/* CSS Card Back Pattern */}
-                      <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(0,0,0,0.2)_10px,rgba(0,0,0,0.2)_20px)] opacity-50" />
-                      <div className="w-16 h-16 border-4 border-slate-500 rounded-full opacity-30" />
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Player Card Reveal */}
-          <AnimatePresence>
-            {playerSelection && (
-              <motion.div
-                layoutId={`card-${playerSelection.id}`}
-                className="absolute z-30"
-                initial={{ y: 100, scale: 1 }}
-                animate={{ y: 40, scale: 1.1 }}
-              >
-                <div
-                  className={`w-36 h-52 rounded-lg border-2 bg-slate-800 shadow-2xl overflow-hidden relative ${
-                    roundState === "REVEAL" || roundState === "ROUND_RESULT"
-                      ? "border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.4)]"
-                      : "border-slate-600"
-                  }`}
-                >
-                  <Image
-                    src={playerSelection.image}
-                    alt=""
-                    fill
-                    className="object-cover"
+                <span className="text-cyan-400 font-bold text-sm animate-pulse">
+                  PICK A CARD
+                </span>
+                {/* Timer Bar */}
+                <div className="w-32 h-1 bg-slate-700 rounded-full mt-4 overflow-hidden">
+                  <motion.div
+                    initial={{ width: "100%" }}
+                    animate={{ width: "0%" }}
+                    transition={{ duration: TOTAL_TIME, ease: "linear" }}
+                    className="h-full bg-red-500"
                   />
-                  <div className="absolute bottom-0 w-full bg-black/80 text-white text-center font-black py-1 text-sm border-t border-cyan-400">
-                    {currentStat === "ATK"
-                      ? playerSelection.atk
-                      : playerSelection.hp}
-                  </div>
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
-
-          {/* Result Text Overlay */}
-          <AnimatePresence>
-            {roundState === "ROUND_RESULT" && (
-              <motion.div
-                initial={{ scale: 0, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0 }}
-                className="absolute z-50 pointer-events-none"
-              >
-                <div
-                  className={`text-5xl font-black italic tracking-tighter stroke-black stroke-2 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)] ${
-                    roundWinner === "PLAYER"
-                      ? "text-green-400"
-                      : roundWinner === "OPPONENT"
-                      ? "text-red-500"
-                      : "text-white"
-                  }`}
-                  style={{ textShadow: "0 0 10px currentColor" }}
-                >
-                  {roundWinner === "PLAYER"
-                    ? "VICTORY!"
-                    : roundWinner === "OPPONENT"
-                    ? "CRUSHED!"
-                    : "DRAW"}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* --- PLAYER SECTION (BOTTOM) --- */}
-      <div className="relative z-10 w-full flex flex-col items-center pb-6">
+      <div className="relative z-10 w-full flex flex-col items-center pb-6 min-h-[160px]">
         {/* Player Profile */}
-        <div className="flex flex-col items-center mb-4 relative">
+        <div
+          className={`flex flex-col items-center mb-4 relative transition-opacity duration-500 ${
+            isBattleActive ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
           <span className="text-sm font-bold text-white mb-1 uppercase tracking-wider shadow-black drop-shadow-md">
             {playerName}
           </span>
@@ -399,12 +544,15 @@ export default function BattlePhase({
         </div>
 
         {/* Player Hand */}
-        <div className="flex items-center justify-center gap-3 px-4 w-full max-w-2xl">
+        <div
+          className={`flex items-center justify-center gap-3 px-4 w-full max-w-2xl transition-opacity duration-500 ${
+            isBattleActive ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
           <AnimatePresence>
             {playerHand.map((card) => (
               <motion.div
                 key={card.id}
-                layoutId={`card-${card.id}`}
                 initial={{ y: 100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 100, opacity: 0 }}
@@ -454,6 +602,60 @@ export default function BattlePhase({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* --- CSS UTILS for shake animation --- */}
+      <style jsx global>{`
+        @keyframes shake {
+          0% {
+            transform: translate(1px, 1px) rotate(0deg);
+          }
+          10% {
+            transform: translate(-1px, -2px) rotate(-1deg);
+          }
+          20% {
+            transform: translate(-3px, 0px) rotate(1deg);
+          }
+          30% {
+            transform: translate(3px, 2px) rotate(0deg);
+          }
+          40% {
+            transform: translate(1px, -1px) rotate(1deg);
+          }
+          50% {
+            transform: translate(-1px, 2px) rotate(-1deg);
+          }
+          60% {
+            transform: translate(-3px, 1px) rotate(0deg);
+          }
+          70% {
+            transform: translate(3px, 1px) rotate(-1deg);
+          }
+          80% {
+            transform: translate(-1px, -1px) rotate(1deg);
+          }
+          90% {
+            transform: translate(1px, 2px) rotate(0deg);
+          }
+          100% {
+            transform: translate(1px, -2px) rotate(-1deg);
+          }
+        }
+        .animate-shake {
+          animation: shake 0.5s;
+          animation-iteration-count: infinite;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }
