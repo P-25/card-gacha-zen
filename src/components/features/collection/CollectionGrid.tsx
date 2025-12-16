@@ -20,7 +20,7 @@ export default function CollectionGrid({
     id: "summon",
     label: "SUMMON",
     subtitle: "(Draw Cards)",
-    icon: "/assets/icons/tornado.png",
+    icon: "/assets/icons/tornado.webp",
     onClick: () => onNavigate("gacha"),
   };
   if (cards.length === 0) {

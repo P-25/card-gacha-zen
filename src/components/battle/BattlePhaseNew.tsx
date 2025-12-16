@@ -221,8 +221,8 @@ const Card: React.FC<CardProps> = ({
           >
             {/* Image Area */}
             <div className="flex-1 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-black opacity-30"></div>
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+              {/* <div className="absolute inset-0 bg-black opacity-30"></div>
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div> */}
               <div
                 className={`z-10 text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] transform scale-125 transition-transform duration-500 ${
                   status === "WINNER" ? "scale-150" : ""
@@ -571,11 +571,11 @@ export default function CardBattle() {
         <>
           <div className="absolute inset-0 bg-black opacity-60 transition-opacity duration-1000"></div>
           {/* Speed Lines during attack */}
-          <div
+          {/* <div
             className={`absolute inset-0 opacity-0 transition-opacity duration-100 ${
               animPhase === "ATTACK" ? "opacity-40" : ""
             } bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] animate-pan`}
-          ></div>
+          ></div> */}
         </>
       )}
 

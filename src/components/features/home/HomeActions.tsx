@@ -14,14 +14,14 @@ export default function HomeActions({ onNavigate }: HomeActionsProps) {
       id: "summon",
       label: "SUMMON",
       subtitle: "(Draw Cards)",
-      icon: "/assets/icons/tornado.png",
+      icon: "/assets/icons/tornado.webp",
       onClick: () => onNavigate("gacha"),
     },
     {
       id: "battle",
       label: "BATTLE",
       subtitle: "(Matchmake)",
-      icon: "/assets/icons/sword.png",
+      icon: "/assets/icons/sword.webp",
       onClick: () => onNavigate("battle"),
     },
   ] as const;

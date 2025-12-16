@@ -66,7 +66,7 @@ export default function RewardsPhase({ onClaim }: RewardsPhaseProps) {
             <div className="flex flex-col items-center gap-2">
               <div className="w-16 h-16 bg-[#FFD700]/20 rounded-full flex items-center justify-center border-2 border-[#FFD700]">
                 <Image
-                  src="/assets/coin.svg"
+                  src="/assets/icons/gold-coin.webp"
                   width={32}
                   height={32}
                   alt="Gold"
@@ -77,7 +77,7 @@ export default function RewardsPhase({ onClaim }: RewardsPhaseProps) {
             <div className="flex flex-col items-center gap-2">
               <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center border-2 border-blue-500">
                 <Image
-                  src="/assets/gem.svg"
+                  src="/assets/icons/gem.webp"
                   width={32}
                   height={32}
                   alt="Gems"

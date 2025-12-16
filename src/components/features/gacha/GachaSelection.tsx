@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import GoldSummonSection from "./GoldSummom/GoldSummonSection";
 import RateUpSummonSection from "./RateUpSummon/RateUpSummonSection";
 
 import { Card, Resource } from "@/types/game";

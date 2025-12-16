@@ -195,10 +195,11 @@ export default function RateUpSummonSection({
                   filter: { duration: 2.4, times: [0, 0.5, 1] },
                 }}
               >
-                <img
-                  src="/assets/dragon_silhouette.png"
+                <Image
+                  src="/assets/summon/active.webp"
                   alt="Dragon"
                   className="no-global-filter w-full h-full object-contain "
+                  fill
                 />
               </motion.div>
             </div>

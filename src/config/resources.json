@@ -5,7 +5,7 @@
         "type": "RESOURCE",
         "rarity": "COMMON",
         "value": 50,
-        "image": "/assets/Card_Art/resource/card_001.png"
+        "image": "/assets/Card_Art/resource/card_001.webp"
     },
     {
         "id": "gold_pack_large",
@@ -13,7 +13,7 @@
         "type": "RESOURCE",
         "rarity": "UNCOMMON",
         "value": 100,
-        "image": "/assets/Card_Art/resource/card_002.png"
+        "image": "/assets/Card_Art/resource/card_002.webp"
     },
     {
         "id": "gold_pack_huge",
@@ -21,6 +21,6 @@
         "type": "RESOURCE",
         "rarity": "RARE",
         "value": 1000,
-        "image": "/assets/Card_Art/resource/card_003.png"
+        "image": "/assets/Card_Art/resource/card_003.webp"
     }
 ]

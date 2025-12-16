@@ -1,32 +1,20 @@
 [
     {
         "id": "default_1",
-        "name": "Professor",
-        "imagePath": "/assets/avatars/avatar_1.png",
+        "name": "Chrono Sent",
+        "imagePath": "/assets/avatars/avatar_1.webp",
         "unlockCondition": "Default"
     },
     {
-        "id": "starter_grass",
-        "name": "Grass Starter",
-        "imagePath": "/assets/avatars/avatar_2.png",
+        "id": "starter_cosmic",
+        "name": "Star Seeker",
+        "imagePath": "/assets/avatars/avatar_2.webp",
         "unlockCondition": "Reach Level 5"
     },
     {
         "id": "starter_fire",
-        "name": "Fire Starter",
-        "imagePath": "/assets/avatars/avatar_3.png",
+        "name": "Obsidian",
+        "imagePath": "/assets/avatars/avatar_3.webp",
         "unlockCondition": "Reach Level 10"
-    },
-    {
-        "id": "starter_water",
-        "name": "Water Starter",
-        "imagePath": "/assets/avatars/avatar_4.png",
-        "unlockCondition": "Win 10 Battles"
-    },
-    {
-        "id": "rare_dragon",
-        "name": "Dragon Tamer",
-        "imagePath": "/assets/avatars/avatar_5.png",
-        "unlockCondition": "Collect 50 Cards"
     }
 ]
