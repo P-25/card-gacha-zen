@@ -8,6 +8,7 @@ import BattleScreen from "@/components/BattleScreen";
 import { PlaceholderScreen } from "@/components/PlaceholderScreens";
 import CollectionScreen from "@/components/CollectionScreen";
 import ShopScreen from "@/components/features/shop/ShopScreen";
+import QuestScreen from "@/components/QuestScreen";
 
 export default function GamePage() {
   const { appState, navigateTo, resources } = useGameState();
@@ -36,7 +37,7 @@ export default function GamePage() {
           setBattleNavVisible={setBattleNavVisible}
         />
       )}
-      {appState === "quests" && <PlaceholderScreen title="Quests" icon="📜" />}
+      {appState === "quests" && <QuestScreen />}
       {appState === "collection" && (
         <CollectionScreen onNavigate={navigateTo} />
       )}

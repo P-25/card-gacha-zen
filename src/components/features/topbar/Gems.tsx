@@ -11,7 +11,7 @@ export default function Gems() {
     <div className="flex items-center gap-2">
       <div className="w-6 h-6 relative">
         <Image
-          src="/assets/icons/gem.png"
+          src="/assets/icons/gem.webp"
           alt="Diamond"
           fill
           className="object-contain"

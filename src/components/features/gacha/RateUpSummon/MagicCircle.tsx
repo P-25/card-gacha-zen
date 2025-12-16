@@ -1,18 +1,10 @@
+/* eslint-disable react-hooks/purity */
 /* eslint-disable react-hooks/immutability */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define the possible game states
 type GameState = "IDLE" | "SUMMONING" | "RESULT";
-
-// Define the shape of a particle object
-interface Particle {
-  id: number;
-  angle: number;
-  speed: number;
-  size: number;
-  distance: number;
-  opacity: number;
-}
 
 interface MagicCircleProps {
   summonStarted: boolean;
@@ -20,7 +12,6 @@ interface MagicCircleProps {
 
 const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
   const [gameState, setGameState] = useState<GameState>("IDLE");
-  const [particles, setParticles] = useState<Particle[]>([]);
   const [shake, setShake] = useState<boolean>(false);
   const [flash, setFlash] = useState<boolean>(false);
 
@@ -33,7 +24,6 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
   // --- GAME LOOP & SEQUENCING ---
   const handleSummon = () => {
     if (gameState !== "IDLE") {
-      // Reset to start if clicked during result
       setGameState("IDLE");
       setFlash(false);
       return;
@@ -63,112 +53,6 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
       setFlash(false);
     }, 2800);
   };
-
-  // --- PARTICLE SYSTEM ---
-  useEffect(() => {
-    if (gameState === "RESULT") {
-      setParticles([]);
-      return;
-    }
-
-    const isImploding = gameState === "SUMMONING";
-
-    // Interval to spawn particles
-    const spawnInterval = setInterval(
-      () => {
-        const id = Date.now() + Math.random();
-        const angle = Math.random() * 360;
-
-        // Eruption Mode
-        if (flash) {
-          const speed = 15 + Math.random() * 15; // FAST OUTWARD
-          const size = 3 + Math.random() * 4;
-          setParticles((prev) => [
-            ...prev,
-            { id, angle, speed, size, distance: 10, opacity: 1 },
-          ]);
-          return;
-        }
-
-        // Implosion: spawn far out, move in. Idle: spawn center, move out.
-        const startDist = isImploding ? 250 : 0;
-
-        // MODIFIED: Reduced speed for implosion (was 4 + rand*4, now 2 + rand*2)
-        // This makes the suck-in effect slower and more dramatic
-        const speed = isImploding
-          ? 2 + Math.random() * 2
-          : 1 + Math.random() * 1;
-
-        const size = 2 + Math.random() * 3;
-
-        setParticles((prev) => {
-          // Limit particle count for performance
-          if (prev.length > 150) return prev; // Slightly increased limit for denser slow moving cloud
-          return [
-            ...prev,
-            {
-              id,
-              angle,
-              speed,
-              size,
-              distance: startDist,
-              opacity: isImploding ? 0 : 1,
-            },
-          ];
-        });
-      },
-      flash ? 5 : isImploding ? 15 : 50
-    ); // Super fast spawn for eruption
-
-    // Animation Loop for particles
-    const animFrame = setInterval(() => {
-      setParticles((prev) =>
-        prev
-          .map((p) => {
-            let newDist = p.distance;
-            let newOp = p.opacity;
-
-            if (flash) {
-              // ERUPTION: EXPLODE OUTWARD
-              // If it was an imploding particle, fade it out fast
-              if (p.speed < 10) {
-                newOp -= 0.1;
-              } else {
-                // Eruption particle
-                newDist += p.speed;
-                newOp -= 0.02;
-              }
-            } else if (isImploding) {
-              // SUCK IN
-              newDist -= p.speed;
-
-              // Fade in logic based on distance from edge
-              if (p.distance > 200) {
-                newOp += 0.05; // Slower fade in
-              }
-              // Fade out logic near center
-              else if (p.distance < 80) {
-                newOp -= 0.05; // Start fading out earlier but slower
-              } else {
-                newOp = Math.min(newOp + 0.05, 1);
-              }
-            } else {
-              // FLOAT OUT
-              newDist += p.speed;
-              newOp -= 0.015;
-            }
-
-            return { ...p, distance: newDist, opacity: newOp };
-          })
-          .filter((p) => p.opacity > 0 && p.distance >= 0)
-      );
-    }, 16);
-
-    return () => {
-      clearInterval(spawnInterval);
-      clearInterval(animFrame);
-    };
-  }, [gameState, flash]);
 
   // --- CONFIG VARIABLES ---
   const isSummoning = gameState === "SUMMONING" || gameState === "RESULT";
@@ -200,24 +84,9 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
           }`}
         >
           <div className="relative">
-            {/* Particle Layer */}
+            {/* Particle Layer - Optimized with Framer Motion */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              {particles.map((p) => (
-                <div
-                  key={p.id}
-                  className="absolute rounded-full blur-[1px]"
-                  style={{
-                    backgroundColor: isSummoning ? "darkgoldenrod" : "#FFD700",
-                    width: `${p.size}px`,
-                    height: `${p.size}px`,
-                    opacity: p.opacity,
-                    transform: `rotate(${p.angle}deg) translate(${p.distance}px) rotate(-${p.angle}deg)`,
-                    boxShadow: `0 0 ${p.size * 2}px ${
-                      isSummoning ? "#fff" : "gold"
-                    }`,
-                  }}
-                />
-              ))}
+              <MagicCircleParticles gameState={gameState} isFlash={flash} />
             </div>
 
             <svg
@@ -531,5 +400,85 @@ const MagicCircle = ({ summonStarted }: MagicCircleProps) => {
     </div>
   );
 };
+
+// Optimized Particle System using Framer Motion
+const MagicCircleParticles = React.memo(
+  ({ gameState, isFlash }: { gameState: GameState; isFlash: boolean }) => {
+    // Generate static particle config once
+    const particles = useMemo(() => {
+      return Array.from({ length: 40 }).map((_, i) => ({
+        id: i,
+        angle: Math.random() * 360,
+        size: 2 + Math.random() * 3,
+        delay: Math.random() * 2,
+        duration: 2 + Math.random() * 2,
+        startDist: Math.random() * 50,
+      }));
+    }, []);
+
+    const isSummoning = gameState === "SUMMONING";
+
+    return (
+      <>
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full blur-[1px] will-change-transform"
+            style={{
+              backgroundColor: isSummoning ? "darkgoldenrod" : "#FFD700",
+              width: p.size,
+              height: p.size,
+              boxShadow: `0 0 ${p.size * 2}px ${isSummoning ? "#fff" : "gold"}`,
+            }}
+            initial={{
+              opacity: 0,
+              rotate: p.angle,
+              x: 0, // We'll use x to represent distance from center (rotated by parent or self)
+            }}
+            animate={
+              isFlash
+                ? {
+                    // Eruption: Explode outward fast
+                    opacity: [1, 0],
+                    x: [0, 300], // Move way out
+                    transition: { duration: 0.5, ease: "easeOut" },
+                  }
+                : isSummoning
+                ? {
+                    // Implosion: Start far, move in
+                    opacity: [0, 1, 0],
+                    x: [200, 0],
+                    transition: {
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeIn",
+                      delay: p.delay,
+                    },
+                  }
+                : {
+                    // Idle: Float gently from center out
+                    opacity: [0, 0.8, 0],
+                    x: [0, 60],
+                    transition: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeOut",
+                      delay: p.delay,
+                    },
+                  }
+            }
+            // Rotate the particle container to the correct angle
+            // We apply the rotation to the wrapper or via transform template
+            transformTemplate={({ x }) =>
+              `rotate(${p.angle}deg) translateX(${x})`
+            }
+          />
+        ))}
+      </>
+    );
+  }
+);
+
+MagicCircleParticles.displayName = "MagicCircleParticles";
 
 export default MagicCircle;

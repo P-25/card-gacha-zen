@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Sparkles,
-  Skull,
-  Zap,
-  Shield,
-  Trophy,
-  RefreshCw,
-  Swords,
-  Flame,
-  Disc,
-} from "lucide-react";
+// import {
+//   Sparkles,
+//   Skull,
+//   Zap,
+//   Shield,
+//   Trophy,
+//   RefreshCw,
+//   Swords,
+//   Flame,
+//   Disc,
+// } from "lucide-react";
 
 // --- Types & Interfaces ---
 
@@ -111,42 +111,42 @@ const WRESTLERS: Wrestler[] = [
     name: "The Titan",
     color: "from-red-600 to-orange-900",
     stats: { POW: 95, SPD: 40, TEC: 60 },
-    icon: <Skull size={32} />,
+    icon: "Skull",
   },
   {
     id: 2,
     name: "Viper",
     color: "from-green-600 to-emerald-900",
     stats: { POW: 60, SPD: 92, TEC: 75 },
-    icon: <Zap size={32} />,
+    icon: "Zap",
   },
   {
     id: 3,
     name: "Iron Wall",
     color: "from-slate-500 to-slate-800",
     stats: { POW: 85, SPD: 30, TEC: 90 },
-    icon: <Shield size={32} />,
+    icon: "Shield",
   },
   {
     id: 4,
     name: "Blaze",
     color: "from-orange-500 to-red-800",
     stats: { POW: 88, SPD: 70, TEC: 50 },
-    icon: <Flame size={32} />,
+    icon: "Flame",
   },
   {
     id: 5,
     name: "Shadow",
     color: "from-purple-600 to-indigo-900",
     stats: { POW: 55, SPD: 95, TEC: 80 },
-    icon: <Disc size={32} />,
+    icon: "Disc",
   },
   {
     id: 6,
     name: "Technician",
     color: "from-blue-600 to-cyan-900",
     stats: { POW: 65, SPD: 60, TEC: 98 },
-    icon: <RefreshCw size={32} />,
+    icon: "RefreshCw",
   },
 ];
 
@@ -751,7 +751,7 @@ export default function CardBattle() {
              }
           `}
             >
-              <Swords className="text-white w-24 h-24 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+              <p>VS</p>
             </div>
 
             {/* --- OPPONENT CARD CONTAINER --- */}
@@ -880,7 +880,7 @@ export default function CardBattle() {
         <div className="absolute inset-0 z-[100] bg-black bg-opacity-95 flex flex-col items-center justify-center animate-zoom-out-entry p-8 text-center backdrop-blur-sm">
           {userScore > oppScore ? (
             <>
-              <Trophy className="text-yellow-400 w-32 h-32 mb-6 animate-bounce drop-shadow-[0_0_20px_rgba(234,179,8,0.6)]" />
+              {/* <Trophy className="text-yellow-400 w-32 h-32 mb-6 animate-bounce drop-shadow-[0_0_20px_rgba(234,179,8,0.6)]" /> */}
               <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 mb-2">
                 VICTORY
               </h1>
@@ -890,7 +890,7 @@ export default function CardBattle() {
             </>
           ) : userScore < oppScore ? (
             <>
-              <Skull className="text-gray-500 w-32 h-32 mb-6 animate-pulse" />
+              {/* <Skull className="text-gray-500 w-32 h-32 mb-6 animate-pulse" /> */}
               <h1 className="text-6xl font-black text-gray-400 mb-2">DEFEAT</h1>
               <p className="text-gray-600 mb-8 tracking-widest text-lg">
                 CRUSHED AND BROKEN
@@ -898,7 +898,7 @@ export default function CardBattle() {
             </>
           ) : (
             <>
-              <RefreshCw className="text-blue-400 w-32 h-32 mb-6 animate-spin-slow" />
+              {/* <RefreshCw className="text-blue-400 w-32 h-32 mb-6 animate-spin-slow" /> */}
               <h1 className="text-6xl font-black text-white mb-2">DRAW</h1>
               <p className="text-gray-400 mb-8 tracking-widest text-lg">
                 EVEN MATCH
@@ -916,7 +916,7 @@ export default function CardBattle() {
                 />
                 {userScore > oppScore && (
                   <div className="absolute -top-2 -right-2 bg-yellow-500 text-black p-1 rounded-full">
-                    <Trophy size={16} fill="black" />
+                    {/* <Trophy size={16} fill="black" /> */}
                   </div>
                 )}
               </div>
@@ -941,7 +941,7 @@ export default function CardBattle() {
                 />
                 {oppScore > userScore && (
                   <div className="absolute -top-2 -right-2 bg-yellow-500 text-black p-1 rounded-full">
-                    <Trophy size={16} fill="black" />
+                    {/* <Trophy size={16} fill="black" /> */}
                   </div>
                 )}
               </div>

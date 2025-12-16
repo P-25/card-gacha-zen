@@ -54,7 +54,7 @@ export default function ShopItemCard({
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 relative">
                 <Image
-                  src="/assets/icons/gold-coin.png"
+                  src="/assets/icons/gold-coin.webp"
                   alt="Gold"
                   fill
                   className="object-cover"
@@ -68,7 +68,7 @@ export default function ShopItemCard({
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 relative">
                 <Image
-                  src="/assets/icons/gem.png"
+                  src="/assets/icons/gem.webp"
                   alt="Gem"
                   fill
                   className="object-contain"

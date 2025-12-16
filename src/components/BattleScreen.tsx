@@ -46,7 +46,7 @@ export default function BattleScreen({
         >
           <div className="relative w-full h-32 mb-1 flex justify-center items-center">
             <Image
-              src="/assets/icons/story.png"
+              src="/assets/icons/story.webp"
               alt="Story Mode"
               fill
               className="object-contain no-global-filter"
@@ -70,7 +70,7 @@ export default function BattleScreen({
         >
           <div className="relative w-full h-32 mb-1 flex justify-center items-center">
             <Image
-              src="/assets/icons/pvp.png"
+              src="/assets/icons/pvp.webp"
               alt="1v1 Duel"
               fill
               className="object-contain no-global-filter"

@@ -11,7 +11,7 @@ export default function GoldCoin() {
     <div className="flex items-center gap-2">
       <div className="w-6 h-6 relative">
         <Image
-          src="/assets/icons/gold-coin.png"
+          src="/assets/icons/gold-coin.webp"
           alt="Gold"
           fill
           className="object-contain"

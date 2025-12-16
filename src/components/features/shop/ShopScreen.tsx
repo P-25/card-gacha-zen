@@ -35,7 +35,7 @@ const InfoTooltip = ({
         onClick={() => setIsVisible(!isVisible)}
       >
         <Image
-          src="/assets/icons/info.png"
+          src="/assets/icons/info.webp"
           alt="Info"
           fill
           className="object-contain"
@@ -299,7 +299,7 @@ export default function ShopScreen({ title }: { title: string }) {
               <div className="flex justify-center gap-2 my-4">
                 <div className="w-6 h-6 relative">
                   <Image
-                    src="/assets/icons/gem.png"
+                    src="/assets/icons/gem.webp"
                     alt="Diamond"
                     fill
                     className="object-contain"

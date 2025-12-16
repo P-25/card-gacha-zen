@@ -17,7 +17,7 @@ const FloatingParticles = ({ theme = "dark" }: FloatingParticlesProps) => {
     // The SCSS used 200 particles.
     // In React/JS, 60-80 is usually enough for the same visual density
     // without killing mobile performance.
-    const particleCount = 70;
+    const particleCount = 30;
 
     const newParticles = Array.from({ length: particleCount }).map((_, i) => {
       // Logic from SCSS: $particleBaseSize: 8
@@ -76,7 +76,7 @@ const Particle = ({ size, duration, delay, startX, endX, theme }: any) => {
   return (
     <motion.div
       id="particles"
-      className={`absolute rounded-full ${zIndex}`}
+      className={`absolute rounded-full ${zIndex} will-change-transform`}
       style={{
         width: size,
         height: size,

@@ -13,6 +13,7 @@ import VersusPhase from "./VersusPhase";
 import { generateRandomPlayerInfo } from "@/lib/rarityStyles";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import CardBattle from "./BattlePhaseNew";
 
 export type BattlePhaseType =
   | "SELECT"
@@ -122,13 +123,14 @@ export default function BattleFlow({
           />
         )}
         {phase === "BATTLE" && (
-          <BattlePhase
-            key="battle"
-            playerDeck={playerDeck}
-            opponentInfo={opponentInfo}
-            opponentDeck={opponentDeck}
-            onComplete={handleBattleComplete}
-          />
+          // <BattlePhase
+          //   key="battle"
+          //   playerDeck={playerDeck}
+          //   opponentInfo={opponentInfo}
+          //   opponentDeck={opponentDeck}
+          //   onComplete={handleBattleComplete}
+          // />
+          <CardBattle />
         )}
         {phase === "RESULT" && (
           <ResultPhase

@@ -240,7 +240,7 @@ export default function CardDetailModal({
                 className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer"
               >
                 <Image
-                  src="/assets/icons/info.png"
+                  src="/assets/icons/info.webp"
                   alt="Info"
                   width={24}
                   height={24}
@@ -556,7 +556,7 @@ export default function CardDetailModal({
                     <span>Required</span>
                     <div className="w-6 h-6 relative">
                       <Image
-                        src="/assets/icons/gold-coin.png"
+                        src="/assets/icons/gold-coin.webp"
                         alt="Gold"
                         fill
                         className="object-contain"

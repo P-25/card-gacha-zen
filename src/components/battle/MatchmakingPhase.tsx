@@ -31,7 +31,7 @@ export default function MatchmakingPhase({
     <div className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center">
       <motion.div className="relative w-64 h-64">
         <Image
-          src="/assets/icons/loader.png"
+          src="/assets/icons/loader.webp"
           alt="Loading"
           fill
           className="object-contain opacity-80"

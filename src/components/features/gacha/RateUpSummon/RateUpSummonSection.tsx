@@ -347,7 +347,7 @@ export default function RateUpSummonSection({
               <div className="flex items-center gap-1">
                 <div className="w-4 h-4 relative">
                   <Image
-                    src="/assets/icons/gem.png"
+                    src="/assets/icons/gem.webp"
                     alt="Gem"
                     fill
                     className="object-contain"
@@ -377,7 +377,7 @@ export default function RateUpSummonSection({
               <div className="flex items-center gap-1">
                 <div className="w-4 h-4 relative">
                   <Image
-                    src="/assets/icons/gem.png"
+                    src="/assets/icons/gem.webp"
                     alt="Gem"
                     fill
                     className="object-contain"

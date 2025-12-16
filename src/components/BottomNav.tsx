@@ -15,22 +15,22 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
     {
       id: "home",
       label: "HOME",
-      icon: "/assets/icons/home.png",
+      icon: "/assets/icons/home.webp",
     },
     {
       id: "collection",
       label: "COLLECTION",
-      icon: "/assets/icons/collection.png",
+      icon: "/assets/icons/collection.webp",
     },
     {
       id: "shop",
       label: "SHOP",
-      icon: "/assets/icons/shop.png",
+      icon: "/assets/icons/shop.webp",
     },
     {
       id: "quests",
       label: "QUESTS",
-      icon: "/assets/icons/quest.png",
+      icon: "/assets/icons/quest.webp",
     },
   ] as const;
 
