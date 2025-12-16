@@ -17,7 +17,7 @@ export default function TopBar({ title = "Home" }: TopBarProps) {
   return (
     <>
       <div className="z-50 px-4 py-4 flex items-center justify-between bg-transparent pointer-events-none border-b border-[#1a2e2e]/20">
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto flex items-center gap-2">
           <Profile onClick={() => setShowProfileModal(true)} />
         </div>
         <div className="flex items-center gap-4 pointer-events-auto">

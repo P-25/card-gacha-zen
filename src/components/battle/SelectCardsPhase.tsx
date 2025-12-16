@@ -1,32 +1,117 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Card } from "@/types/game";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import TopBar from "@/components/features/home/TopBar";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 
 interface SelectCardsPhaseProps {
+  initialDeck: Card[];
   onConfirm: (deck: Card[]) => void;
   onBack: () => void;
 }
 
+// Memoized Card Item to prevent re-renders
+const CardItem = memo(
+  ({
+    card,
+    isSelected,
+    onToggle,
+  }: {
+    card: Card;
+    isSelected: boolean;
+    onToggle: (card: Card) => void;
+  }) => {
+    const borderColor = getRarityBorderColor(card.rarity);
+
+    return (
+      <motion.div
+        whileTap={{ scale: 0.95 }}
+        onClick={() => onToggle(card)}
+        className={`aspect-[2/3] rounded-lg relative cursor-pointer transition-all duration-200 overflow-hidden ${
+          isSelected
+            ? "ring-4 ring-[#422462] opacity-50 grayscale"
+            : "shadow-md hover:shadow-lg"
+        }`}
+      >
+        <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
+          <div className="relative w-full h-full scale-[1.1] opacity-60">
+            <Image
+              src={getStrokeImage(card.rarity)}
+              alt="brush stroke"
+              fill
+              className="object-contain no-global-filter"
+              sizes="(max-width: 768px) 50vw, 300px"
+            />
+          </div>
+        </div>
+
+        {/* Card Image */}
+        <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
+          <Image
+            src={card.image}
+            alt={card.name}
+            fill
+            sizes="(max-width: 768px) 33vw, 200px"
+            loading="lazy"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        </div>
+        <div className="absolute justify-between top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
+          Lv.{card.level}
+        </div>
+        <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 p-2">
+          <div className="flex items-center">
+            <div className="w-5 h-5 relative drop-shadow-sm">
+              <Image
+                src="/assets/icons/ATK.webp"
+                alt="ATK"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-[#1a2e2e] font-bold text-lg">{card.atk}</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 relative drop-shadow-sm">
+              <Image
+                src="/assets/icons/HP.webp"
+                alt="HP"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-[#1a2e2e] font-bold text-lg">{card.hp}</span>
+          </div>
+        </div>
+        <div
+          className="absolute inset-0 z-30 pointer-events-none rounded-lg"
+          style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
+        />
+      </motion.div>
+    );
+  }
+);
+
+CardItem.displayName = "CardItem";
+
 export default function SelectCardsPhase({
+  initialDeck,
   onConfirm,
   onBack,
 }: SelectCardsPhaseProps) {
   const { inventory } = useSelector((state: RootState) => state.player);
-  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  const [selectedCards, setSelectedCards] = useState<Card[]>(initialDeck || []);
 
   // Filter States
   const [visibleCount, setVisibleCount] = useState(24);
   const SCROLL_INCREMENT = 24;
 
   const filteredCards = useMemo(() => {
-    let result = [...inventory];
+    const result = [...inventory];
 
     // 4. Sort
     result.sort((a, b) => {
@@ -43,8 +128,10 @@ export default function SelectCardsPhase({
     source: "list" | "slot" = "slot"
   ) => {
     if (selectedCards.find((c) => c.id === card.id)) {
-      console.log(`Debug - already selected`);
       if (source === "slot") {
+        setSelectedCards(selectedCards.filter((c) => c.id !== card.id));
+      } else {
+        // If clicking from list, we also allow deselecting
         setSelectedCards(selectedCards.filter((c) => c.id !== card.id));
       }
     } else {
@@ -77,18 +164,14 @@ export default function SelectCardsPhase({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-full flex flex-col"
+      className="w-full h-full flex flex-col pt-8"
     >
-      {/* Stats Header */}
-      <div className="px-4 py-2 flex justify-between items-center bg-white/50 backdrop-blur-sm mx-4 rounded-lg mt-2 shadow-sm">
-        <div className="flex gap-4 text-sm font-bold text-[#2D3748]">
-          <span>
-            TOTAL POWER: <span className="text-red-600">{totalPower}</span>
-          </span>
-        </div>
-        <div className="flex gap-2 text-xs font-bold text-[#4A5568]">
-          <span>{selectedCards.length}/3 SELECTED</span>
-        </div>
+      {/* Title */}
+      <div className="text-center mb-4">
+        <h1 className="text-3xl font-bold text-[#2D3748] tracking-wider uppercase drop-shadow-sm">
+          Echo Loadout
+        </h1>
+        <div className="w-16 h-1 bg-[#C5A059] mx-auto mt-2 rounded-full" />
       </div>
 
       {/* Selected Slots */}
@@ -186,78 +269,14 @@ export default function SelectCardsPhase({
       >
         <div className="grid grid-cols-3 gap-3 p-4 pb-24 min-h-[400px] max-h-[510px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {visibleCards.map((card, index) => {
-            const isSelected = selectedCards.find((c) => c.id === card.id);
-            const borderColor = getRarityBorderColor(card.rarity);
+            const isSelected = !!selectedCards.find((c) => c.id === card.id);
             return (
-              <motion.div
+              <CardItem
                 key={`${card.id}-${index}`}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => toggleCardSelection(card, "list")}
-                className={`aspect-[2/3] rounded-lg relative cursor-pointer transition-all duration-200 overflow-hidden ${
-                  isSelected
-                    ? "ring-4 ring-[#422462] opacity-50 grayscale"
-                    : "shadow-md hover:shadow-lg"
-                }`}
-              >
-                <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
-                  <div className="relative w-full h-full scale-[1.1] opacity-60">
-                    <Image
-                      src={getStrokeImage(card.rarity)}
-                      alt="brush stroke"
-                      fill
-                      className="object-contain no-global-filter"
-                      sizes="(max-width: 768px) 50vw, 300px"
-                    />
-                  </div>
-                </div>
-
-                {/* Card Image */}
-                <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
-                  <Image
-                    src={card.image}
-                    alt={card.name}
-                    fill
-                    sizes="(max-width: 768px) 33vw, 200px"
-                    loading="lazy"
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                </div>
-                <div className="absolute justify-between top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
-                  Lv.{card.level}
-                </div>
-                <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 p-2">
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 relative drop-shadow-sm">
-                      <Image
-                        src="/assets/icons/ATK.webp"
-                        alt="ATK"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <span className="text-[#1a2e2e] font-bold text-lg">
-                      {card.atk}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 relative drop-shadow-sm">
-                      <Image
-                        src="/assets/icons/HP.webp"
-                        alt="HP"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <span className="text-[#1a2e2e] font-bold text-lg">
-                      {card.hp}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className="absolute inset-0 z-30 pointer-events-none rounded-lg"
-                  style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
-                />
-              </motion.div>
+                card={card}
+                isSelected={isSelected}
+                onToggle={(c) => toggleCardSelection(c, "list")}
+              />
             );
           })}
         </div>
@@ -271,16 +290,11 @@ export default function SelectCardsPhase({
       {/* Confirm Button */}
       <div className="absolute bottom-24 left-0 right-0 px-6 flex justify-center z-20">
         <motion.button
-          disabled={selectedCards.length !== 3}
           whileTap={{ scale: 0.95 }}
           onClick={() => onConfirm(selectedCards)}
-          className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer ${
-            selectedCards.length === 3
-              ? "bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
+          className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]`}
         >
-          READY
+          DONE
         </motion.button>
       </div>
     </motion.div>
