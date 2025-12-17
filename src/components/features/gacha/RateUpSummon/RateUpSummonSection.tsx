@@ -56,10 +56,7 @@ export default function RateUpSummonSection({
     let tempPity = { ...currentPity };
     const results: (Card | Resource)[] = [];
 
-    // Bonus logic for x10 could be added here if needed (e.g. guaranteed SR)
-    const actualCount = count === 10 ? 11 : count; // Example: 10 pulls + 1 bonus? User said "1 Bonus!"
-
-    for (let i = 0; i < actualCount; i++) {
+    for (let i = 0; i < count; i++) {
       try {
         const { item, newPityState } = performSummon(banner.id, tempPity);
         results.push(item);

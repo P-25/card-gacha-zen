@@ -9,8 +9,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Once a garden statue brought to life by wild magic, it shields nature with a gentle soul. In battle, it becomes an immovable object with diamond-hard skin.",
-        "hp": 14,
-        "atk": 6,
+        "state": {
+            "pow": 5,
+            "spd": 3,
+            "def": 22
+        },
         "image": "/assets/Card_Art/common/card_001.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -27,8 +30,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A scavenger from sunless trenches who navigates pressure changes to recover artifacts. It seeks the Sunken Star to finally bring light to the deep.",
-        "hp": 12,
-        "atk": 8,
+        "state": {
+            "pow": 8,
+            "spd": 12,
+            "def": 10
+        },
         "image": "/assets/Card_Art/common/card_002.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -45,8 +51,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A silent warrior monk who rejects weapons to channel magic through their fists. They wander on a pilgrimage to defeat a thousand foes in unarmed combat.",
-        "hp": 8,
-        "atk": 12,
+        "state": {
+            "pow": 12,
+            "spd": 10,
+            "def": 8
+        },
         "image": "/assets/Card_Art/common/card_003.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -63,8 +72,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A loyal construct serving a deceased inventor, maintaining a memory of a lost mansion. It saves the world to ensure its master's grave remains clean.",
-        "hp": 12,
-        "atk": 8,
+        "state": {
+            "pow": 8,
+            "spd": 6,
+            "def": 16
+        },
         "image": "/assets/Card_Art/common/card_004.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -81,8 +93,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Traded their voice to Fae for melodies that heal or destroy. They wander silently, seeking the Lost Chord to break their curse.",
-        "hp": 12,
-        "atk": 8,
+        "state": {
+            "pow": 6,
+            "spd": 14,
+            "def": 10
+        },
         "image": "/assets/Card_Art/common/card_005.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -99,8 +114,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Steals secrets and memories using dark glass blades instead of gold. They hunt for a specific memory they stole from themselves long ago.",
-        "hp": 6,
-        "atk": 14,
+        "state": {
+            "pow": 10,
+            "spd": 15,
+            "def": 5
+        },
         "image": "/assets/Card_Art/common/card_006.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -117,8 +135,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Raised by wolves, they hunt corrupted beasts to preserve nature's balance. Distrusting civilization, they rely only on their bow and the wild.",
-        "hp": 8,
-        "atk": 12,
+        "state": {
+            "pow": 12,
+            "spd": 10,
+            "def": 8
+        },
         "image": "/assets/Card_Art/common/card_007.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -135,8 +156,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Made of soot and magic, this guardian keeps the Eternal Flame alive in their lantern. They scavenge for fuel, terrified that rain will extinguish them.",
-        "hp": 8,
-        "atk": 12,
+        "state": {
+            "pow": 14,
+            "spd": 10,
+            "def": 6
+        },
         "image": "/assets/Card_Art/common/card_008.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -153,8 +177,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Trapped by a forgotten vow, this ghost bears heavy chains of guilt. It aids heroes, hoping to fulfill a destiny and find peace.",
-        "hp": 8,
-        "atk": 12,
+        "state": {
+            "pow": 8,
+            "spd": 8,
+            "def": 14
+        },
         "image": "/assets/Card_Art/common/card_009.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -171,8 +198,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Can smell gold through granite but fears waking the Earth Eaters. They wear their mining lamp constantly, forever ready for the deep dark.",
-        "hp": 12,
-        "atk": 8,
+        "state": {
+            "pow": 10,
+            "spd": 5,
+            "def": 15
+        },
         "image": "/assets/Card_Art/common/card_010.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -189,8 +219,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "The silent voice of the Old Forest who bleeds sap instead of blood. They emerge to stop the Iron Mines and protect nature.",
-        "hp": 12,
-        "atk": 8,
+        "state": {
+            "pow": 8,
+            "spd": 8,
+            "def": 14
+        },
         "image": "/assets/Card_Art/common/card_011.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -207,8 +240,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A Viper Clan assassin who slows their heart to vanish. They hunt a dishonest merchant to settle a debt from the Black Ledger.",
-        "hp": 6,
-        "atk": 14,
+        "state": {
+            "pow": 12,
+            "spd": 14,
+            "def": 4
+        },
         "image": "/assets/Card_Art/common/card_012.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -225,8 +261,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Immune to toxins, they believe dosage defines the poison. They hunt dragon spores to brew the legendary Elixir of Silence.",
-        "hp": 12,
-        "atk": 18,
+        "state": {
+            "pow": 15,
+            "spd": 10,
+            "def": 20
+        },
         "image": "/assets/Card_Art/uncommon/card_001.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -243,8 +282,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Banished for claiming magic is finite, they map invisible Ley Lines. They study the void to stop the world's magic from leaking away.",
-        "hp": 12,
-        "atk": 18,
+        "state": {
+            "pow": 25,
+            "spd": 10,
+            "def": 10
+        },
         "image": "/assets/Card_Art/uncommon/card_002.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -261,8 +303,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Forbidden from touching the ground, they hover to deliver messages. Arrogant and fast, they claim to outrun storms with their lightning spear.",
-        "hp": 12,
-        "atk": 18,
+        "state": {
+            "pow": 15,
+            "spd": 22,
+            "def": 8
+        },
         "image": "/assets/Card_Art/uncommon/card_003.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -279,8 +324,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Animated armor fueled by a fallen city's justice. It stands motionless until a crime occurs, then strikes instantly with its gavel.",
-        "hp": 20,
-        "atk": 10,
+        "state": {
+            "pow": 10,
+            "spd": 5,
+            "def": 30
+        },
         "image": "/assets/Card_Art/uncommon/card_004.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -297,8 +345,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Guardian of the Northern Breach where time moves slow. Banned from warm lands, their cold presence freezes crops and cracks stone.",
-        "hp": 18,
-        "atk": 12,
+        "state": {
+            "pow": 15,
+            "spd": 5,
+            "def": 25
+        },
         "image": "/assets/Card_Art/uncommon/card_005.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -315,8 +366,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Sworn to the Dawn, they never sleep while the sun shines. A living wall whose massive shield dampens magic and protects allies.",
-        "hp": 22,
-        "atk": 8,
+        "state": {
+            "pow": 8,
+            "spd": 5,
+            "def": 32
+        },
         "image": "/assets/Card_Art/uncommon/card_006.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -333,8 +387,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A polite exile who treats skeletons as unpaid interns, not monsters. They seek the Ivory Tome to turn death into art.",
-        "hp": 12,
-        "atk": 18,
+        "state": {
+            "pow": 22,
+            "spd": 10,
+            "def": 13
+        },
         "image": "/assets/Card_Art/uncommon/card_007.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -351,8 +408,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Etched spells onto their skin to cast explosions with a broken blade. The magic slowly consumes them, turning flesh into pure energy.",
-        "hp": 12,
-        "atk": 18,
+        "state": {
+            "pow": 25,
+            "spd": 12,
+            "def": 8
+        },
         "image": "/assets/Card_Art/uncommon/card_008.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -369,8 +429,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "A cosmic entity holding the gravity of a dying star. It descends only when reality breaks, freezing time to restore balance.",
-        "hp": 20,
-        "atk": 30,
+        "state": {
+            "pow": 25,
+            "spd": 20,
+            "def": 30
+        },
         "image": "/assets/Card_Art/rare/card_001.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -387,8 +450,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Forged in volcanic fury, it sleeps until tectonic plates shift. With diamond-hard skin and molten blood, it is earth's rage.",
-        "hp": 30,
-        "atk": 20,
+        "state": {
+            "pow": 30,
+            "spd": 5,
+            "def": 40
+        },
         "image": "/assets/Card_Art/rare/card_002.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -405,8 +471,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "Fractured across time after failing their own reality, they exist in all moments. They foresee attacks to save this timeline from the same fate.",
-        "hp": 30,
-        "atk": 20,
+        "state": {
+            "pow": 20,
+            "spd": 35,
+            "def": 20
+        },
         "image": "/assets/Card_Art/rare/card_003.webp",
         "experience": 0,
         "design_type": "Eternal",
@@ -423,8 +492,11 @@
         "level": 1,
         "releaseDate": "2025-12-08",
         "description": "The ancient Sun Dragon manifested in heavy armor to stabilize the world. Its blood is molten gold, and its presence heralds the apocalypse.",
-        "hp": 30,
-        "atk": 20,
+        "state": {
+            "pow": 28,
+            "spd": 12,
+            "def": 35
+        },
         "image": "/assets/Card_Art/rare/card_004.webp",
         "experience": 0,
         "design_type": "Eternal",

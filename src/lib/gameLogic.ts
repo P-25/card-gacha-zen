@@ -14,7 +14,7 @@ import {
  * Calculates the Total Power (TP) of a card.
  */
 export function calculateTotalPower(card: Card): number {
-  return card.hp + card.atk;
+  return card.state.pow + card.state.spd + card.state.def;
 }
 
 /**

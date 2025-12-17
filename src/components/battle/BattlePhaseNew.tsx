@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { Card } from "@/types/game";
+import React, { useEffect, useState } from "react";
+import SingleCard from "./SingleCard";
 // import {
 //   Sparkles,
 //   Skull,
@@ -13,12 +15,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 // --- Types & Interfaces ---
 
-type StatType = "POW" | "SPD" | "TEC";
+type StatType = "POW" | "SPD" | "HP";
 
 interface Stats {
   POW: number;
   SPD: number;
-  TEC: number;
+  HP: number;
 }
 
 interface Wrestler {
@@ -104,191 +106,165 @@ const CRACK_OVERLAY = `
   <path d="M50 50 L20 20 M50 50 L80 20 M50 50 L20 80 M50 50 L80 80" stroke="black" stroke-width="2"/>
 </svg>
 `;
-
-const WRESTLERS: Wrestler[] = [
+const PLAYER_INFO = {
+  level: 10,
+  name: "Prince26",
+  tag: "#111111",
+  activeProfilePicId: "default_1",
+};
+const OPPONENT_INFO = {
+  level: 10,
+  name: "DimKiss680",
+  tag: "#1234",
+  activeProfilePicId: "default_1",
+};
+const PLAYER_DECK: Card[] = [
   {
-    id: 1,
-    name: "The Titan",
-    color: "from-red-600 to-orange-900",
-    stats: { POW: 95, SPD: 40, TEC: 60 },
-    icon: "Skull",
+    id: "rare_card_003",
+    name: "Chrono Sent",
+    type: "CARD",
+    rarity: "RARE",
+    setName: "Light",
+    setId: "L01",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "Fractured across time after failing their own reality, they exist in all moments. They foresee attacks to save this timeline from the same fate.",
+    state: {
+      pow: 20,
+      spd: 10,
+      def: 30,
+    },
+    image: "/assets/Card_Art/rare/card_003.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#3CA692",
+    textColor: "#F2F2F2",
+    tp: 50,
+    instanceId: "df22jk68d",
   },
   {
-    id: 2,
-    name: "Viper",
-    color: "from-green-600 to-emerald-900",
-    stats: { POW: 60, SPD: 92, TEC: 75 },
-    icon: "Zap",
+    id: "uncommon_card_007",
+    name: "Bone Weaver",
+    type: "CARD",
+    rarity: "UNCOMMON",
+    setName: "Dark",
+    setId: "D01",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "A polite exile who treats skeletons as unpaid interns, not monsters. They seek the Ivory Tome to turn death into art.",
+    state: {
+      pow: 18,
+      spd: 10,
+      def: 12,
+    },
+    image: "/assets/Card_Art/uncommon/card_007.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#192625",
+    textColor: "#F2F2F2",
+    tp: 30,
+    instanceId: "zhmg09j52",
   },
   {
-    id: 3,
-    name: "Iron Wall",
-    color: "from-slate-500 to-slate-800",
-    stats: { POW: 85, SPD: 30, TEC: 90 },
-    icon: "Shield",
-  },
-  {
-    id: 4,
-    name: "Blaze",
-    color: "from-orange-500 to-red-800",
-    stats: { POW: 88, SPD: 70, TEC: 50 },
-    icon: "Flame",
-  },
-  {
-    id: 5,
-    name: "Shadow",
-    color: "from-purple-600 to-indigo-900",
-    stats: { POW: 55, SPD: 95, TEC: 80 },
-    icon: "Disc",
-  },
-  {
-    id: 6,
-    name: "Technician",
-    color: "from-blue-600 to-cyan-900",
-    stats: { POW: 65, SPD: 60, TEC: 98 },
-    icon: "RefreshCw",
+    id: "uncommon_card_003",
+    name: "Sky Lance",
+    type: "CARD",
+    rarity: "UNCOMMON",
+    setName: "Wind",
+    setId: "W02",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "Forbidden from touching the ground, they hover to deliver messages. Arrogant and fast, they claim to outrun storms with their lightning spear.",
+    state: {
+      pow: 18,
+      spd: 10,
+      def: 12,
+    },
+    image: "/assets/Card_Art/uncommon/card_003.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#3C5E73",
+    textColor: "#F2F2F2",
+    tp: 30,
+    instanceId: "vkqs5ww0q",
   },
 ];
 
-const STAT_TYPES: StatType[] = ["POW", "SPD", "TEC"];
+const OPPONENT_DECK: Card[] = [
+  {
+    id: "uncommon_card_003",
+    name: "Sky Lance",
+    type: "CARD",
+    rarity: "UNCOMMON",
+    setName: "Wind",
+    setId: "W02",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "Forbidden from touching the ground, they hover to deliver messages. Arrogant and fast, they claim to outrun storms with their lightning spear.",
+    state: {
+      pow: 28,
+      spd: 10,
+      def: 32,
+    },
+    image: "/assets/Card_Art/uncommon/card_003.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#3C5E73",
+    textColor: "#F2F2F2",
+  },
+  {
+    id: "uncommon_card_006",
+    name: "Sun Aegis",
+    type: "CARD",
+    rarity: "UNCOMMON",
+    setName: "Light",
+    setId: "L01",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "Sworn to the Dawn, they never sleep while the sun shines. A living wall whose massive shield dampens magic and protects allies.",
+    state: {
+      pow: 8,
+      spd: 10,
+      def: 22,
+    },
+    image: "/assets/Card_Art/uncommon/card_006.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#735438",
+    textColor: "#F2F2F2",
+  },
+  {
+    id: "common_card_003",
+    name: "Silent Fist",
+    type: "CARD",
+    rarity: "COMMON",
+    setName: "Earth",
+    setId: "E01",
+    level: 1,
+    releaseDate: "2025-12-08",
+    description:
+      "A silent warrior monk who rejects weapons to channel magic through their fists. They wander on a pilgrimage to defeat a thousand foes in unarmed combat.",
+    state: {
+      pow: 12,
+      spd: 10,
+      def: 8,
+    },
+    image: "/assets/Card_Art/common/card_003.webp",
+    experience: 0,
+    design_type: "Eternal",
+    backgroundColor: "#9A6E4B",
+    textColor: "#BF5A36",
+  },
+];
+
+const STAT_TYPES: StatType[] = ["POW", "HP"];
 
 // --- Components ---
-
-const Card: React.FC<CardProps> = ({
-  data,
-  isFaceDown,
-  onClick,
-  disabled,
-  className = "",
-  status = "NEUTRAL",
-  isCharging,
-}) => {
-  return (
-    <div
-      onClick={!disabled && onClick ? onClick : undefined}
-      className={`
-        relative w-28 h-44 rounded-xl shadow-2xl transition-all duration-300 transform preserve-3d
-        ${
-          disabled
-            ? "cursor-default"
-            : "cursor-pointer hover:scale-105 active:scale-95 hover:shadow-blue-500/50"
-        }
-        ${isCharging ? "animate-pulse-fast" : ""}
-        ${className}
-      `}
-      style={{ perspective: "1000px" }}
-    >
-      {/* Charging Aura */}
-      {isCharging && (
-        <div
-          className={`absolute -inset-4 rounded-xl blur-xl opacity-60 ${
-            data.id > 3 ? "bg-red-500" : "bg-blue-500"
-          } animate-pulse`}
-        ></div>
-      )}
-
-      <div
-        className={`
-        relative w-full h-full rounded-xl border-2 overflow-hidden
-        transition-all duration-500 backface-hidden
-        ${
-          isFaceDown
-            ? "bg-gray-800 border-gray-600 rotate-y-180"
-            : `bg-gray-900 ${
-                status === "LOSER"
-                  ? "border-red-900 grayscale brightness-50"
-                  : "border-white border-opacity-50"
-              }`
-        }
-      `}
-      >
-        {isFaceDown ? (
-          // Card Back
-          <div className="w-full h-full flex items-center justify-center relative bg-gray-900">
-            <div
-              className="absolute inset-0 opacity-40"
-              dangerouslySetInnerHTML={{ __html: CARD_BACK_PATTERN }}
-            />
-            <div className="z-10 text-4xl font-black text-gray-500 select-none opacity-50">
-              VS
-            </div>
-            <div className="absolute inset-1 border-2 border-gray-700 rounded-lg opacity-50"></div>
-          </div>
-        ) : (
-          // Card Front
-          <div
-            className={`w-full h-full bg-gradient-to-br ${data.color} flex flex-col relative`}
-          >
-            {/* Image Area */}
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden">
-              {/* <div className="absolute inset-0 bg-black opacity-30"></div>
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div> */}
-              <div
-                className={`z-10 text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] transform scale-125 transition-transform duration-500 ${
-                  status === "WINNER" ? "scale-150" : ""
-                }`}
-              >
-                {data.icon}
-              </div>
-            </div>
-
-            {/* Stats Area */}
-            <div className="h-16 bg-black bg-opacity-90 backdrop-blur-md p-1.5 flex flex-col justify-between border-t border-white border-opacity-20 z-10">
-              <div className="text-[10px] font-black text-white truncate text-center uppercase tracking-widest bg-gradient-to-r from-transparent via-gray-800 to-transparent py-0.5 mb-1 border-b border-gray-800">
-                {data.name}
-              </div>
-              <div className="flex justify-between items-end text-[9px] text-gray-400 font-mono">
-                <div
-                  className={`flex flex-col items-center flex-1 ${
-                    data.stats.POW > 80 ? "text-red-400" : ""
-                  }`}
-                >
-                  <span>POW</span>
-                  <span className="font-bold text-white text-xs">
-                    {data.stats.POW}
-                  </span>
-                </div>
-                <div
-                  className={`flex flex-col items-center flex-1 border-l border-gray-800 ${
-                    data.stats.SPD > 80 ? "text-yellow-400" : ""
-                  }`}
-                >
-                  <span>SPD</span>
-                  <span className="font-bold text-white text-xs">
-                    {data.stats.SPD}
-                  </span>
-                </div>
-                <div
-                  className={`flex flex-col items-center flex-1 border-l border-gray-800 ${
-                    data.stats.TEC > 80 ? "text-blue-400" : ""
-                  }`}
-                >
-                  <span>TEC</span>
-                  <span className="font-bold text-white text-xs">
-                    {data.stats.TEC}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Dynamic Light Reflection */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-0 hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-
-            {/* Cracks Overlay (Loser) */}
-            {status === "LOSER" && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-appear-crack z-20 mix-blend-multiply">
-                <div
-                  className="w-full h-full opacity-80"
-                  dangerouslySetInnerHTML={{ __html: CRACK_OVERLAY }}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 // --- Main App ---
 
@@ -299,16 +275,16 @@ export default function CardBattle() {
   // Stat Reveal Logic
   const [activeStat, setActiveStat] = useState<StatType>("POW");
   const [displayStat, setDisplayStat] = useState<StatType>("POW");
-  const [isStatRevealing, setIsStatRevealing] = useState(false);
+  const [isStatRevealing, setIsStatRevealing] = useState(true);
 
-  const [userHand, setUserHand] = useState<Wrestler[]>([]);
-  const [oppHand, setOppHand] = useState<Wrestler[]>([]);
+  const [userHand, setUserHand] = useState<Card[]>([]);
+  const [oppHand, setOppHand] = useState<Card[]>([]);
   const [userScore, setUserScore] = useState<number>(0);
   const [oppScore, setOppScore] = useState<number>(0);
 
   // Battle State
-  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
-  const [oppCardId, setOppCardId] = useState<number | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [oppCardId, setOppCardId] = useState<string | null>(null);
   const [battleResult, setBattleResult] = useState<BattleResult>(null);
   const [animPhase, setAnimPhase] = useState<AnimPhase>("IDLE");
 
@@ -322,9 +298,8 @@ export default function CardBattle() {
   }, []);
 
   const startNewGame = () => {
-    const shuffled = [...WRESTLERS].sort(() => 0.5 - Math.random());
-    setUserHand(shuffled.slice(0, 3));
-    setOppHand(shuffled.slice(3, 6));
+    setUserHand(PLAYER_DECK);
+    setOppHand(OPPONENT_DECK);
     setUserScore(0);
     setOppScore(0);
     startTurn();
@@ -389,7 +364,7 @@ export default function CardBattle() {
     setShockwaves(newShockwaves);
   };
 
-  const handleCardSelect = (card: Wrestler) => {
+  const handleCardSelect = (card: Card) => {
     if (gameState !== "SELECTION" || isStatRevealing) return;
 
     setSelectedCardId(card.id);
@@ -403,9 +378,9 @@ export default function CardBattle() {
     runBattleSequence(card, randomOppCard);
   };
 
-  const runBattleSequence = (uCard: Wrestler, oCard: Wrestler) => {
-    const uStat = uCard.stats[activeStat];
-    const oStat = oCard.stats[activeStat];
+  const runBattleSequence = (uCard: Card, oCard: Card) => {
+    const uStat = uCard.state.pow;
+    const oStat = oCard.state.pow;
     let result: BattleResult = "DRAW";
     if (uStat > oStat) result = "WIN";
     if (uStat < oStat) result = "LOSE";
@@ -554,7 +529,7 @@ export default function CardBattle() {
   return (
     <div
       className={`
-        relative w-full h-screen bg-gray-950 overflow-hidden font-sans select-none text-white
+        relative w-full h-full overflow-hidden font-sans select-none text-black
         transition-transform duration-100
         ${
           animPhase === "IMPACT"
@@ -570,18 +545,12 @@ export default function CardBattle() {
       {gameState === "BATTLE" && (
         <>
           <div className="absolute inset-0 bg-black opacity-60 transition-opacity duration-1000"></div>
-          {/* Speed Lines during attack */}
-          {/* <div
-            className={`absolute inset-0 opacity-0 transition-opacity duration-100 ${
-              animPhase === "ATTACK" ? "opacity-40" : ""
-            } bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] animate-pan`}
-          ></div> */}
         </>
       )}
 
       {/* FINALE CURTAIN - Fades to black at the end */}
       <div
-        className={`absolute inset-0 bg-black z-[90] pointer-events-none transition-opacity duration-[1500ms] ease-in ${
+        className={`absolute inset-0 z-[90] pointer-events-none transition-opacity duration-[1500ms] ease-in ${
           animPhase === "FINALE" ? "opacity-100" : "opacity-0"
         }`}
       ></div>
@@ -598,7 +567,7 @@ export default function CardBattle() {
         <div className="flex flex-col items-center">
           <div className="flex gap-4 -mb-8 z-0 perspective-500">
             {oppHand.map((card, i) => (
-              <Card
+              <SingleCard
                 key={card.id}
                 data={card}
                 isFaceDown={true}
@@ -674,7 +643,7 @@ export default function CardBattle() {
           </div>
           <div className="flex gap-4 perspective-500">
             {userHand.map((card) => (
-              <Card
+              <SingleCard
                 key={card.id}
                 data={card}
                 onClick={() => handleCardSelect(card)}
@@ -769,7 +738,7 @@ export default function CardBattle() {
                     : ""
                 }`}
               >
-                <Card
+                <SingleCard
                   data={activeOppCard}
                   isFaceDown={animPhase === "ZOOM"}
                   status={
@@ -800,7 +769,7 @@ export default function CardBattle() {
                   {activeStat}
                 </span>
                 <span className="block skew-x-[12deg]">
-                  {activeOppCard.stats[activeStat]}
+                  {activeOppCard.state.pow}
                 </span>
               </div>
 
@@ -829,7 +798,7 @@ export default function CardBattle() {
                     : ""
                 }`}
               >
-                <Card
+                <SingleCard
                   data={activeUserCard}
                   status={
                     animPhase === "DESTROY" && battleResult === "LOSE"
@@ -859,7 +828,7 @@ export default function CardBattle() {
                   {activeStat}
                 </span>
                 <span className="block skew-x-[-12deg]">
-                  {activeUserCard.stats[activeStat]}
+                  {activeUserCard.state.pow}
                 </span>
               </div>
 

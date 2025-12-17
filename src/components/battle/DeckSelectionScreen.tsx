@@ -22,8 +22,8 @@ export default function DeckSelectionScreen({
 }: DeckSelectionScreenProps) {
   const isReady = deck.length === 3;
 
-  const totalAtk = deck.reduce((sum, card) => sum + card.atk, 0);
-  const totalHp = deck.reduce((sum, card) => sum + card.hp, 0);
+  const totalAtk = deck.reduce((sum, card) => sum + card.state.pow, 0);
+  const totalHp = deck.reduce((sum, card) => sum + card.state.def, 0);
   const totalPower = totalAtk + totalHp;
 
   return (
@@ -31,7 +31,7 @@ export default function DeckSelectionScreen({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-full flex flex-col relative pt-8"
+      className="w-full h-full flex flex-col justify-between relative pt-8 pb-24"
     >
       {/* Title */}
       <div className="text-center mb-6">
@@ -41,7 +41,7 @@ export default function DeckSelectionScreen({
         <div className="w-16 h-1 bg-[#C5A059] mx-auto mt-2 rounded-full" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-start gap-8 pb-20">
+      <div className="flex flex-col items-center justify-start gap-8 pb-20">
         {/* Stats Summary */}
         <div className="flex gap-8 text-[#2D3748] bg-white/50 backdrop-blur-md px-6 py-3 rounded-xl shadow-sm border border-white/20">
           <div className="flex flex-col items-center">
@@ -122,7 +122,7 @@ export default function DeckSelectionScreen({
                           />
                         </div>
                         <span className="text-[#1a2e2e] font-bold text-xs">
-                          {card.atk}
+                          {card.state.pow}
                         </span>
                       </div>
                       <div className="flex items-center gap-0.5">
@@ -135,7 +135,7 @@ export default function DeckSelectionScreen({
                           />
                         </div>
                         <span className="text-[#1a2e2e] font-bold text-xs">
-                          {card.hp}
+                          {card.state.def}
                         </span>
                       </div>
                     </div>
@@ -165,8 +165,8 @@ export default function DeckSelectionScreen({
       </div>
 
       {/* Action Buttons */}
-      <div className="absolute bottom-24 left-0 right-0 px-6 flex justify-center gap-4 z-20">
-        <motion.button
+      <div className="px-4 flex justify-center gap-4 z-20">
+        {/* <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onAutoForm}
           className="flex-1 max-w-[160px] py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-lg bg-[#4A5568] text-white hover:bg-[#2D3748]"
@@ -185,7 +185,25 @@ export default function DeckSelectionScreen({
           }`}
         >
           <span>Enter</span>
-        </motion.button>
+        </motion.button> */}
+        {/* Share Button (Ghost) */}
+        <button
+          onClick={onAutoForm}
+          className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider"
+        >
+          Auto-form
+        </button>
+
+        {/* Claim/Next Button (Primary) */}
+        <button
+          disabled={!isReady}
+          onClick={onStartBattle}
+          className="flex-2 bg-[#3E206D] text-[#FDB931] font-bold text-xl py-3 rounded-xl border-4 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer hover:brightness-110"
+        >
+          <span className="relative z-10">Enter</span>
+          {/* Sheen */}
+          <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
+        </button>
       </div>
     </motion.div>
   );

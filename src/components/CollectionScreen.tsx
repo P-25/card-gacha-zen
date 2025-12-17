@@ -46,8 +46,8 @@ export default function CollectionScreen({
 
     // 4. Sort
     result.sort((a, b) => {
-      const powerA = a.hp + a.atk;
-      const powerB = b.hp + b.atk;
+      const powerA = a.state.def + a.state.pow;
+      const powerB = b.state.def + b.state.pow;
       if (sortOrder === "desc") {
         return powerB - powerA;
       } else {

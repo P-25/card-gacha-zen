@@ -14,6 +14,7 @@ interface CardRevealProps {
 }
 
 export default function CardReveal({ onReset, results }: CardRevealProps) {
+  console.log(`Debug - results`, results);
   const [currentIndex, setCurrentIndex] = useState(0);
   const item = results[currentIndex];
 
@@ -119,7 +120,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
           </div>
 
           {/* Card Info */}
-          <div className="flex flex-col items-center gap-2 w-full">
+          <div className="flex flex-col items-center gap-2 w-full min-h-[110px]">
             {/* Name & Stats Row */}
             <div className="flex flex-col items-center justify-center gap-1 w-full">
               <h3 className="text-2xl font-bold text-[#2D2D2D] tracking-wide uppercase text-center drop-shadow-sm">
@@ -128,8 +129,9 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
 
               {isCard && (
                 <div className="flex justify-between items-center px-4 mb-1 text-[#1a2e2e] font-bold w-[80%] text-sm">
-                  <span>ATK: {cardItem.atk}</span>
-                  <span>HP: {cardItem.hp}</span>
+                  <span>POW: {cardItem.state.pow}</span>
+                  <span>SPD: {cardItem.state.spd}</span>
+                  <span>DEF: {cardItem.state.def}</span>
                   <span>Level: {cardItem.level}</span>
                 </div>
               )}

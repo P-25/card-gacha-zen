@@ -16,8 +16,11 @@ export interface Card extends GameItem {
   level: number;
   releaseDate: string;
   description: string;
-  hp: number;
-  atk: number;
+  state: {
+    pow: number;
+    spd: number;
+    def: number;
+  };
   tp?: number; // Total Power (calculated)
   experience: number;
   design_type: "Eternal" | "Hero" | "Landbound";

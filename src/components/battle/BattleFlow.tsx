@@ -16,6 +16,7 @@ import { RootState } from "@/store/store";
 import CardBattle from "./BattlePhaseNew";
 
 import DeckSelectionScreen from "./DeckSelectionScreen";
+import BattlePhase from "./BattlePhase";
 
 export type BattlePhaseType =
   | "DECK"
@@ -79,12 +80,32 @@ export default function BattleFlow({
   };
 
   const handleAutoForm = () => {
-    // Sort inventory by power (HP + ATK)
-    const sorted = [...inventory].sort((a, b) => {
-      return b.hp + b.atk - (a.hp + a.atk);
+    // 1. Filter for unique cards by ID (taking the highest power instance of each)
+    const uniqueCardsMap = new Map<string, Card>();
+
+    inventory.forEach((card) => {
+      const existing = uniqueCardsMap.get(card.id);
+      if (!existing) {
+        uniqueCardsMap.set(card.id, card);
+      } else {
+        // If we have a duplicate ID, keep the one with higher stats
+        if (
+          card.state.def + card.state.pow >
+          existing.state.def + existing.state.pow
+        ) {
+          uniqueCardsMap.set(card.id, card);
+        }
+      }
     });
 
-    // Take top 3
+    const uniqueInventory = Array.from(uniqueCardsMap.values());
+
+    // 2. Sort unique inventory by power (HP + ATK)
+    const sorted = uniqueInventory.sort((a, b) => {
+      return b.state.def + b.state.pow - (a.state.def + a.state.pow);
+    });
+
+    // 3. Take top 3
     const top3 = sorted.slice(0, 3);
 
     setPlayerDeck(top3);
@@ -104,6 +125,10 @@ export default function BattleFlow({
 
   const handleVersusComplete = () => {
     setPhase("BATTLE");
+  };
+
+  const handleBattleComplete = () => {
+    console.log(`Debug - aaaaaaaaaaaaaaaaaaa`);
   };
 
   const { level } = useSelector((state: RootState) => state.player);
@@ -143,7 +168,16 @@ export default function BattleFlow({
             onComplete={handleVersusComplete}
           />
         )}
-        {phase === "BATTLE" && <CardBattle />}
+        {phase === "BATTLE" && (
+          // <BattlePhase
+          //   key="battle"
+          //   playerDeck={playerDeck}
+          //   opponentInfo={opponentInfo}
+          //   opponentDeck={opponentDeck}
+          //   onComplete={handleBattleComplete}
+          // />
+          <CardBattle />
+        )}
         {phase === "RESULT" && (
           <ResultPhase
             key="result"

@@ -32,11 +32,18 @@ const CardItem = memo(
         whileTap={{ scale: 0.95 }}
         onClick={() => onToggle(card)}
         className={`aspect-[2/3] rounded-lg relative cursor-pointer transition-all duration-200 overflow-hidden ${
-          isSelected
-            ? "ring-4 ring-[#422462] opacity-50 grayscale"
-            : "shadow-md hover:shadow-lg"
+          isSelected ? "" : "shadow-md hover:shadow-lg"
         }`}
       >
+        {isSelected && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+            <div className="px-4 py-2 bg-black/60 border-2 border-white rounded-lg shadow-xl backdrop-blur-md transform scale-110">
+              <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md whitespace-nowrap">
+                IN USE
+              </span>
+            </div>
+          </div>
+        )}
         <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
           <div className="relative w-full h-full scale-[1.1] opacity-60">
             <Image
@@ -73,7 +80,9 @@ const CardItem = memo(
                 className="object-contain"
               />
             </div>
-            <span className="text-[#1a2e2e] font-bold text-lg">{card.atk}</span>
+            <span className="text-[#1a2e2e] font-bold text-lg">
+              {card.state.pow}
+            </span>
           </div>
           <div className="flex items-center">
             <div className="w-4 h-4 relative drop-shadow-sm">
@@ -84,7 +93,9 @@ const CardItem = memo(
                 className="object-contain"
               />
             </div>
-            <span className="text-[#1a2e2e] font-bold text-lg">{card.hp}</span>
+            <span className="text-[#1a2e2e] font-bold text-lg">
+              {card.state.def}
+            </span>
           </div>
         </div>
         <div
@@ -104,7 +115,16 @@ export default function SelectCardsPhase({
   onBack,
 }: SelectCardsPhaseProps) {
   const { inventory } = useSelector((state: RootState) => state.player);
-  const [selectedCards, setSelectedCards] = useState<Card[]>(initialDeck || []);
+  // Initialize with 3 slots, filling them with initialDeck or null
+  const [selectedCards, setSelectedCards] = useState<(Card | null)[]>(() => {
+    const slots = [null, null, null] as (Card | null)[];
+    if (initialDeck) {
+      initialDeck.forEach((card, i) => {
+        if (i < 3) slots[i] = card;
+      });
+    }
+    return slots;
+  });
 
   // Filter States
   const [visibleCount, setVisibleCount] = useState(24);
@@ -115,8 +135,8 @@ export default function SelectCardsPhase({
 
     // 4. Sort
     result.sort((a, b) => {
-      const powerA = a.hp + a.atk;
-      const powerB = b.hp + b.atk;
+      const powerA = a.state.def + a.state.pow;
+      const powerB = b.state.def + b.state.pow;
       return powerB - powerA;
     });
 
@@ -127,16 +147,20 @@ export default function SelectCardsPhase({
     card: Card,
     source: "list" | "slot" = "slot"
   ) => {
-    if (selectedCards.find((c) => c.id === card.id)) {
-      if (source === "slot") {
-        setSelectedCards(selectedCards.filter((c) => c.id !== card.id));
-      } else {
-        // If clicking from list, we also allow deselecting
-        setSelectedCards(selectedCards.filter((c) => c.id !== card.id));
-      }
+    const existingIndex = selectedCards.findIndex((c) => c?.id === card.id);
+
+    if (existingIndex !== -1) {
+      // Card is already selected, remove it from its specific slot
+      const newSlots = [...selectedCards];
+      newSlots[existingIndex] = null;
+      setSelectedCards(newSlots);
     } else {
-      if (selectedCards.length < 3) {
-        setSelectedCards([...selectedCards, card]);
+      // Card is not selected, find first empty slot
+      const emptyIndex = selectedCards.findIndex((c) => c === null);
+      if (emptyIndex !== -1) {
+        const newSlots = [...selectedCards];
+        newSlots[emptyIndex] = card;
+        setSelectedCards(newSlots);
       }
     }
   };
@@ -151,21 +175,22 @@ export default function SelectCardsPhase({
       }
     }
   };
+
   const visibleCards = useMemo(() => {
     return filteredCards.slice(0, visibleCount);
   }, [filteredCards, visibleCount]);
-
-  const totalAtk = selectedCards.reduce((sum, card) => sum + card.atk, 0);
-  const totalHp = selectedCards.reduce((sum, card) => sum + card.hp, 0);
+  const totalAtk = selectedCards.reduce(
+    (sum, card) => sum + (card?.state.pow || 0),
+    0
+  );
+  const totalHp = selectedCards.reduce(
+    (sum, card) => sum + (card?.state.def || 0),
+    0
+  );
 
   const totalPower = totalAtk + totalHp;
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="w-full h-full flex flex-col pt-8"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Title */}
       <div className="text-center mb-4">
         <h1 className="text-3xl font-bold text-[#2D3748] tracking-wider uppercase drop-shadow-sm">
@@ -178,7 +203,7 @@ export default function SelectCardsPhase({
       <div className="flex justify-center gap-3 py-6 px-4">
         {[0, 1, 2].map((index) => {
           const card = selectedCards[index];
-          const borderColor = getRarityBorderColor(card?.rarity || "common");
+          const borderColor = getRarityBorderColor(card?.rarity || "COMMON");
           return (
             <div
               key={index}
@@ -227,7 +252,7 @@ export default function SelectCardsPhase({
                         />
                       </div>
                       <span className="text-[#1a2e2e] font-semibold text-md">
-                        {card.atk}
+                        {card.state.pow}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -240,7 +265,7 @@ export default function SelectCardsPhase({
                         />
                       </div>
                       <span className="text-[#1a2e2e] font-semibold text-md">
-                        {card.hp}
+                        {card.state.def}
                       </span>
                     </div>
                   </div>
@@ -269,7 +294,7 @@ export default function SelectCardsPhase({
       >
         <div className="grid grid-cols-3 gap-3 p-4 pb-24 min-h-[400px] max-h-[510px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {visibleCards.map((card, index) => {
-            const isSelected = !!selectedCards.find((c) => c.id === card.id);
+            const isSelected = !!selectedCards.find((c) => c?.id === card.id);
             return (
               <CardItem
                 key={`${card.id}-${index}`}
@@ -288,10 +313,15 @@ export default function SelectCardsPhase({
       </div>
 
       {/* Confirm Button */}
-      <div className="absolute bottom-24 left-0 right-0 px-6 flex justify-center z-20">
+      <div className="absolute bottom-6 left-0 right-0 px-6 flex justify-center z-20">
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => onConfirm(selectedCards)}
+          onClick={() => {
+            const validDeck = selectedCards.filter(
+              (c): c is Card => c !== null
+            );
+            onConfirm(validDeck);
+          }}
           className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]`}
         >
           DONE
