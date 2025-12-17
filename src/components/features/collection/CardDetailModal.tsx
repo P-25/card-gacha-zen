@@ -228,7 +228,7 @@ export default function CardDetailModal({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative w-full max-w-md bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden pointer-events-auto"
+              className="relative w-full bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden pointer-events-auto"
               style={{ maxHeight: "90vh" }}
             >
               {/* Drag Handle */}
@@ -270,8 +270,9 @@ export default function CardDetailModal({
                   </h2>
 
                   <div className="flex flex-row justify-between gap-1 text-sm text-[#5F5A46] font-bold">
-                    <span>ATK: {activeCard.atk}</span>
-                    <span>HP: {activeCard.hp}</span>
+                    <span>POW: {activeCard.state.pow}</span>
+                    <span>SPD: {activeCard.state.spd}</span>
+                    <span>DEF: {activeCard.state.def}</span>
                     <span style={{ color: borderColor }}>
                       {activeCard.rarity}
                     </span>

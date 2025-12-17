@@ -1,11 +1,12 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { Quicksand } from "next/font/google";
+import { Luckiest_Guy } from "next/font/google";
 
-const quicksand = Quicksand({
+const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
-  variable: "--font-quicksand",
+  variable: "--font-luckiest-guy",
+  weight: "400",
   display: "swap",
 });
 
@@ -18,7 +19,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>EchoRift</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div className={`${quicksand.className} ${quicksand.variable}`}>
+      <div className={`${luckiestGuy.className} ${luckiestGuy.variable}`}>
         <Component {...pageProps} />
       </div>
     </ReduxProvider>

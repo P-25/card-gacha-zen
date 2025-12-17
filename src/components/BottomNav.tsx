@@ -49,7 +49,7 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
             >
               <div
                 className={`relative w-8 h-8 transition-all duration-300 ${
-                  isActive ? "scale-110" : "opacity-50 grayscale"
+                  isActive ? "scale-110" : "opacity-70 grayscale"
                 }`}
               >
                 <Image

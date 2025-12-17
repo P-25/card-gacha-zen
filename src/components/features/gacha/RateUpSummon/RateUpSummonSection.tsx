@@ -1,23 +1,21 @@
-"use client";
-
-import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import {
-  spendGems,
-  addCardToInventory,
-  addGold,
-} from "@/store/slices/playerSlice";
-import { updatePity } from "@/store/slices/pitySlice";
-import { performSummon } from "@/lib/gameLogic";
-import { Card, Resource } from "@/types/game";
 import FloatingParticles from "@/components/summon/FloatingParticles";
+import { Card, Resource } from "@/types/game";
 import MagicCircle from "./MagicCircle";
-import OfferingRateModal from "./OfferingRateModal";
 
 import summonsData from "@/config/summons.json";
+import { performSummon } from "@/lib/gameLogic";
+import { updatePity } from "@/store/slices/pitySlice";
+import {
+  addCardToInventory,
+  addGold,
+  spendGems,
+} from "@/store/slices/playerSlice";
+import { RootState } from "@/store/store";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 interface RateUpSummonSectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
@@ -29,10 +27,11 @@ export default function RateUpSummonSection({
   const [summonState, setSummonState] = useState<
     "idle" | "charging" | "summoning"
   >("idle");
-  const [isOfferingModalOpen, setIsOfferingModalOpen] = useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
+  const router = useRouter();
 
   const banner = summonsData[0];
 
@@ -114,7 +113,7 @@ export default function RateUpSummonSection({
       {/* Starburst Light Eruption (Rays) */}
       <motion.div
         id="whiteRayFlash"
-        className="absolute left-1/2 top-[20%] z-[100] w-20 h-20 rounded-full pointer-events-none"
+        className="absolute left-1/2 top-[20%] z-1000 w-20 h-20 rounded-full pointer-events-none"
         style={{
           x: "-50%",
           y: "-50%",
@@ -153,7 +152,7 @@ export default function RateUpSummonSection({
       <AnimatePresence mode="wait">
         <motion.div
           key={"content"}
-          className="w-full flex flex-col items-center justify-end px-6 gap-4 relative z-20"
+          className="w-full flex flex-col items-center justify-end px-6 gap-4 relative z-20 mt-4"
           animate={{
             opacity: summonState === "summoning" ? 0 : 1,
           }}
@@ -203,13 +202,13 @@ export default function RateUpSummonSection({
           </div>
 
           {/* PITY COUNTER */}
-          <div className="w-full max-w-sm bg-[#2D3748]/90 backdrop-blur-md rounded-xl p-4 border border-white/10 relative shadow-2xl">
+          <div className="w-full bg-[#2D3748]/90 backdrop-blur-md rounded-xl p-4 border border-white/10 relative shadow-2xl">
             <div className="flex justify-between items-center mb-2 relative z-10">
               <span className="text-[#E2E8F0] font-bold text-sm tracking-wide">
                 {banner.pity.targetRarity} Summon Support In Progress
               </span>
               <button
-                onClick={() => setIsOfferingModalOpen(true)}
+                onClick={() => router.push("/offering-rates")}
                 className="text-xs text-[#E2E8F0] border border-[#C5A059] rounded-full px-3 py-1 hover:bg-[#C5A059]/20 transition-colors"
               >
                 Drop Info
@@ -275,15 +274,22 @@ export default function RateUpSummonSection({
               </div>
 
               {/* Search Icon with Tooltip */}
-              <div className="relative group">
-                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors border border-white/10">
+              <div className="relative">
+                <button
+                  onClick={() => setIsTooltipOpen(!isTooltipOpen)}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors border border-white/10 ${
+                    isTooltipOpen
+                      ? "bg-white/20 text-white"
+                      : "bg-white/10 text-[#A0AEC0] hover:bg-white/20 hover:text-white"
+                  }`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="w-3.5 h-3.5 text-[#A0AEC0] group-hover:text-white transition-colors"
+                    className="w-3.5 h-3.5"
                   >
                     <path
                       strokeLinecap="round"
@@ -291,10 +297,16 @@ export default function RateUpSummonSection({
                       d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
                     />
                   </svg>
-                </div>
+                </button>
 
                 {/* Tooltip */}
-                <div className="absolute bottom-full right-0 mb-2 w-82 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                <div
+                  className={`absolute bottom-full right-0 mb-2 w-82 transition-opacity z-50 ${
+                    isTooltipOpen
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  }`}
+                >
                   <div className="bg-[#1A202C] text-[#E2E8F0] text-xs p-3 rounded-lg shadow-xl border border-white/10 leading-relaxed">
                     The rate increases after{" "}
                     <span className="text-[#FDB931] font-bold">
@@ -403,10 +415,6 @@ export default function RateUpSummonSection({
           </div>
         </motion.div>
       </AnimatePresence>
-      <OfferingRateModal
-        isOpen={isOfferingModalOpen}
-        onClose={() => setIsOfferingModalOpen(false)}
-      />
     </div>
   );
 }

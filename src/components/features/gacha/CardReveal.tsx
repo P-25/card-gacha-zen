@@ -75,7 +75,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
             </div>
 
             <motion.div
-              className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer shadow-2xl group border"
+              className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer shadow-2xl group"
               style={{
                 boxShadow: `0 10px 30px -10px ${borderColor}60, inset 0 0 0 4px ${borderColor}80`,
               }}
@@ -128,7 +128,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
               </h3>
 
               {isCard && (
-                <div className="flex justify-between items-center px-4 mb-1 text-[#1a2e2e] font-bold w-[80%] text-sm">
+                <div className="flex justify-between items-center px-4 mb-1 text-[#1a2e2e] font-bold w-[90%] text-md">
                   <span>POW: {cardItem.state.pow}</span>
                   <span>SPD: {cardItem.state.spd}</span>
                   <span>DEF: {cardItem.state.def}</span>
@@ -139,7 +139,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
 
             {/* Flavor Text */}
             {isCard ? (
-              <p className="text-sm font-semibold text-gray-600 italic text-center max-w-xs leading-relaxed line-clamp-2">
+              <p className="text-md font-semibold text-gray-600 italic text-center leading-relaxed line-clamp-2">
                 &quot;{cardItem.description}&quot;
               </p>
             ) : (
