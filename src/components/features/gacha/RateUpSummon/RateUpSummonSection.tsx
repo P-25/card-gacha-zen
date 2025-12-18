@@ -104,7 +104,10 @@ export default function RateUpSummonSection({
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center relative overflow-hidden">
+    <div
+      className="w-full flex flex-col items-center relative overflow-hidden pb-2"
+      id="rateupSummonSection"
+    >
       {/* BACKGROUND LAYERS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <FloatingParticles />
@@ -152,7 +155,7 @@ export default function RateUpSummonSection({
       <AnimatePresence mode="wait">
         <motion.div
           key={"content"}
-          className="w-full flex flex-col items-center justify-end px-6 gap-4 relative z-20 mt-4"
+          className="w-full flex flex-col items-center justify-end px-6 gap-4 relative z-20 mt-4 max-[400px]:mt-2"
           animate={{
             opacity: summonState === "summoning" ? 0 : 1,
           }}
@@ -204,7 +207,7 @@ export default function RateUpSummonSection({
           {/* PITY COUNTER */}
           <div className="w-full bg-[#2D3748]/90 backdrop-blur-md rounded-xl p-4 border border-white/10 relative shadow-2xl">
             <div className="flex justify-between items-center mb-2 relative z-10">
-              <span className="text-[#E2E8F0] font-bold text-sm tracking-wide">
+              <span className="text-[#E2E8F0] font-bold text-sm max-[400px]:text-[10px] tracking-wide">
                 {banner.pity.targetRarity} Summon Support In Progress
               </span>
               <button
@@ -330,7 +333,7 @@ export default function RateUpSummonSection({
               </div>
             </div>
 
-            <p className="text-center text-xs text-[#A0AEC0] font-medium tracking-wide">
+            <p className="text-center text-xs max-[400px]:text-[10px] text-[#A0AEC0] font-medium tracking-wide">
               Guaranteed{" "}
               <span className="text-[#FDB931] font-bold text-sm">
                 {banner.pity.targetRarity}
@@ -351,7 +354,7 @@ export default function RateUpSummonSection({
                   "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <span className="text-lg font-bold tracking-wider">
+              <span className="text-lg max-[400px]:text-sm font-bold tracking-wider">
                 SUMMON x1
               </span>
               <div className="flex items-center gap-1">
@@ -363,7 +366,7 @@ export default function RateUpSummonSection({
                     className="object-contain"
                   />
                 </div>
-                <span className="text-[#1a2e2e] font-bold text-md">
+                <span className="text-[#1a2e2e] font-bold text-md max-[400px]:text-xs ">
                   x{banner.singlePrice.toLocaleString()}
                 </span>
               </div>
@@ -380,7 +383,7 @@ export default function RateUpSummonSection({
                   "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <span className="text-lg font-bold tracking-wider relative z-10">
+              <span className="text-lg max-[400px]:text-sm  font-bold tracking-wider relative z-10">
                 SUMMON x10
               </span>
 
@@ -393,7 +396,7 @@ export default function RateUpSummonSection({
                     className="object-contain"
                   />
                 </div>
-                <span className="text-white font-bold text-md">
+                <span className="text-white font-bold text-md max-[400px]:text-xs ">
                   x{banner.multiPrice.toLocaleString()}
                 </span>
               </div>

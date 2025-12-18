@@ -9,7 +9,7 @@ export default function Gems() {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-6 h-6 relative">
+      <div className="w-6 h-6 relative max-[400px]:w-5 max-[400px]:h-5">
         <Image
           src="/assets/icons/gem.webp"
           alt="Diamond"
@@ -17,7 +17,7 @@ export default function Gems() {
           className="object-contain"
         />
       </div>
-      <span className="text-[#1a2e2e] font-medium text-lg">
+      <span className="text-[#1a2e2e] font-medium text-lg max-[400px]:text-sm">
         {gems.toLocaleString()}
       </span>
     </div>
