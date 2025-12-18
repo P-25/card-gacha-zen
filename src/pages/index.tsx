@@ -50,6 +50,7 @@ export default function GamePage() {
         <GachaScreen
           resources={resources}
           onSelectionModeChange={setIsGachaSelectionMode}
+          onNavigate={navigateTo}
         />
       )}
       {!isGlobalLoading && appState === "battle" && (

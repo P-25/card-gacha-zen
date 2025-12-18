@@ -161,6 +161,9 @@ export default function RateUpSummonSection({
           }}
           transition={{ duration: 0.5 }}
         >
+          <div>
+            <h2 className="text-[#3E206D] font-bold text-xl">Regular Summon</h2>
+          </div>
           {/* Central Portal Container */}
           <div className="relative w-full max-w-md aspect-square flex items-center justify-center mb-4">
             <div className="w-full h-full" id="MagicCircle">
@@ -207,14 +210,19 @@ export default function RateUpSummonSection({
           {/* PITY COUNTER */}
           <div className="w-full bg-[#2D3748]/90 backdrop-blur-md rounded-xl p-4 border border-white/10 relative shadow-2xl">
             <div className="flex justify-between items-center mb-2 relative z-10">
-              <span className="text-[#E2E8F0] font-bold text-sm max-[400px]:text-[10px] tracking-wide">
-                {banner.pity.targetRarity} Summon Support In Progress
+              <span className="text-[#E2E8F0] font-bold text-sm tracking-wide">
+                {banner.pity.targetRarity} Rift Meter
               </span>
               <button
                 onClick={() => router.push("/offering-rates")}
-                className="text-xs text-[#E2E8F0] border border-[#C5A059] rounded-full px-3 py-1 hover:bg-[#C5A059]/20 transition-colors"
+                className="px-2 py-1 hover:bg-[#C5A059]/20 transition-colors"
               >
-                Drop Info
+                <Image
+                  src="/assets/icons/info-white.webp"
+                  alt="Offerings"
+                  width={20}
+                  height={20}
+                />
               </button>
             </div>
 
@@ -256,10 +264,41 @@ export default function RateUpSummonSection({
                     transition={{ duration: 1, ease: "easeOut" }}
                   />
                   {/* Text Overlay on Bar */}
-                  <div className="absolute inset-0 flex items-center justify-center z-10 ">
+                  <div
+                    onClick={() => setIsTooltipOpen(!isTooltipOpen)}
+                    className="absolute inset-0 flex items-center justify-center z-10 "
+                  >
                     <span className="text-[10px] font-bold text-white drop-shadow-md tracking-wider">
                       {pityCount} / {maxPity}
                     </span>
+                  </div>
+
+                  <div
+                    className={`absolute bottom-full right-0 mb-2 w-82 transition-opacity z-50 ${
+                      isTooltipOpen
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    <div className="bg-[#1A202C] text-[#E2E8F0] text-xs p-3 rounded-lg shadow-xl border border-white/10 leading-relaxed">
+                      The rate increases after{" "}
+                      <span className="text-[#FDB931] font-bold">
+                        {banner.pity.softPity}
+                      </span>{" "}
+                      summons and an{" "}
+                      <span className="text-[#FDB931] font-bold">
+                        {banner.pity.targetRarity}
+                      </span>{" "}
+                      is guaranteed to appear after{" "}
+                      <span className="text-[#FDB931] font-bold">
+                        {banner.pity.hardPity}
+                      </span>{" "}
+                      summons. Summon Support will reset when you obtain an{" "}
+                      <span className="text-[#FDB931] font-bold">
+                        {banner.pity.targetRarity}
+                      </span>
+                      .
+                    </div>
                   </div>
 
                   {/* Shine effect on bar */}
@@ -275,65 +314,9 @@ export default function RateUpSummonSection({
                   />
                 </div>
               </div>
-
-              {/* Search Icon with Tooltip */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsTooltipOpen(!isTooltipOpen)}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors border border-white/10 ${
-                    isTooltipOpen
-                      ? "bg-white/20 text-white"
-                      : "bg-white/10 text-[#A0AEC0] hover:bg-white/20 hover:text-white"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-3.5 h-3.5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                    />
-                  </svg>
-                </button>
-
-                {/* Tooltip */}
-                <div
-                  className={`absolute bottom-full right-0 mb-2 w-82 transition-opacity z-50 ${
-                    isTooltipOpen
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  }`}
-                >
-                  <div className="bg-[#1A202C] text-[#E2E8F0] text-xs p-3 rounded-lg shadow-xl border border-white/10 leading-relaxed">
-                    The rate increases after{" "}
-                    <span className="text-[#FDB931] font-bold">
-                      {banner.pity.softPity}
-                    </span>{" "}
-                    summons and an{" "}
-                    <span className="text-[#FDB931] font-bold">
-                      {banner.pity.targetRarity}
-                    </span>{" "}
-                    is guaranteed to appear after{" "}
-                    <span className="text-[#FDB931] font-bold">
-                      {banner.pity.hardPity}
-                    </span>{" "}
-                    summons. Summon Support will reset when you obtain an{" "}
-                    <span className="text-[#FDB931] font-bold">
-                      {banner.pity.targetRarity}
-                    </span>
-                    .
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <p className="text-center text-xs max-[400px]:text-[10px] text-[#A0AEC0] font-medium tracking-wide">
+            <p className="text-xs max-[400px]:text-[10px] text-[#A0AEC0] font-medium tracking-wide">
               Guaranteed{" "}
               <span className="text-[#FDB931] font-bold text-sm">
                 {banner.pity.targetRarity}
@@ -383,7 +366,7 @@ export default function RateUpSummonSection({
                   "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <span className="text-lg max-[400px]:text-sm  font-bold tracking-wider relative z-10">
+              <span className="text-lg max-[400px]:text-sm text-[#FDB931] font-bold tracking-wider relative z-10">
                 SUMMON x10
               </span>
 
@@ -396,14 +379,14 @@ export default function RateUpSummonSection({
                     className="object-contain"
                   />
                 </div>
-                <span className="text-white font-bold text-md max-[400px]:text-xs ">
+                <span className="text-[#FDB931] font-bold text-md max-[400px]:text-xs ">
                   x{banner.multiPrice.toLocaleString()}
                 </span>
               </div>
 
               {/* Best Value Ribbon */}
-              <div className="absolute top-0 left-0 overflow-hidden w-24 h-24 pointer-events-none">
-                <div className="absolute top-[10px] left-[-28px] w-[100px] h-[20px] bg-gradient-to-r from-[#8B0000] to-[#A52A2A] text-white text-[8px] font-bold flex items-center justify-center -rotate-45 shadow-md border-y border-[#FFD700] tracking-wider z-20">
+              <div className="absolute top-0 left-0 overflow-hidden w-15 h-15 pointer-events-none">
+                <div className="absolute top-[7px] left-[-18px] w-[70px] h-[20px] bg-gradient-to-r from-[#8B0000] to-[#A52A2A] text-white text-[6px] font-bold flex items-center justify-center -rotate-45 shadow-md border-y border-[#FFD700] tracking-wider z-20">
                   BEST VALUE
                 </div>
               </div>

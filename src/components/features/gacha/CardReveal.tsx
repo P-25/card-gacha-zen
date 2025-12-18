@@ -168,10 +168,19 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
             transition={{ delay: 0.5 }}
             className="w-full flex gap-4 mt-2"
           >
-            {/* Share Button (Ghost) */}
-            <button className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider">
-              SHARE
-            </button>
+            {/* Share / Skip Button */}
+            {results.length > 1 && currentIndex < results.length - 1 ? (
+              <button
+                onClick={onReset}
+                className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider"
+              >
+                SKIP ALL
+              </button>
+            ) : (
+              <button className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider">
+                SHARE
+              </button>
+            )}
 
             {/* Claim/Next Button (Primary) */}
             <button

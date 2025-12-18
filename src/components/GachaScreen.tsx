@@ -3,27 +3,30 @@
 import CurrencyHeader from "@/components/features/gacha/CurrencyHeader";
 import GachaRevealView from "@/components/features/gacha/GachaRevealView";
 import GachaSelection from "@/components/features/gacha/GachaSelection";
-import { GameResources } from "@/hooks/useGameState";
+import SummonResults from "@/components/features/gacha/SummonResults";
+import { AppState, GameResources } from "@/hooks/useGameState";
 import { useState } from "react";
 
 interface GachaScreenProps {
   resources: GameResources;
   onSelectionModeChange: (isSelection: boolean) => void;
+  onNavigate: (screen: AppState) => void;
 }
 
 import { Card, Resource } from "@/types/game";
 import TopBar from "./features/home/TopBar";
+import BackButtonTopBar from "./common/BackButtonTopBar";
 
 // ... imports
 
 export default function GachaScreen({
   resources,
   onSelectionModeChange,
+  onNavigate,
 }: GachaScreenProps) {
   const [showCard, setShowCard] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [summonResults, setSummonResults] = useState<(Card | Resource)[]>([]);
-
-  // ... useEffect
 
   const handleSummon = (
     type: "gem" | "gold",
@@ -54,23 +57,37 @@ export default function GachaScreen({
 
   const handleReset = () => {
     setShowCard(false);
+    setShowResults(true);
+  };
+
+  const handleBackFromResults = () => {
+    setShowResults(false);
     onSelectionModeChange(true);
+  };
+
+  const handleBackOnGacha = () => {
+    onNavigate("home");
   };
 
   // 2. Card Reveal Overlay (Highest Priority)
   if (showCard) {
     return (
       <>
-        <TopBar title="Card" />
         <GachaRevealView onReset={handleReset} results={summonResults} />
       </>
+    );
+  }
+
+  if (showResults) {
+    return (
+      <SummonResults results={summonResults} onBack={handleBackFromResults} />
     );
   }
 
   // 5. Selection View (Default)
   return (
     <>
-      <TopBar title="Summon" />
+      <BackButtonTopBar onBack={handleBackOnGacha} />
       <GachaSelection onSummon={handleSummon} />
     </>
   );

@@ -14,7 +14,7 @@ export default function GachaRevealView({
   results,
 }: GachaRevealViewProps) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center pb-24">
+    <div className="w-full h-full flex flex-col items-center justify-center">
       <CardReveal onReset={onReset} results={results} />
     </div>
   );
