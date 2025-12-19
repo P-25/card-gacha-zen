@@ -40,13 +40,20 @@ export default function MatchmakingPhase({
       </motion.div>
 
       <motion.div
-        key={"loading"}
-        // initial={{ opacity: 0 }}
-        // animate={{ opacity: [0.5, 1, 0.5] }}
-        // transition={{ duration: 2, repeat: Infinity }}
-        className="mt-8 text-[#3C595E] font-bold text-xl tracking-widest uppercase font-display text-center px-4"
+        key={"loading-text"}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mt-8 flex flex-col items-center gap-2"
       >
-        Matchmaking...
+        <h2 className="text-[#3C595E] font-bold text-xl tracking-[0.3em] uppercase font-display text-center drop-shadow-lg">
+          Matchmaking
+        </h2>
+        <motion.div
+          className="h-1 w-24 bg-gradient-to-r from-transparent via-[#3C595E] to-transparent"
+          animate={{ scaleX: [0, 1, 0], opacity: [0, 1, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
       </motion.div>
     </div>
   );

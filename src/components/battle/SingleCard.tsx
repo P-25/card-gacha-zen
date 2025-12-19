@@ -1,4 +1,4 @@
-import { getStrokeImage } from "@/lib/rarityStyles";
+import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 import { Card } from "@/types/game";
 import Image from "next/image";
 
@@ -11,17 +11,8 @@ interface CardProps {
   className?: string;
   status?: "WINNER" | "LOSER" | "NEUTRAL";
   isCharging?: boolean;
+  activeState?: string;
 }
-
-const CARD_BACK_PATTERN = `
-<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100" height="100" fill="#1f2937"/>
-  <path d="M0 0 L50 50 L0 100" fill="none" stroke="#374151" stroke-width="2"/>
-  <path d="M100 0 L50 50 L100 100" fill="none" stroke="#374151" stroke-width="2"/>
-  <circle cx="50" cy="50" r="20" stroke="#4b5563" stroke-width="2" fill="none"/>
-  <path d="M50 20 L50 80 M20 50 L80 50" stroke="#374151" stroke-width="1"/>
-</svg>
-`;
 
 const CRACK_OVERLAY = `
 <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,12 +29,15 @@ export default function SingleCard({
   className = "",
   status = "NEUTRAL",
   isCharging,
+  activeState,
 }: CardProps) {
+  const borderColor = getRarityBorderColor(data.rarity || "common");
+
   return (
     <div
       onClick={!disabled && onClick ? onClick : undefined}
       className={`
-        relative w-28 h-44 rounded-xl shadow-2xl transition-all duration-300 transform preserve-3d
+        relative w-1/3 aspect-2/3 rounded-md shadow-md transition-all duration-300 transform preserve-3d
         ${
           disabled
             ? "cursor-default"
@@ -54,6 +48,10 @@ export default function SingleCard({
       `}
       style={{ perspective: "1000px" }}
     >
+      <div
+        className="absolute inset-0 z-30 pointer-events-none rounded-lg"
+        style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
+      />
       {/* Charging Aura */}
       {isCharging && (
         <div
@@ -82,7 +80,7 @@ export default function SingleCard({
               src={"./assets/Card_Art/back/card_001.webp"}
               alt={data.name}
               fill
-              className="object-cover"
+              className="object-cover no-global-filter"
             />
           </div>
         ) : (
@@ -94,38 +92,57 @@ export default function SingleCard({
             </div>
 
             {/* Stats Area */}
-            <div className="absolute h-16 w-full bottom-0 bg-black bg-opacity-90 backdrop-blur-md p-1.5 flex flex-col justify-between border-t border-white border-opacity-20 z-10">
-              <div className="text-[10px] font-black text-white truncate text-center uppercase tracking-widest bg-gradient-to-r from-transparent via-gray-800 to-transparent py-0.5 mb-1 border-b border-gray-800">
-                {data.name}
-              </div>
-              <div className="flex justify-between items-end text-[9px] text-gray-400 font-mono">
-                <div
-                  className={`flex flex-col items-center flex-1 ${
-                    data.state.pow > 80 ? "text-red-400" : ""
-                  }`}
-                >
-                  <span>ATK</span>
-                  <span className="font-bold text-white text-xs">
+            <div className="absolute w-full bottom-0 bg-gradient-to-t from-black via-black/80 to-black/60 backdrop-blur-md p-1.5 flex flex-col justify-between z-10">
+              <div className="flex justify-between items-end text-[9px] font-mono">
+                <div className={`flex flex-col items-center flex-1`}>
+                  <span
+                    className={`${
+                      activeState === "POW" ? "text-[#913833]" : "text-gray-400"
+                    }`}
+                  >
+                    POW
+                  </span>
+                  <span
+                    className={`font-bold text-xs ${
+                      activeState === "POW" ? "text-[#913833]" : "text-white"
+                    }`}
+                  >
                     {data.state.pow}
                   </span>
                 </div>
                 <div
-                  className={`flex flex-col items-center flex-1 border-l border-gray-800 ${
-                    data.state.def > 80 ? "text-yellow-400" : ""
-                  }`}
+                  className={`flex flex-col items-center flex-1 border-l border-gray-800`}
                 >
-                  <span>HP</span>
-                  <span className="font-bold text-white text-xs">
-                    {data.state.def}
+                  <span
+                    className={`${
+                      activeState === "SPD" ? "text-[#8a46c2]" : "text-gray-400"
+                    }`}
+                  >
+                    SPD
+                  </span>
+                  <span
+                    className={`font-bold text-xs ${
+                      activeState === "SPD" ? "text-[#8a46c2]" : "text-white"
+                    }`}
+                  >
+                    {data.state.spd}
                   </span>
                 </div>
                 <div
-                  className={`flex flex-col items-center flex-1 border-l border-gray-800 ${
-                    data.state.def > 80 ? "text-blue-400" : ""
-                  }`}
+                  className={`flex flex-col items-center flex-1 border-l border-gray-800`}
                 >
-                  <span>HP</span>
-                  <span className="font-bold text-white text-xs">
+                  <span
+                    className={`${
+                      activeState === "DEF" ? "text-[#335991]" : "text-gray-400"
+                    }`}
+                  >
+                    DEF
+                  </span>
+                  <span
+                    className={`font-bold text-xs ${
+                      activeState === "DEF" ? "text-[#335991]" : "text-white"
+                    }`}
+                  >
                     {data.state.def}
                   </span>
                 </div>

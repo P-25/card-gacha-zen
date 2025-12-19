@@ -113,7 +113,7 @@ export default function VersusPhase({
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex flex-col gap-1 max-w-[60%]"
+              className="flex flex-col gap-1 max-w-[80%]"
             >
               <Profile onClick={() => console.log(`profile clicked`)} />
               <h3 className="uppercase font-bold text-[#2D3748] text-lg">
@@ -125,33 +125,57 @@ export default function VersusPhase({
                   const borderColor = getRarityBorderColor(card.rarity);
                   return (
                     <div
-                      key={i}
-                      className="w-18 h-24 bg-white/60 rounded overflow-hidden relative"
-                      style={{
-                        boxShadow: `inset 0 0 0 4px ${borderColor}`,
-                      }}
+                      className="w-1/3 aspect-2/3 relative"
+                      key={`${card.id}-${i}`}
                     >
-                      <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
-                        <div className="relative w-full h-full scale-[1.1] opacity-60">
+                      {/* Background Effect */}
+                      <div className="absolute inset-0 z-0 opacity-80 flex items-center justify-center">
+                        <div className="relative w-full h-full scale-[1.2] opacity-60">
                           <Image
                             src={getStrokeImage(card.rarity)}
                             alt="brush stroke"
                             fill
                             className="object-contain no-global-filter"
-                            sizes="(max-width: 768px) 50vw, 300px"
                           />
                         </div>
                       </div>
-                      <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
+
+                      {/* Card Image */}
+                      <div className="absolute inset-1 z-10 rounded-lg overflow-hidden scale-[0.9]">
                         <Image
                           src={card.image}
                           alt={card.name}
                           fill
-                          sizes="(max-width: 768px) 33vw, 200px"
-                          loading="lazy"
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="object-cover"
                         />
                       </div>
+
+                      {/* Level Badge */}
+                      <div className="absolute top-0.5 left-0.5 bg-black/60 backdrop-blur-md text-white text-[6px] font-bold px-1 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
+                        Lv.{card.level}
+                      </div>
+
+                      {/* Stats Footer */}
+                      <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 px-1 pb-2 pt-1 divide-x divide-gray-400">
+                        <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                          <span className="uppercase text-[6px]">POW</span>
+                          <span>{card.state.pow}</span>
+                        </div>
+                        <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                          <span className="uppercase text-[6px]">SPD</span>
+                          <span>{card.state.spd}</span>
+                        </div>
+                        <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                          <span className="uppercase text-[6px]">DEF</span>
+                          <span>{card.state.def}</span>
+                        </div>
+                      </div>
+
+                      {/* Rarity Border */}
+                      <div
+                        className="absolute inset-0 z-30 pointer-events-none rounded-md"
+                        style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
+                      />
                     </div>
                   );
                 })}
@@ -162,10 +186,10 @@ export default function VersusPhase({
           {/* Player 2 Content */}
           <div className="absolute inset-0 z-20 p-8 flex flex-col justify-end items-end pointer-events-none">
             <motion.div
-              initial={{ x: 100, opacity: 0 }}
+              initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex flex-col gap-2 items-end max-w-[60%]"
+              className="flex flex-col gap-1 w-full max-w-[80%] items-end"
             >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#8FA89B] to-[#7A9286] border-2 border-white flex items-center justify-center shadow-md cursor-pointer overflow-hidden relative">
                 <Image
@@ -175,43 +199,29 @@ export default function VersusPhase({
                   className="object-cover"
                 />
               </div>
-              <h3 className="uppercase font-bold text-[#2D3748] text-lg ">
+              <h3 className="uppercase font-bold text-[#2D3748] text-lg">
                 {opponentInfo.name}
               </h3>
-
               {/* Tiny Deck Preview */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 w-full">
                 {opponentDeck.map((card, i) => {
                   const borderColor = getRarityBorderColor(card.rarity);
                   return (
                     <div
-                      key={i}
-                      className="w-18 h-24 bg-white/60 rounded overflow-hidden relative"
-                      style={{
-                        boxShadow: `inset 0 0 0 4px ${borderColor}`,
-                      }}
+                      className="w-1/3 aspect-2/3 relative"
+                      key={`${card.id}-${i}`}
                     >
-                      <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
-                        <div className="relative w-full h-full scale-[1.1] opacity-60">
-                          <Image
-                            src={getStrokeImage(card.rarity)}
-                            alt="brush stroke"
-                            fill
-                            className="object-contain no-global-filter"
-                            sizes="(max-width: 768px) 50vw, 300px"
-                          />
-                        </div>
-                      </div>
-                      <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
-                        <Image
-                          src={"/assets/icons/battle.webp"}
-                          alt={"Card-info"}
-                          fill
-                          sizes="(max-width: 768px) 33vw, 200px"
-                          loading="lazy"
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      </div>
+                      <Image
+                        src={"./assets/Card_Art/back/card_001.webp"}
+                        alt={card.name}
+                        fill
+                        className="object-cover"
+                      />
+                      {/* Rarity Border */}
+                      <div
+                        className="absolute inset-0 z-30 pointer-events-none rounded-md"
+                        style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
+                      />
                     </div>
                   );
                 })}
@@ -252,17 +262,11 @@ const VersusBadge = () => (
           className="no-global-filter"
         />
       </div>
-      <div className="absolute inset-1 z-10 flex items-center justify-center">
-        <h2
-          className="text-4xl font-black tracking-widest skew-x-[12deg] text-center mt-[-10px]"
-          style={{ fontFamily: "serif" }}
-        >
+      <div className="absolute inset-1 z-10 flex items-center justify-center ml-[4px]">
+        <h2 className="text-[#E7DBD1] text-5xl font-black tracking-widest skew-x-[-6deg] text-center mt-[-10px]">
           V
         </h2>
-        <h2
-          className="text-4xl font-black tracking-widest skew-x-[-12deg] text-center ml-[-10px]"
-          style={{ fontFamily: "serif" }}
-        >
+        <h2 className="text-[#F9F8EB] text-5xl font-black tracking-widest skew-x-[-14deg] text-center ml-[-5px]">
           S
         </h2>
       </div>

@@ -1,6 +1,8 @@
 import { Card } from "@/types/game";
 import React, { useEffect, useState } from "react";
 import SingleCard from "./SingleCard";
+import Image from "next/image";
+import { motion } from "framer-motion";
 // import {
 //   Sparkles,
 //   Skull,
@@ -15,37 +17,11 @@ import SingleCard from "./SingleCard";
 
 // --- Types & Interfaces ---
 
-type StatType = "POW" | "SPD" | "HP";
-
-interface Stats {
-  POW: number;
-  SPD: number;
-  HP: number;
-}
-
-interface Wrestler {
-  id: number;
-  name: string;
-  color: string;
-  stats: Stats;
-  icon: React.ReactNode;
-  used?: boolean;
-}
+type StatType = "POW" | "SPD" | "DEF";
 
 interface PlayerProfile {
   name: string;
   avatar: string;
-}
-
-interface CardProps {
-  data: Wrestler;
-  isOpponent?: boolean;
-  isFaceDown?: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-  className?: string;
-  status?: "WINNER" | "LOSER" | "NEUTRAL";
-  isCharging?: boolean;
 }
 
 type GameState = "INIT" | "SELECTION" | "BATTLE" | "RESOLVE" | "END";
@@ -262,31 +238,42 @@ const OPPONENT_DECK: Card[] = [
   },
 ];
 
-const STAT_TYPES: StatType[] = ["POW", "HP"];
+const STAT_TYPES: StatType[] = ["POW", "SPD", "DEF"];
 
 // --- Components ---
 
 // --- Main App ---
 
-export default function CardBattle() {
+interface CardBattleProps {
+  playerDeck?: Card[];
+  opponentDeck?: Card[];
+}
+
+export default function CardBattle({
+  playerDeck = [],
+  opponentDeck = [],
+}: CardBattleProps) {
   // Game State
   const [gameState, setGameState] = useState<GameState>("INIT");
-
-  // Stat Reveal Logic
-  const [activeStat, setActiveStat] = useState<StatType>("POW");
-  const [displayStat, setDisplayStat] = useState<StatType>("POW");
-  const [isStatRevealing, setIsStatRevealing] = useState(true);
-
-  const [userHand, setUserHand] = useState<Card[]>([]);
-  const [oppHand, setOppHand] = useState<Card[]>([]);
-  const [userScore, setUserScore] = useState<number>(0);
-  const [oppScore, setOppScore] = useState<number>(0);
 
   // Battle State
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [oppCardId, setOppCardId] = useState<string | null>(null);
   const [battleResult, setBattleResult] = useState<BattleResult>(null);
   const [animPhase, setAnimPhase] = useState<AnimPhase>("IDLE");
+
+  // Game Logic State
+  const [userHand, setUserHand] = useState<(Card | null)[]>([]);
+  const [oppHand, setOppHand] = useState<(Card | null)[]>([]);
+  const [userScore, setUserScore] = useState<number>(0);
+  const [oppScore, setOppScore] = useState<number>(0);
+  const [round, setRound] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(20);
+
+  // Stat Reveal Logic
+  const [activeStat, setActiveStat] = useState<StatType>("POW");
+  const [displayStat, setDisplayStat] = useState<StatType>("POW");
+  const [isStatRevealing, setIsStatRevealing] = useState(true);
 
   // Visual Effects
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -298,10 +285,11 @@ export default function CardBattle() {
   }, []);
 
   const startNewGame = () => {
-    setUserHand(PLAYER_DECK);
-    setOppHand(OPPONENT_DECK);
+    setUserHand(playerDeck.length > 0 ? playerDeck : PLAYER_DECK);
+    setOppHand(opponentDeck.length > 0 ? opponentDeck : OPPONENT_DECK);
     setUserScore(0);
     setOppScore(0);
+    setRound(0);
     startTurn();
   };
 
@@ -313,6 +301,8 @@ export default function CardBattle() {
     setAnimPhase("IDLE");
     setParticles([]);
     setShockwaves([]);
+    setRound((prev) => prev + 1);
+    setTimeLeft(20);
 
     // Start Stat Reveal Animation
     setIsStatRevealing(true);
@@ -338,6 +328,28 @@ export default function CardBattle() {
       }
     }, intervalTime);
   };
+
+  // Timer & Auto-Picker Logic
+  useEffect(() => {
+    if (gameState !== "SELECTION" || isStatRevealing) return;
+
+    if (timeLeft <= 0) {
+      // Auto-pick
+      const validCards = userHand.filter((c): c is Card => c !== null);
+      if (validCards.length > 0) {
+        const randomCard =
+          validCards[Math.floor(Math.random() * validCards.length)];
+        handleCardSelect(randomCard);
+      }
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState, isStatRevealing, timeLeft, userHand]);
 
   const spawnVisuals = () => {
     // 1. Particles
@@ -371,7 +383,9 @@ export default function CardBattle() {
     setGameState("BATTLE");
 
     // AI Logic
-    const randomOppCard = oppHand[Math.floor(Math.random() * oppHand.length)];
+    const validOppCards = oppHand.filter((c): c is Card => c !== null);
+    const randomOppCard =
+      validOppCards[Math.floor(Math.random() * validOppCards.length)];
     setOppCardId(randomOppCard.id);
 
     // Start Animation Sequence
@@ -379,8 +393,12 @@ export default function CardBattle() {
   };
 
   const runBattleSequence = (uCard: Card, oCard: Card) => {
-    const uStat = uCard.state.pow;
-    const oStat = oCard.state.pow;
+    // Use the active stat determined at the start of the turn
+    const uStat =
+      uCard.state[activeStat.toLowerCase() as keyof typeof uCard.state];
+    const oStat =
+      oCard.state[activeStat.toLowerCase() as keyof typeof oCard.state];
+
     let result: BattleResult = "DRAW";
     if (uStat > oStat) result = "WIN";
     if (uStat < oStat) result = "LOSE";
@@ -413,24 +431,31 @@ export default function CardBattle() {
       if (result === "LOSE") setOppScore((prev) => prev + 1);
     }, 4000);
 
-    // 5500ms: Cleanup
+    // 7000ms: Cleanup (Extended for Winner Glory)
     setTimeout(() => {
-      setUserHand((prev) => prev.filter((c) => c.id !== uCard.id));
-      setOppHand((prev) => prev.filter((c) => c.id !== oCard.id));
+      setUserHand((prev) => prev.map((c) => (c?.id === uCard.id ? null : c)));
+      setOppHand((prev) => prev.map((c) => (c?.id === oCard.id ? null : c)));
+
+      // Check remaining cards (count non-nulls)
+      const remainingCount = userHand.filter((c) => c !== null).length;
 
       // Dramatic Exit if it's the last turn
-      if (userHand.length <= 1) {
+      if (remainingCount <= 1) {
         setAnimPhase("FINALE"); // Trigger Finale Phase
         // Wait for finale animation before showing END screen
         setTimeout(() => setGameState("END"), 1800);
       } else {
         startTurn();
       }
-    }, 5500);
+    }, 7000);
   };
 
-  const activeUserCard = userHand.find((c) => c.id === selectedCardId);
-  const activeOppCard = oppHand.find((c) => c.id === oppCardId);
+  const activeUserCard = userHand.find((c) => c?.id === selectedCardId) as
+    | Card
+    | undefined;
+  const activeOppCard = oppHand.find((c) => c?.id === oppCardId) as
+    | Card
+    | undefined;
 
   // Position Logic
   const getOpponentPositionClass = () => {
@@ -465,8 +490,10 @@ export default function CardBattle() {
     // DESTROY Phase
     if (animPhase === "DESTROY") {
       if (battleResult === "LOSE")
-        return "bottom-[50%] left-1/2 -translate-x-1/2 scale-100 opacity-0 duration-1000";
-      return "top-[15%] left-1/2 -translate-x-1/2 scale-150 opacity-0 duration-1000";
+        return "bottom-[50%] left-1/2 -translate-x-1/2 scale-100 opacity-0 duration-1000 pointer-events-none";
+      if (battleResult === "WIN")
+        return "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-150 z-[70] duration-500"; // Winner Scales Up & Centers
+      return base; // DRAW
     }
 
     // FINALE Phase
@@ -512,8 +539,10 @@ export default function CardBattle() {
     // DESTROY Phase
     if (animPhase === "DESTROY") {
       if (battleResult === "WIN")
-        return "bottom-[50%] scale-100 opacity-0 duration-1000";
-      return "bottom-[15%] scale-150 opacity-0 duration-1000";
+        return "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-150 z-[70] duration-500"; // Winner Scales Up & Centers
+      if (battleResult === "LOSE")
+        return "bottom-[15%] scale-100 opacity-0 duration-1000 pointer-events-none";
+      return base; // DRAW
     }
 
     // FINALE Phase
@@ -565,30 +594,43 @@ export default function CardBattle() {
       >
         {/* Opponent Hand */}
         <div className="flex flex-col items-center">
-          <div className="flex gap-4 -mb-8 z-0 perspective-500">
-            {oppHand.map((card, i) => (
-              <SingleCard
-                key={card.id}
-                data={card}
-                isFaceDown={true}
-                disabled
-                className="transform hover:-translate-y-2 transition-transform duration-300"
-              />
-            ))}
+          <div className="flex gap-4 -mb-8 z-0 perspective-500 w-full px-4">
+            {oppHand.map((card, i) =>
+              card ? (
+                <SingleCard
+                  key={card.id}
+                  data={card}
+                  isFaceDown={true}
+                  disabled
+                  className="transform hover:-translate-y-2 transition-transform duration-300"
+                  activeState={displayStat}
+                />
+              ) : (
+                <div key={`empty-opp-${i}`} className="w-1/3 aspect-2/3" />
+              )
+            )}
           </div>
-          <div className="z-10 bg-gray-900 px-6 py-2 rounded-b-xl border-x border-b border-gray-700 mt-12 flex items-center gap-3 shadow-lg min-w-[180px] justify-between">
-            <div className="flex items-center gap-2">
-              <img
-                src={OPP_PROFILE.avatar}
-                alt="Opp"
-                className="w-8 h-8 rounded-full border border-red-500"
-              />
-              <span className="text-gray-300 text-xs font-bold tracking-widest uppercase">
-                {OPP_PROFILE.name}
-              </span>
-            </div>
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-red-800 to-red-600 flex items-center justify-center font-black text-sm shadow-inner text-white">
-              {oppScore}
+          <div
+            className={`flex flex-col items-end relative transition-opacity duration-500 w-full px-4`}
+          >
+            <div className="relative">
+              <div className="w-15 h-15 rounded-full border-4 border-red-600 overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.5)] z-10 relative bg-slate-800">
+                <Image
+                  src={OPP_PROFILE.avatar}
+                  alt="Player"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div
+                className="absolute right-12 top-1/2 -translate-y-1/2 text-white text-sm px-4 py-1 rounded-full z-20 min-w-[70px] text-center shadow-lg bg-gradient-to-br from-red-800 to-red-600"
+                style={{
+                  WebkitTextStroke: "2px black",
+                  paintOrder: "stroke fill",
+                }}
+              >
+                {oppScore} PTS
+              </div>
             </div>
           </div>
         </div>
@@ -596,7 +638,7 @@ export default function CardBattle() {
         {/* --- STAT REVEAL CENTER --- */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full z-20">
           <div className="text-3xl font-black italic tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-100 to-gray-600 uppercase drop-shadow-md transform -skew-x-12">
-            MATCH STAT
+            ROUND {round}
           </div>
 
           {/* Animated Stat Text */}
@@ -616,39 +658,62 @@ export default function CardBattle() {
           </div>
 
           <div
-            className={`mt-4 text-sm font-bold tracking-[0.2em] text-blue-400 ${
+            className={`mt-4 text-sm font-bold tracking-[0.2em] text-gray-700 ${
               isStatRevealing ? "opacity-0" : "animate-pulse"
             }`}
           >
             {isStatRevealing ? "..." : "SELECT YOUR FIGHTER"}
           </div>
+
+          {/* Timer */}
+          {!isStatRevealing && (
+            <div
+              className="mt-2 text-4xl font-mono font-bold text-white drop-shadow-md"
+              style={{
+                WebkitTextStroke: "4px black",
+                paintOrder: "stroke fill",
+              }}
+            >
+              {timeLeft}
+            </div>
+          )}
         </div>
 
         {/* User Hand */}
         <div className="flex flex-col items-center z-10">
-          <div className="mb-4 bg-gray-900 px-6 py-2 rounded-t-xl border-x border-t border-gray-700 flex items-center gap-3 shadow-lg min-w-[180px] justify-between">
-            <div className="flex items-center gap-2">
-              <img
-                src={USER_PROFILE.avatar}
-                alt="You"
-                className="w-8 h-8 rounded-full border border-blue-500"
-              />
-              <span className="text-blue-400 font-bold text-xs tracking-widest uppercase">
-                {USER_PROFILE.name}
-              </span>
-            </div>
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-800 to-blue-600 flex items-center justify-center font-black text-sm shadow-inner text-white">
-              {userScore}
+          <div
+            className={`flex flex-col items-left relative transition-opacity duration-500 w-full px-4`}
+          >
+            <div className="relative">
+              <div className="w-15 h-15 rounded-full border-4 border-blue-600 overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.5)] z-10 relative bg-slate-800">
+                <Image
+                  src={USER_PROFILE.avatar}
+                  alt="Player"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div
+                className="absolute left-12 top-1/2 -translate-y-1/2 text-white text-sm px-4 py-1 rounded-full z-20 min-w-[70px] text-center shadow-lg bg-gradient-to-br from-blue-800 to-blue-600"
+                style={{
+                  WebkitTextStroke: "2px black",
+                  paintOrder: "stroke fill",
+                }}
+              >
+                {userScore} PTS
+              </div>
             </div>
           </div>
-          <div className="flex gap-4 perspective-500">
-            {userHand.map((card) => (
-              <SingleCard
-                key={card.id}
-                data={card}
-                onClick={() => handleCardSelect(card)}
-                disabled={isStatRevealing}
-                className={`
+
+          <div className="flex gap-4 perspective-500 w-full px-4">
+            {userHand.map((card, i) =>
+              card ? (
+                <SingleCard
+                  key={card.id}
+                  data={card}
+                  onClick={() => handleCardSelect(card)}
+                  disabled={isStatRevealing}
+                  className={`
                     shadow-[0_10px_20px_rgba(0,0,0,0.5)] 
                     ${
                       isStatRevealing
@@ -656,8 +721,12 @@ export default function CardBattle() {
                         : "hover:-translate-y-6 hover:rotate-1"
                     }
                   `}
-              />
-            ))}
+                  activeState={displayStat}
+                />
+              ) : (
+                <div key={`empty-user-${i}`} className="w-1/3 aspect-2/3" />
+              )
+            )}
           </div>
         </div>
       </div>
@@ -707,21 +776,14 @@ export default function CardBattle() {
               ></div>
             ))}
 
-            {/* VS Badge - Hide during FINALE */}
-            <div
-              className={`
-             absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-             flex flex-col items-center z-10 transition-all duration-500
-             ${
-               ["TENSION", "CHARGE"].includes(animPhase) &&
-               animPhase !== "FINALE"
-                 ? "opacity-100 scale-100"
-                 : "opacity-0 scale-0"
-             }
-          `}
-            >
-              <p>VS</p>
-            </div>
+            {/* DRAW OVERLAY - Centered on Screen */}
+            {animPhase === "DESTROY" && battleResult === "DRAW" && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] animate-pop-in">
+                <div className="text-6xl font-black text-gray-200 tracking-widest drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] border-4 border-white/50 px-8 py-2 rounded-xl bg-black/50 backdrop-blur-sm">
+                  DRAW
+                </div>
+              </div>
+            )}
 
             {/* --- OPPONENT CARD CONTAINER --- */}
             <div
@@ -731,24 +793,67 @@ export default function CardBattle() {
               ${getOpponentPositionClass()}
             `}
             >
-              <div
-                className={`transition-all duration-1000 ${
-                  animPhase === "DESTROY" && battleResult === "WIN"
-                    ? "animate-disintegrate"
-                    : ""
-                }`}
-              >
-                <SingleCard
-                  data={activeOppCard}
-                  isFaceDown={animPhase === "ZOOM"}
-                  status={
-                    animPhase === "DESTROY" && battleResult === "WIN"
-                      ? "LOSER"
-                      : "NEUTRAL"
-                  }
-                  isCharging={animPhase === "CHARGE" && battleResult === "LOSE"}
-                  className="shadow-[0_0_60px_rgba(239,68,68,0.3)]"
-                />
+              <div className="transition-all duration-1000">
+                {(animPhase === "DESTROY" || animPhase === "IMPACT") &&
+                battleResult === "WIN" ? (
+                  /* SHATTERED OPPONENT CARD */
+                  <div className="relative w-32 aspect-2/3">
+                    {[
+                      "polygon(0 0, 40% 0, 50% 50%, 0 60%)",
+                      "polygon(40% 0, 100% 0, 100% 40%, 50% 50%)",
+                      "polygon(100% 40%, 100% 100%, 60% 100%, 50% 50%)",
+                      "polygon(0 60%, 50% 50%, 60% 100%, 0 100%)",
+                    ].map((clip, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute inset-0 w-full h-full"
+                        initial={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
+                        animate={{
+                          opacity: 0,
+                          x:
+                            (i === 0
+                              ? -50
+                              : i === 1
+                              ? 50
+                              : i === 2
+                              ? 50
+                              : -50) *
+                            (Math.random() + 0.5),
+                          y:
+                            (i === 0
+                              ? -50
+                              : i === 1
+                              ? -50
+                              : i === 2
+                              ? 50
+                              : 50) *
+                            (Math.random() + 0.5),
+                          rotate: (Math.random() - 0.5) * 45,
+                          scale: 0.8,
+                        }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{ clipPath: clip }}
+                      >
+                        <SingleCard
+                          data={activeOppCard!}
+                          isOpponent
+                          status="LOSER"
+                          className="w-full h-full"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <SingleCard
+                    data={activeOppCard!}
+                    isFaceDown={animPhase === "ZOOM"}
+                    status="NEUTRAL"
+                    isCharging={
+                      animPhase === "CHARGE" && battleResult === "LOSE"
+                    }
+                    className="shadow-[0_0_60px_rgba(239,68,68,0.3)] w-32"
+                  />
+                )}
               </div>
 
               {/* Stat Bubble */}
@@ -757,9 +862,8 @@ export default function CardBattle() {
                 absolute -right-20 top-8 bg-black/90 text-white font-black text-4xl p-4 rounded-xl border-l-4 border-red-500 shadow-2xl skew-x-[-12deg]
                 transition-all duration-300 transform
                 ${
-                  ["TENSION", "CHARGE", "ATTACK", "IMPACT"].includes(
-                    animPhase
-                  ) && animPhase !== "FINALE"
+                  ["TENSION", "CHARGE"].includes(animPhase) &&
+                  animPhase !== "FINALE"
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 -translate-x-20"
                 }
@@ -769,14 +873,43 @@ export default function CardBattle() {
                   {activeStat}
                 </span>
                 <span className="block skew-x-[12deg]">
-                  {activeOppCard.state.pow}
+                  {
+                    activeOppCard.state[
+                      activeStat.toLowerCase() as keyof typeof activeOppCard.state
+                    ]
+                  }
                 </span>
               </div>
+
+              {/* Winner Overlay (Opponent Wins) */}
+              {animPhase === "DESTROY" && battleResult === "LOSE" && (
+                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] flex flex-col items-center animate-pop-in pointer-events-none">
+                  <div className="relative mb-2">
+                    <div className="w-16 h-16 rounded-full border-2 border-red-500 overflow-hidden shadow-[0_0_20px_rgba(239,68,68,0.8)] bg-black">
+                      <Image
+                        src={OPP_PROFILE.avatar}
+                        alt="Winner"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-lg border border-white/20">
+                      {OPP_PROFILE.name}
+                    </div>
+                  </div>
+                  <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-200 to-yellow-500 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] whitespace-nowrap italic transform -skew-x-12">
+                    WINNER
+                  </div>
+                  <div className="text-xl font-black text-white mt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    +1 PTS
+                  </div>
+                </div>
+              )}
 
               {/* Hit Effect (Only if Opponent Wins) */}
               {animPhase === "IMPACT" && battleResult === "LOSE" && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100]">
-                  <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-red-600 animate-pop-in drop-shadow-[0_0_20px_rgba(255,0,0,1)] whitespace-nowrap transform -rotate-6">
+                  <div className="text-5xl max-[400px]:text-md font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-red-600 animate-pop-in drop-shadow-[0_0_20px_rgba(255,0,0,1)] whitespace-nowrap transform -rotate-6">
                     SMASH!
                   </div>
                 </div>
@@ -791,23 +924,65 @@ export default function CardBattle() {
               ${getUserPositionClass()}
              `}
             >
-              <div
-                className={`transition-all duration-1000 ${
-                  animPhase === "DESTROY" && battleResult === "LOSE"
-                    ? "animate-disintegrate"
-                    : ""
-                }`}
-              >
-                <SingleCard
-                  data={activeUserCard}
-                  status={
-                    animPhase === "DESTROY" && battleResult === "LOSE"
-                      ? "LOSER"
-                      : "NEUTRAL"
-                  }
-                  isCharging={animPhase === "CHARGE" && battleResult === "WIN"}
-                  className="shadow-[0_0_60px_rgba(59,130,246,0.3)]"
-                />
+              <div className="transition-all duration-1000">
+                {(animPhase === "DESTROY" || animPhase === "IMPACT") &&
+                battleResult === "LOSE" ? (
+                  /* SHATTERED USER CARD */
+                  <div className="relative w-32 aspect-2/3">
+                    {[
+                      "polygon(0 0, 40% 0, 50% 50%, 0 60%)",
+                      "polygon(40% 0, 100% 0, 100% 40%, 50% 50%)",
+                      "polygon(100% 40%, 100% 100%, 60% 100%, 50% 50%)",
+                      "polygon(0 60%, 50% 50%, 60% 100%, 0 100%)",
+                    ].map((clip, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute inset-0 w-full h-full"
+                        initial={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
+                        animate={{
+                          opacity: 0,
+                          x:
+                            (i === 0
+                              ? -50
+                              : i === 1
+                              ? 50
+                              : i === 2
+                              ? 50
+                              : -50) *
+                            (Math.random() + 0.5),
+                          y:
+                            (i === 0
+                              ? -50
+                              : i === 1
+                              ? -50
+                              : i === 2
+                              ? 50
+                              : 50) *
+                            (Math.random() + 0.5),
+                          rotate: (Math.random() - 0.5) * 45,
+                          scale: 0.8,
+                        }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{ clipPath: clip }}
+                      >
+                        <SingleCard
+                          data={activeUserCard!}
+                          status="LOSER"
+                          className="w-full h-full"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <SingleCard
+                    data={activeUserCard!}
+                    status="NEUTRAL"
+                    isCharging={
+                      animPhase === "CHARGE" && battleResult === "WIN"
+                    }
+                    className="shadow-[0_0_60px_rgba(59,130,246,0.3)] w-32"
+                  />
+                )}
               </div>
 
               {/* Stat Bubble */}
@@ -816,9 +991,8 @@ export default function CardBattle() {
                 absolute -left-20 top-8 bg-black/90 text-white font-black text-4xl p-4 rounded-xl border-r-4 border-blue-500 shadow-2xl skew-x-[12deg]
                 transition-all duration-300 transform
                 ${
-                  ["TENSION", "CHARGE", "ATTACK", "IMPACT"].includes(
-                    animPhase
-                  ) && animPhase !== "FINALE"
+                  ["TENSION", "CHARGE"].includes(animPhase) &&
+                  animPhase !== "FINALE"
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 translate-x-20"
                 }
@@ -828,14 +1002,43 @@ export default function CardBattle() {
                   {activeStat}
                 </span>
                 <span className="block skew-x-[-12deg]">
-                  {activeUserCard.state.pow}
+                  {
+                    activeUserCard.state[
+                      activeStat.toLowerCase() as keyof typeof activeOppCard.state
+                    ]
+                  }
                 </span>
               </div>
+
+              {/* Winner Overlay (User Wins) */}
+              {animPhase === "DESTROY" && battleResult === "WIN" && (
+                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] flex flex-col items-center animate-pop-in pointer-events-none">
+                  <div className="relative mb-2">
+                    <div className="w-16 h-16 rounded-full border-2 border-blue-500 overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.8)] bg-black">
+                      <Image
+                        src={USER_PROFILE.avatar}
+                        alt="Winner"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-lg border border-white/20">
+                      {USER_PROFILE.name}
+                    </div>
+                  </div>
+                  <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-yellow-200 to-yellow-500 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] whitespace-nowrap italic transform -skew-x-12">
+                    WINNER
+                  </div>
+                  <div className="text-xl font-black text-white mt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    +1 PTS
+                  </div>
+                </div>
+              )}
 
               {/* Hit Effect (Only if User Wins) */}
               {animPhase === "IMPACT" && battleResult === "WIN" && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100]">
-                  <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-red-600 animate-pop-in drop-shadow-[0_0_20px_rgba(255,0,0,1)] whitespace-nowrap transform -rotate-6">
+                  <div className="text-5xl max-[400px]:text-md font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-red-600 animate-pop-in drop-shadow-[0_0_20px_rgba(255,0,0,1)] whitespace-nowrap transform -rotate-6">
                     SMASH!
                   </div>
                 </div>
@@ -972,9 +1175,10 @@ export default function CardBattle() {
         }
         
         @keyframes disintegrate {
-          0% { transform: scale(1); filter: brightness(1) blur(0); opacity: 1; mask-image: linear-gradient(to bottom, black 100%, transparent 0%); }
-          20% { transform: scale(1.05) rotate(2deg); filter: brightness(2) contrast(1.5); }
-          100% { transform: scale(1.2) translateY(50px); filter: brightness(0) blur(20px); opacity: 0; }
+          0% { transform: scale(1) rotate(0deg); filter: brightness(1) blur(0); opacity: 1; }
+          20% { transform: scale(1.1) rotate(-5deg); filter: brightness(2) contrast(2); opacity: 1; }
+          40% { transform: scale(1.1) rotate(5deg); filter: brightness(2) contrast(2); opacity: 0.8; }
+          100% { transform: scale(1.2) rotate(0deg); filter: brightness(0) blur(10px) grayscale(1); opacity: 0; }
         }
         .animate-disintegrate {
           animation: disintegrate 1.5s ease-out forwards;

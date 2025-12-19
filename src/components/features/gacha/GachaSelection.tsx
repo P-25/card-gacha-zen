@@ -13,15 +13,21 @@ import { AppState } from "@/hooks/useGameState";
 interface GachaSelectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
   onNavigate: (screen: AppState) => void;
+  onSummonStateChange?: (isSummoning: boolean) => void;
 }
 
 export default function GachaSelection({
   onSummon,
   onNavigate,
+  onSummonStateChange,
 }: GachaSelectionProps) {
   return (
     <>
-      <RateUpSummonSection onSummon={onSummon} onNavigate={onNavigate} />
+      <RateUpSummonSection
+        onSummon={onSummon}
+        onNavigate={onNavigate}
+        onSummonStateChange={onSummonStateChange}
+      />
     </>
   );
 }

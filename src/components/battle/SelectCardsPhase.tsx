@@ -26,7 +26,7 @@ const CardItem = memo(
     onToggle: (card: Card) => void;
   }) => {
     const borderColor = getRarityBorderColor(card.rarity);
-
+    const totalPower = card.state.pow + card.state.def + card.state.spd;
     return (
       <motion.div
         whileTap={{ scale: 0.95 }}
@@ -37,8 +37,8 @@ const CardItem = memo(
       >
         {isSelected && (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-            <div className="px-4 py-2 bg-black/60 border-2 border-white rounded-lg shadow-xl backdrop-blur-md transform scale-110">
-              <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md whitespace-nowrap">
+            <div className="px-2 py-1 bg-black/60 w-full flex items-center justify-center">
+              <span className="text-white font-bold text-xs text-center tracking-widest uppercase drop-shadow-md whitespace-nowrap">
                 IN USE
               </span>
             </div>
@@ -55,7 +55,6 @@ const CardItem = memo(
             />
           </div>
         </div>
-
         {/* Card Image */}
         <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
           <Image
@@ -67,37 +66,30 @@ const CardItem = memo(
             className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
         </div>
-        <div className="absolute justify-between top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
-          Lv.{card.level}
+        <div
+          className="absolute justify-between top-1 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10"
+          style={{
+            WebkitTextStroke: "2px black",
+            paintOrder: "stroke fill",
+          }}
+        >
+          LV {card.level}
         </div>
-        <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 p-2">
+
+        <div className="flex justify-between z-20 absolute bottom-1 left-0 right-0 bg-gradient-to-r from-[#F5EEDF] to-transparent p-1">
           <div className="flex items-center">
-            <div className="w-5 h-5 relative drop-shadow-sm">
-              <Image
-                src="/assets/icons/ATK.webp"
-                alt="ATK"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-[#1a2e2e] font-bold text-lg">
-              {card.state.pow}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 relative drop-shadow-sm">
-              <Image
-                src="/assets/icons/HP.webp"
-                alt="HP"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-[#1a2e2e] font-bold text-lg">
-              {card.state.def}
+            <span
+              className="font-black text-white text-xl z-10 relative tracking-widest pl-1"
+              style={{
+                WebkitTextStroke: "5px black",
+                paintOrder: "stroke fill",
+              }}
+            >
+              {totalPower}
             </span>
           </div>
         </div>
+
         <div
           className="absolute inset-0 z-30 pointer-events-none rounded-lg"
           style={{ boxShadow: `inset 0 0 0 4px ${borderColor}` }}
@@ -150,6 +142,9 @@ export default function SelectCardsPhase({
     const existingIndex = selectedCards.findIndex((c) => c?.id === card.id);
 
     if (existingIndex !== -1) {
+      if (source === "list") {
+        return;
+      }
       // Card is already selected, remove it from its specific slot
       const newSlots = [...selectedCards];
       newSlots[existingIndex] = null;
@@ -179,20 +174,15 @@ export default function SelectCardsPhase({
   const visibleCards = useMemo(() => {
     return filteredCards.slice(0, visibleCount);
   }, [filteredCards, visibleCount]);
-  const totalAtk = selectedCards.reduce(
-    (sum, card) => sum + (card?.state.pow || 0),
-    0
-  );
-  const totalHp = selectedCards.reduce(
-    (sum, card) => sum + (card?.state.def || 0),
-    0
-  );
 
-  const totalPower = totalAtk + totalHp;
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col h-full"
+    >
       {/* Title */}
-      <div className="text-center mb-4">
+      <div className="text-center mt-4">
         <h1 className="text-3xl font-bold text-[#2D3748] tracking-wider uppercase drop-shadow-sm">
           Echo Loadout
         </h1>
@@ -207,7 +197,9 @@ export default function SelectCardsPhase({
           return (
             <div
               key={index}
-              className="w-24 h-36 rounded-lg border-2 border-dashed border-[#C5A059] bg-[#FAF3E5] flex items-center justify-center relative overflow-hidden shadow-inner cursor-pointer"
+              className={`w-24 h-36 rounded-lg bg-[#FAF3E5] flex items-center justify-center relative overflow-hidden shadow-inner cursor-pointer ${
+                !card ? "border-2 border-dashed border-[#C5A059]" : ""
+              }`}
               onClick={() => card && toggleCardSelection(card)}
             >
               {card ? (
@@ -216,7 +208,7 @@ export default function SelectCardsPhase({
                   className="w-full h-full relative"
                 >
                   <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
-                    <div className="relative w-full h-full scale-[1.1] opacity-60">
+                    <div className="relative w-full h-full scale-[1.2] opacity-60">
                       <Image
                         src={getStrokeImage(card.rarity)}
                         alt="brush stroke"
@@ -235,39 +227,11 @@ export default function SelectCardsPhase({
                       fill
                       sizes="(max-width: 768px) 33vw, 200px"
                       loading="lazy"
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover transition-transform duration-300 scale-90 group-hover:scale-110"
                     />
                   </div>
                   <div className="absolute justify-between top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
                     Lv.{card.level}
-                  </div>
-                  <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 p-2">
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 relative drop-shadow-sm">
-                        <Image
-                          src="/assets/icons/ATK.webp"
-                          alt="ATK"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="text-[#1a2e2e] font-semibold text-md">
-                        {card.state.pow}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 relative drop-shadow-sm">
-                        <Image
-                          src="/assets/icons/HP.webp"
-                          alt="HP"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="text-[#1a2e2e] font-semibold text-md">
-                        {card.state.def}
-                      </span>
-                    </div>
                   </div>
                   <div
                     className="absolute inset-0 z-30 pointer-events-none rounded-lg"
@@ -289,10 +253,10 @@ export default function SelectCardsPhase({
       </div>
 
       <div
-        className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-32 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+        className="container p-2 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
         onScroll={handleScroll}
       >
-        <div className="grid grid-cols-3 gap-3 p-4 pb-24 min-h-[400px] max-h-[510px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+        <div className="grid grid-cols-3 gap-3 px-4 pt-2 pb-24 min-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {visibleCards.map((card, index) => {
             const isSelected = !!selectedCards.find((c) => c?.id === card.id);
             return (
@@ -322,9 +286,9 @@ export default function SelectCardsPhase({
             );
             onConfirm(validDeck);
           }}
-          className={`w-full py-3 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shrink-0 cursor-pointer bg-[#3A4E48] text-white shadow-lg hover:bg-[#2a3b3b]`}
+          className={`w-[80%] px-4 py-4 bg-[#3E206D] text-[#FDB931] font-bold rounded-lg shadow-md active:scale-95 transition-transform text-lg uppercase tracking-wider border-2 border-[#C5A059]`}
         >
-          DONE
+          Ready
         </motion.button>
       </div>
     </motion.div>

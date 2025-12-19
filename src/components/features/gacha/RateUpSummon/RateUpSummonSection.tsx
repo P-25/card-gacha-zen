@@ -20,11 +20,13 @@ import { useDispatch, useSelector } from "react-redux";
 interface RateUpSummonSectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
   onNavigate: (screen: AppState) => void;
+  onSummonStateChange?: (isSummoning: boolean) => void;
 }
 
 export default function RateUpSummonSection({
   onSummon,
   onNavigate,
+  onSummonStateChange,
 }: RateUpSummonSectionProps) {
   const [summonState, setSummonState] = useState<
     "idle" | "charging" | "summoning"
@@ -48,6 +50,7 @@ export default function RateUpSummonSection({
     if (gems < cost) {
       alert("Not enough Gems!");
       setSummonState("idle");
+      onSummonStateChange?.(false);
       return;
     }
 
@@ -87,6 +90,7 @@ export default function RateUpSummonSection({
 
     // Step 1: Input & Fade Out
     setSummonState("charging");
+    onSummonStateChange?.(true);
 
     // Step 2: Charge Up (200ms - 1500ms)
     // We wait for the charge animation
@@ -117,7 +121,7 @@ export default function RateUpSummonSection({
       {/* Starburst Light Eruption (Rays) */}
       <motion.div
         id="whiteRayFlash"
-        className="absolute left-1/2 top-[20%] z-1000 w-20 h-20 rounded-full pointer-events-none"
+        className="fixed left-1/2 top-[35%] z-1002 w-20 h-20 rounded-full pointer-events-none"
         style={{
           x: "-50%",
           y: "-50%",
@@ -141,7 +145,7 @@ export default function RateUpSummonSection({
 
       {/* Solid White Flash Overlay (Screen Cover) */}
       <motion.div
-        className="absolute inset-0 z-[101] bg-white pointer-events-none"
+        className="fixed inset-0 z-1001 bg-white pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{
           opacity: summonState === "summoning" ? 1 : 0,
@@ -216,7 +220,12 @@ export default function RateUpSummonSection({
               </span>
               <button
                 onClick={() => onNavigate("offering-rates")}
-                className="px-2 py-1 transition-colors"
+                disabled={summonState !== "idle"}
+                className={`px-2 py-1 transition-colors ${
+                  summonState !== "idle"
+                    ? "opacity-50 cursor-not-allowed grayscale"
+                    : ""
+                }`}
               >
                 <Image
                   src="/assets/icons/info-white.webp"

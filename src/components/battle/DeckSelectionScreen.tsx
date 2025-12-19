@@ -22,9 +22,16 @@ export default function DeckSelectionScreen({
 }: DeckSelectionScreenProps) {
   const isReady = deck.length === 3;
 
-  const totalAtk = deck.reduce((sum, card) => sum + card.state.pow, 0);
-  const totalHp = deck.reduce((sum, card) => sum + card.state.def, 0);
-  const totalPower = totalAtk + totalHp;
+  const totalPOW = deck.length
+    ? deck.reduce((sum, card) => sum + (card?.state?.pow || 0), 0)
+    : 0;
+  const totalSPD = deck.length
+    ? deck.reduce((sum, card) => sum + (card?.state?.spd || 0), 0)
+    : 0;
+  const totalDEF = deck.length
+    ? deck.reduce((sum, card) => sum + (card?.state?.def || 0), 0)
+    : 0;
+  const totalPower = totalPOW + totalSPD + totalDEF;
 
   return (
     <motion.div
@@ -79,7 +86,9 @@ export default function DeckSelectionScreen({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onEditDeck}
-                className="w-28 h-40 md:w-36 md:h-52 rounded-xl border-2 border-dashed border-[#C5A059] bg-[#FAF3E5] flex items-center justify-center relative overflow-hidden shadow-md cursor-pointer group"
+                className={`w-1/3 aspect-2/3 md:w-36 md:h-52 rounded-xl bg-[#FAF3E5] flex items-center justify-center relative overflow-hidden shadow-md cursor-pointer group ${
+                  !card ? "border-2 border-dashed border-[#C5A059]" : ""
+                }`}
               >
                 {card ? (
                   <div className="w-full h-full relative">
@@ -96,7 +105,7 @@ export default function DeckSelectionScreen({
                     </div>
 
                     {/* Card Image */}
-                    <div className="absolute inset-1 z-10 rounded-lg overflow-hidden">
+                    <div className="absolute inset-1 z-10 rounded-lg overflow-hidden scale-[0.9]">
                       <Image
                         src={card.image}
                         alt={card.name}
@@ -111,32 +120,18 @@ export default function DeckSelectionScreen({
                     </div>
 
                     {/* Stats Footer */}
-                    <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 p-1.5">
-                      <div className="flex items-center gap-0.5">
-                        <div className="w-3.5 h-3.5 relative">
-                          <Image
-                            src="/assets/icons/ATK.webp"
-                            alt="ATK"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                        <span className="text-[#1a2e2e] font-bold text-xs">
-                          {card.state.pow}
-                        </span>
+                    <div className="flex justify-between z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#F5EEDF] via-[#F5EEDF] to-[#F5EEDF]/80 px-1 pb-2 pt-1 divide-x divide-gray-400">
+                      <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                        <span>POW</span>
+                        <span>{card.state.pow}</span>
                       </div>
-                      <div className="flex items-center gap-0.5">
-                        <div className="w-3.5 h-3.5 relative">
-                          <Image
-                            src="/assets/icons/HP.webp"
-                            alt="HP"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                        <span className="text-[#1a2e2e] font-bold text-xs">
-                          {card.state.def}
-                        </span>
+                      <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                        <span>SPD</span>
+                        <span>{card.state.spd}</span>
+                      </div>
+                      <div className="w-full flex flex-col items-center justify-center text-sm max-[400px]:text-xs">
+                        <span>DEF</span>
+                        <span>{card.state.def}</span>
                       </div>
                     </div>
 
@@ -166,30 +161,10 @@ export default function DeckSelectionScreen({
 
       {/* Action Buttons */}
       <div className="px-4 flex justify-center gap-4 z-20">
-        {/* <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={onAutoForm}
-          className="flex-1 max-w-[160px] py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-lg bg-[#4A5568] text-white hover:bg-[#2D3748]"
-        >
-          Auto-form
-        </motion.button>
-
-        <motion.button
-          disabled={!isReady}
-          whileTap={{ scale: 0.95 }}
-          onClick={onStartBattle}
-          className={`flex-1 max-w-[160px] py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
-            isReady
-              ? "bg-gradient-to-r from-[#C5A059] to-[#D4AF37] text-white hover:brightness-110"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          <span>Enter</span>
-        </motion.button> */}
         {/* Share Button (Ghost) */}
         <button
           onClick={onAutoForm}
-          className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider"
+          className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider max-[400px]:text-xs"
         >
           Auto-form
         </button>

@@ -27,6 +27,7 @@ export default function GachaScreen({
   const [showCard, setShowCard] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [summonResults, setSummonResults] = useState<(Card | Resource)[]>([]);
+  const [isSummoning, setIsSummoning] = useState(false);
 
   const handleSummon = (
     type: "gem" | "gold",
@@ -38,6 +39,7 @@ export default function GachaScreen({
     } else if (type === "gem" && results) {
       setSummonResults(results);
       handleRateUpRevealComplete();
+      setIsSummoning(false);
     }
   };
 
@@ -97,8 +99,12 @@ export default function GachaScreen({
   // 5. Selection View (Default)
   return (
     <>
-      <BackButtonTopBar onBack={handleBackOnGacha} />
-      <GachaSelection onSummon={handleSummon} onNavigate={onNavigate} />
+      <BackButtonTopBar onBack={handleBackOnGacha} disabled={isSummoning} />
+      <GachaSelection
+        onSummon={handleSummon}
+        onNavigate={onNavigate}
+        onSummonStateChange={setIsSummoning}
+      />
     </>
   );
 }

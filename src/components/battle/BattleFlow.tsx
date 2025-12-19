@@ -48,7 +48,14 @@ export default function BattleFlow({
     try {
       const savedDeck = localStorage.getItem(DECK_STORAGE_KEY);
       if (savedDeck) {
-        setPlayerDeck(JSON.parse(savedDeck));
+        const parsed = JSON.parse(savedDeck);
+        if (Array.isArray(parsed)) {
+          // Validate cards
+          const validCards = parsed.filter(
+            (c) => c && typeof c === "object" && c.state
+          );
+          setPlayerDeck(validCards);
+        }
       }
     } catch (e) {
       console.error("Failed to load deck", e);
@@ -83,15 +90,18 @@ export default function BattleFlow({
     // 1. Filter for unique cards by ID (taking the highest power instance of each)
     const uniqueCardsMap = new Map<string, Card>();
 
-    inventory.forEach((card) => {
+    // Filter out invalid cards first
+    const validInventory = inventory.filter((card) => card && card.state);
+
+    validInventory.forEach((card) => {
       const existing = uniqueCardsMap.get(card.id);
       if (!existing) {
         uniqueCardsMap.set(card.id, card);
       } else {
         // If we have a duplicate ID, keep the one with higher stats
         if (
-          card.state.def + card.state.pow >
-          existing.state.def + existing.state.pow
+          (card.state.def || 0) + (card.state.pow || 0) >
+          (existing.state.def || 0) + (existing.state.pow || 0)
         ) {
           uniqueCardsMap.set(card.id, card);
         }
@@ -176,7 +186,7 @@ export default function BattleFlow({
           //   opponentDeck={opponentDeck}
           //   onComplete={handleBattleComplete}
           // />
-          <CardBattle />
+          <CardBattle playerDeck={playerDeck} opponentDeck={opponentDeck} />
         )}
         {phase === "RESULT" && (
           <ResultPhase
