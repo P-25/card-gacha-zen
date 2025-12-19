@@ -9,7 +9,8 @@ export type AppState =
   | "battle"
   | "deck"
   | "shop"
-  | "social";
+  | "social"
+  | "offering-rates";
 
 export interface GameResources {
   gold: number;

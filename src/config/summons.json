@@ -6,9 +6,9 @@
         "multiPrice": 90,
         "currency": "gems",
         "rates": {
-            "COMMON": 0.90,
-            "UNCOMMON": 0.09,
-            "RARE": 0.01
+            "COMMON": 0.8540,
+            "UNCOMMON": 0.1320,
+            "RARE": 0.0140
         },
         "pity": {
             "targetRarity": "RARE",

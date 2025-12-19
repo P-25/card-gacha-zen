@@ -7,13 +7,19 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import RateUpHighlight from "@/components/effects/RateUpHighlight";
 
 interface CardRevealProps {
   onReset: () => void;
+  onFinish: () => void;
   results: (Card | Resource)[];
 }
 
-export default function CardReveal({ onReset, results }: CardRevealProps) {
+export default function CardReveal({
+  onReset,
+  onFinish,
+  results,
+}: CardRevealProps) {
   console.log(`Debug - results`, results);
   const [currentIndex, setCurrentIndex] = useState(0);
   const item = results[currentIndex];
@@ -36,7 +42,7 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
     if (currentIndex < results.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      onReset();
+      onFinish();
     }
   };
 
@@ -48,9 +54,21 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
       <div className="flex-1 flex flex-col items-center justify-center w-full relative z-10 py-4">
         <motion.div
           key={currentIndex}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", damping: 20, stiffness: 100 }}
+          initial={
+            isRare
+              ? { scale: 0, opacity: 0, rotate: -10 }
+              : { scale: 0.9, opacity: 0 }
+          }
+          animate={
+            isRare
+              ? { scale: 1, opacity: 1, rotate: 0 }
+              : { scale: 1, opacity: 1 }
+          }
+          transition={
+            isRare
+              ? { type: "spring", damping: 12, stiffness: 200, mass: 1.5 }
+              : { type: "spring", damping: 20, stiffness: 100 }
+          }
           className="flex flex-col items-center gap-2 w-full max-w-md px-6"
         >
           {/* Card Container */}
@@ -74,18 +92,37 @@ export default function CardReveal({ onReset, results }: CardRevealProps) {
               </div>
             </div>
 
+            {/* Rate Up Highlight - Moved outside overflow-hidden */}
+            {/* Rate Up Highlight - Moved outside overflow-hidden */}
+            {isRare && (
+              <>
+                <div className="absolute inset-0 z-0">
+                  <RateUpHighlight />
+                </div>
+                {/* Impact Flash */}
+                <motion.div
+                  className="absolute inset-0 z-50 bg-white pointer-events-none mix-blend-overlay"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+              </>
+            )}
+
             <motion.div
               className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer shadow-2xl group"
               style={{
-                boxShadow: `0 10px 30px -10px ${borderColor}60, inset 0 0 0 4px ${borderColor}80`,
+                boxShadow: isRare
+                  ? `0px 10px 30px 0px #3E206D, inset 0 0 0 4px ${borderColor}`
+                  : `0 10px 30px -10px ${borderColor}60, inset 0 0 0 4px ${borderColor}80`,
               }}
             >
               {/* Card Image */}
               <motion.img
-                animate={{ scale: [1, 1.02, 1] }}
+                animate={{ scale: [0.9, 0.95, 0.9] }}
                 transition={{
-                  scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                  default: { duration: 0.2 },
+                  scale: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                  default: { duration: 0.6 },
                 }}
                 src={cardItem.image}
                 alt={cardItem.name}

@@ -9,6 +9,7 @@ import { PlaceholderScreen } from "@/components/PlaceholderScreens";
 import CollectionScreen from "@/components/CollectionScreen";
 import ShopScreen from "@/components/features/shop/ShopScreen";
 import QuestScreen from "@/components/QuestScreen";
+import OfferingRatesScreen from "@/components/OfferingRatesScreen";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
 
 const CRITICAL_ASSETS = [
@@ -36,7 +37,9 @@ export default function GamePage() {
   // Show nav if not in gacha
   // AND if not in battle OR if in battle but nav is explicitly visible
   const showNav =
-    appState !== "gacha" && (appState !== "battle" || isBattleNavVisible);
+    appState !== "gacha" &&
+    appState !== "offering-rates" &&
+    (appState !== "battle" || isBattleNavVisible);
 
   const isGlobalLoading = appState === "loading" || assetsLoading;
 
@@ -69,6 +72,9 @@ export default function GamePage() {
       {!isGlobalLoading && appState === "shop" && <ShopScreen title="Shop" />}
       {!isGlobalLoading && appState === "social" && (
         <PlaceholderScreen title="Social" icon="👥" />
+      )}
+      {!isGlobalLoading && appState === "offering-rates" && (
+        <OfferingRatesScreen onNavigate={navigateTo} />
       )}
     </GameLayout>
   );

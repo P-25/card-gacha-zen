@@ -48,7 +48,7 @@ export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
           <h2 className="text-2xl font-bold text-[#1a2e2e] uppercase tracking-wider">
             Card Info
           </h2>
-          <div className="w-12 h-1 bg-[#6A9A6A] mx-auto mt-1 rounded-full" />
+          <div className="w-12 h-1 bg-[#1a2e2e] mx-auto mt-1 rounded-full" />
 
           {/* Close Button */}
           <button
@@ -81,17 +81,26 @@ export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
               boxShadow: `inset 0 0 0 4px ${borderColor}`,
             }}
           >
-            <Image src={card.image} alt={card.name} fill />
+            <Image src={card.image} alt={card.name} fill loading="lazy" />
+            <div className="absolute bottom-2 flex items-center justify-center w-full">
+              <h3
+                className="text-lg font-bold uppercase tracking-wider"
+                style={{ color: borderColor }}
+              >
+                {card.rarity}
+              </h3>
+            </div>
           </div>
 
           {/* Stats Box */}
-          <div className="bg-white/20 backdrop-blur-xl border border-white/30 shadow-xl bg-gradient-to-b from-white/40 to-white/10 rounded-xl border border-[#E0DCC0] p-4 mb-6 shadow-sm">
+          <div className="bg-white/90 border border-[#E0DCC0] rounded-xl p-4 mb-6 shadow-sm">
             <h4 className="text-center text-xl font-bold text-[#1a2e2e] uppercase mb-3">
               {card.name}
             </h4>
             <div className="flex justify-between items-center px-4 mb-3 text-[#1a2e2e] font-bold">
-              <span>ATK: {card.atk}</span>
-              <span>HP: {card.hp}</span>
+              <span>POW: {card.state.pow}</span>
+              <span>SPD: {card.state.spd}</span>
+              <span>DEF: {card.state.def}</span>
               <span>Level: {card.level}</span>
             </div>
             <div className="h-px w-full bg-[#E0DCC0] mb-3" />

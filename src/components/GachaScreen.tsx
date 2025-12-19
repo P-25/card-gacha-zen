@@ -69,11 +69,21 @@ export default function GachaScreen({
     onNavigate("home");
   };
 
+  const handleFinishReveal = () => {
+    setShowCard(false);
+    setShowResults(false);
+    onSelectionModeChange(true);
+  };
+
   // 2. Card Reveal Overlay (Highest Priority)
   if (showCard) {
     return (
       <>
-        <GachaRevealView onReset={handleReset} results={summonResults} />
+        <GachaRevealView
+          onReset={handleReset}
+          onFinish={handleFinishReveal}
+          results={summonResults}
+        />
       </>
     );
   }
@@ -88,7 +98,7 @@ export default function GachaScreen({
   return (
     <>
       <BackButtonTopBar onBack={handleBackOnGacha} />
-      <GachaSelection onSummon={handleSummon} />
+      <GachaSelection onSummon={handleSummon} onNavigate={onNavigate} />
     </>
   );
 }

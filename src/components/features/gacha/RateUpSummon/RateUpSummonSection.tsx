@@ -13,16 +13,18 @@ import {
 import { RootState } from "@/store/store";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { AppState } from "@/hooks/useGameState";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 interface RateUpSummonSectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
+  onNavigate: (screen: AppState) => void;
 }
 
 export default function RateUpSummonSection({
   onSummon,
+  onNavigate,
 }: RateUpSummonSectionProps) {
   const [summonState, setSummonState] = useState<
     "idle" | "charging" | "summoning"
@@ -31,7 +33,6 @@ export default function RateUpSummonSection({
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
-  const router = useRouter();
 
   const banner = summonsData[0];
 
@@ -214,8 +215,8 @@ export default function RateUpSummonSection({
                 {banner.pity.targetRarity} Rift Meter
               </span>
               <button
-                onClick={() => router.push("/offering-rates")}
-                className="px-2 py-1 hover:bg-[#C5A059]/20 transition-colors"
+                onClick={() => onNavigate("offering-rates")}
+                className="px-2 py-1 transition-colors"
               >
                 <Image
                   src="/assets/icons/info-white.webp"
