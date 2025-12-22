@@ -70,7 +70,8 @@ export default function BattleFlow({
     }
   }, [phase, setBattleNavVisible]);
 
-  const { inventory } = useSelector((state: RootState) => state.player);
+  const playerInfo = useSelector((state: RootState) => state.player);
+  const { inventory } = playerInfo;
   const [opponentDeck, setOpponentDeck] = useState<Card[]>([]);
   const [battleResult, setBattleResult] = useState<
     "VICTORY" | "DEFEAT" | "DRAW"
@@ -141,7 +142,7 @@ export default function BattleFlow({
     console.log(`Debug - aaaaaaaaaaaaaaaaaaa`);
   };
 
-  const { level } = useSelector((state: RootState) => state.player);
+  const { level } = playerInfo;
 
   const opponentInfo = generateRandomPlayerInfo(level || 1);
 
@@ -186,7 +187,12 @@ export default function BattleFlow({
           //   opponentDeck={opponentDeck}
           //   onComplete={handleBattleComplete}
           // />
-          <CardBattle playerDeck={playerDeck} opponentDeck={opponentDeck} />
+          <CardBattle
+            playerDeck={playerDeck}
+            opponentDeck={opponentDeck}
+            playerInfo={playerInfo}
+            opponentInfo={opponentInfo}
+          />
         )}
         {phase === "RESULT" && (
           <ResultPhase
