@@ -168,7 +168,11 @@ export default function BattleFlow({
           />
         )}
         {phase === "MATCHMAKING" && (
-          <MatchmakingPhase key="matchmaking" onMatchFound={handleMatchFound} />
+          <MatchmakingPhase
+            key="matchmaking"
+            onMatchFound={handleMatchFound}
+            playerDeck={playerDeck}
+          />
         )}
         {phase === "VERSUS" && (
           <VersusPhase

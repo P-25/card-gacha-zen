@@ -845,6 +845,7 @@ export default function CardBattle({
               score={userScore}
               opponentScore={oppScore}
               onContinue={startNewGame}
+              playerDeck={userHand.filter((c): c is Card => c !== null)}
             />
           )}
           {userScore < oppScore && (
@@ -852,6 +853,7 @@ export default function CardBattle({
               score={userScore}
               opponentScore={oppScore}
               onContinue={startNewGame}
+              playerDeck={userHand.filter((c): c is Card => c !== null)}
             />
           )}
           {userScore === oppScore && (
