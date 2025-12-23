@@ -48,7 +48,7 @@ export default function CollectionGrid({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3 p-4 pb-24">
+    <div className="grid grid-cols-3 gap-3 px-4 pt-2 pb-24">
       {cards.map((card, index) => (
         <CollectionCard
           // Use index in key if duplicates exist, or a unique instance ID if available.

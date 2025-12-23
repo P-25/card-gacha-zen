@@ -21,10 +21,8 @@ export default function CollectionScreen({
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
   // Filter States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [rarityFilter, setRarityFilter] = useState<Rarity | "ALL">("ALL");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // Pagination
   const [visibleCount, setVisibleCount] = useState(24);
@@ -33,30 +31,24 @@ export default function CollectionScreen({
   const filteredCards = useMemo(() => {
     let result = [...inventory];
 
-    // 1. Search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((card) => card.name.toLowerCase().includes(query));
-    }
-
-    // 2. Rarity Filter
+    // 1. Rarity Filter
     if (rarityFilter !== "ALL") {
       result = result.filter((card) => card.rarity === rarityFilter);
     }
 
-    // 4. Sort
+    // 2. Sort (Always by Total Power)
     result.sort((a, b) => {
-      const powerA = a.state.def + a.state.pow;
-      const powerB = b.state.def + b.state.pow;
-      if (sortOrder === "desc") {
-        return powerB - powerA;
-      } else {
-        return powerA - powerB;
-      }
+      const powerA =
+        (a.state?.def || 0) + (a.state?.pow || 0) + (a.state?.spd || 0);
+      const powerB =
+        (b.state?.def || 0) + (b.state?.pow || 0) + (b.state?.spd || 0);
+
+      const comparison = powerA - powerB;
+      return sortDirection === "asc" ? comparison : -comparison;
     });
 
     return result;
-  }, [inventory, searchQuery, rarityFilter, sortOrder]);
+  }, [inventory, rarityFilter, sortDirection]);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -79,6 +71,34 @@ export default function CollectionScreen({
     }
   };
 
+  const handleSortToggle = () => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+
+  const getRarityStyle = (r: string, isActive: boolean) => {
+    if (r === "ALL") {
+      return isActive
+        ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.5)] scale-105"
+        : "bg-black/40 text-white/70 border border-white/10 hover:bg-black/60 hover:text-white";
+    }
+    if (r === "COMMON") {
+      return isActive
+        ? "bg-gray-400 text-black shadow-[0_0_15px_rgba(156,163,175,0.5)] scale-105"
+        : "bg-black/40 text-gray-400 border border-gray-400/30 hover:bg-black/60 hover:border-gray-400/60";
+    }
+    if (r === "UNCOMMON") {
+      return isActive
+        ? "bg-green-400 text-black shadow-[0_0_15px_rgba(74,222,128,0.5)] scale-105"
+        : "bg-black/40 text-green-400 border border-green-400/30 hover:bg-black/60 hover:border-green-400/60";
+    }
+    if (r === "RARE") {
+      return isActive
+        ? "bg-purple-400 text-white shadow-[0_0_15px_rgba(192,132,252,0.5)] scale-105"
+        : "bg-black/40 text-purple-400 border border-purple-400/30 hover:bg-black/60 hover:border-purple-400/60";
+    }
+    return "";
+  };
+
   return (
     <div className="h-dvh bg-[#1a1a1a] text-white flex flex-col relative overflow-hidden">
       {/* Background */}
@@ -91,127 +111,64 @@ export default function CollectionScreen({
 
       {/* Header */}
       <div className="relative z-40 px-4 py-3 flex flex-col gap-4">
-        {/* Search & Filter Bar */}
-        <div className="relative w-full max-w-md mx-auto flex gap-2">
-          <div className="flex-1 relative flex items-center bg-white rounded-lg overflow-hidden shadow-lg h-10">
-            <div className="pl-3 text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
+        <div className="flex sm:flex-row gap-4 items-center justify-center mx-auto w-full">
+          {/* Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto sm:pb-0 w-[90%]  sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            {(["ALL", "RARE", "UNCOMMON", "COMMON"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRarityFilter(r)}
+                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                  r === rarityFilter
+                    ? "bg-gray-800 text-white"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="FILTER"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none px-3 text-gray-800 font-bold placeholder-gray-400 text-sm uppercase"
-            />
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 hover:bg-gray-100 transition-colors ${
-                showFilters ? "text-blue-500" : "text-gray-500"
-              }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
-                />
-              </svg>
-            </button>
+                {r}
+              </button>
+            ))}
           </div>
 
-          {/* Sort Toggle */}
-          <button
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="h-10 w-10 bg-white rounded-lg shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            {sortOrder === "desc" ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Expanded Filters */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden bg-[#1a1a1a]/90 backdrop-blur-md rounded-lg border border-white/10 mx-auto w-full max-w-md"
+          {/* Sort Toggle (TP Only) */}
+          <div className="flex gap-2 w-[10%] sm:w-auto justify-end">
+            <button
+              onClick={handleSortToggle}
+              className="h-8 w-8 rounded-lg shadow-lg flex items-center justify-center text-white bg-gray-500 hover:bg-gray-600 transition-colors"
             >
-              <div className="p-3 space-y-3">
-                {/* Rarity Filter */}
-                <div>
-                  <p className="text-xs text-white/50 mb-1 font-bold">RARITY</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setRarityFilter(r as any)}
-                        className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
-                          rarityFilter === r
-                            ? "bg-white text-black"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {sortDirection === "desc" ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
@@ -232,13 +189,15 @@ export default function CollectionScreen({
       </div>
 
       {/* Modal */}
-      {selectedCard && (
-        <CardDetailModal
-          card={selectedCard}
-          onClose={() => setSelectedCard(null)}
-          count={1} // We don't track count in this view anymore
-        />
-      )}
+      <AnimatePresence>
+        {selectedCard && (
+          <CardDetailModal
+            card={selectedCard}
+            onClose={() => setSelectedCard(null)}
+            count={1} // We don't track count in this view anymore
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

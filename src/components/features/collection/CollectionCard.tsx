@@ -12,6 +12,7 @@ interface CollectionCardProps {
 const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
   const borderColor = getRarityBorderColor(card.rarity);
 
+  const totalPower = card.state.pow + card.state.def + card.state.spd;
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -52,11 +53,18 @@ const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
         Lv.{card.level}
       </div>
 
-      {/* Name Overlay */}
-      <div className="z-20 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <p className="text-white text-xs font-bold truncate text-center">
-          {card.name}
-        </p>
+      <div className="flex justify-between z-20 absolute bottom-1 left-0 right-0 bg-gradient-to-r from-[#F5EEDF] to-transparent p-1">
+        <div className="flex items-center">
+          <span
+            className="font-black text-white text-xl z-10 relative tracking-widest pl-1"
+            style={{
+              WebkitTextStroke: "5px black",
+              paintOrder: "stroke fill",
+            }}
+          >
+            {totalPower}
+          </span>
+        </div>
       </div>
     </motion.div>
   );
