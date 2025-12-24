@@ -48,13 +48,9 @@ export default function CollectionGrid({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3 px-4 pt-2 pb-24">
+    <div className="grid grid-cols-3 gap-3 px-2 pt-2 pb-24">
       {cards.map((card, index) => (
         <CollectionCard
-          // Use index in key if duplicates exist, or a unique instance ID if available.
-          // Since we want to show duplicates individually, and they might share the same ID from config,
-          // we should ideally have unique instance IDs.
-          // For now, let's use ID + index to ensure uniqueness in React key.
           key={`${card.id}-${index}`}
           card={card}
           onClick={onCardClick}

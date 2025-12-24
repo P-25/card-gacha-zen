@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import CardInfoLevelProgressBar from "@/components/features/collection/CardInfoLevelProgressBar";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
 import { RootState } from "@/store/store";
 import { Card, Rarity } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import CardInfoModal from "./CardInfoModal";
 import LevelUpPopup from "./LevelUpPopup";
@@ -52,6 +54,13 @@ export default function CardDetailModal({
     oldHp: 0,
     newHp: 0,
   });
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Pagination for Fodder
   const [visibleFodderCount, setVisibleFodderCount] = useState(21);
@@ -199,13 +208,16 @@ export default function CardDetailModal({
     }
   };
 
-  if (!activeCard) return null;
+  if (!activeCard || !mounted) return null;
 
   const borderColor = getRarityBorderColor(activeCard.rarity);
 
-  return (
+  const portalTarget = document.getElementById("game-viewport");
+  if (!portalTarget) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none"
+      className="absolute inset-0 z-[60] flex items-end justify-center pointer-events-none"
       key={activeCard.instanceId}
     >
       {/* Backdrop & Bottom Sheet - Hide when Info Modal is open */}
@@ -222,6 +234,7 @@ export default function CardDetailModal({
 
           {/* Bottom Sheet Container */}
           <motion.div
+            id="bottom-sheet-single-card"
             layout
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -235,31 +248,28 @@ export default function CardDetailModal({
                 onClose();
               }
             }}
-            className="relative w-full bg-[#FFFFFF] rounded-t-3xl px-6 pt-6 pb-24 flex flex-col shadow-2xl z-10 overflow-hidden pointer-events-auto"
+            className="relative w-full bg-[#FFFFFF] rounded-t-3xl px-2 py-6 flex flex-col shadow-2xl z-10 overflow-hidden pointer-events-auto"
             style={{ maxHeight: "90vh" }}
           >
             {/* Drag Handle */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 rounded-full" />
 
-            {/* Info Icon */}
-            <button
-              onClick={() => setShowInfoModal(true)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer"
-            >
-              <Image
-                src="/assets/icons/info.webp"
-                alt="Info"
-                width={24}
-                height={24}
-              />
-            </button>
+            <motion.div layout className="flex justify-center mt-2 shrink-0">
+              <h2 className="text-2xl font-bold text-[#1a2e2e] leading-tight">
+                {activeCard.name}
+              </h2>
+            </motion.div>
 
             {/* 1. TOP SECTION: Card Info */}
             <motion.div layout className="flex gap-5 mt-2 shrink-0">
               {/* Left: Image */}
               <div
-                className="w-1/3 relative rounded-xl overflow-hidden shrink-0"
-                style={{ aspectRatio: "2/3" }}
+                className="w-1/3 relative rounded-xl overflow-hidden shrink-0 cursor-pointer"
+                style={{
+                  aspectRatio: "2/3",
+                  boxShadow: `inset 0 0 0 4px ${borderColor}`,
+                }}
+                onClick={() => setShowInfoModal(true)}
               >
                 <Image
                   src={activeCard.image}
@@ -268,98 +278,101 @@ export default function CardDetailModal({
                   className="object-cover"
                   priority
                 />
+                <div className="absolute bottom-2 w-full flex items-center justify-center">
+                  <span
+                    className="text-[8px] text-white px-2 py-1 rounded-md"
+                    style={{ backgroundColor: borderColor }}
+                  >
+                    {activeCard.rarity}
+                  </span>
+                </div>
               </div>
 
               {/* Right: Details */}
               <div className="flex-1 flex flex-col gap-2">
-                <h2 className="text-2xl font-bold text-[#1a2e2e] leading-tight">
-                  {activeCard.name}
-                </h2>
+                <CardInfoLevelProgressBar
+                  level={isAtPlayerCap ? "MAX" : predictedLevel}
+                  currentXp={
+                    selectedInstanceIds.length > 0
+                      ? predictedXp
+                      : activeCard.experience
+                  }
+                  requiredXp={
+                    selectedInstanceIds.length > 0
+                      ? predictedLevel * 100
+                      : activeCard.level * 100
+                  }
+                />
 
-                <div className="flex flex-row justify-between gap-1 text-sm text-[#5F5A46] font-bold">
-                  <span>POW: {activeCard.state.pow}</span>
-                  <span>SPD: {activeCard.state.spd}</span>
-                  <span>DEF: {activeCard.state.def}</span>
-                  <span style={{ color: borderColor }}>
-                    {activeCard.rarity}
-                  </span>
-                </div>
-
-                {/* XP Bar */}
-                <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden relative mt-2">
-                  {/* Current XP */}
-                  <div
-                    className="h-full bg-[#6A9A6A]"
-                    style={{
-                      width: `${
-                        !isAtPlayerCap
-                          ? (activeCard.experience / (activeCard.level * 100)) *
-                            100
-                          : 100
-                      }%`,
-                    }}
-                  />
-                  {/* Predicted XP Preview (Overlay) */}
-                  {selectedXp > 0 && (
-                    <div
-                      className="h-full bg-[#6A9A6A]/50 absolute top-0 left-0 animate-pulse"
-                      style={{
-                        width: `${
-                          (predictedXp / (predictedLevel * 100)) * 100
-                        }%`,
-                      }} // Simplified preview
-                    />
-                  )}
-                  {!isAtPlayerCap ? (
-                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600 drop-shadow-sm z-10">
-                      {selectedInstanceIds.length > 0
-                        ? `${predictedXp} / ${predictedLevel * 100} XP`
-                        : `${activeCard.experience} / ${
-                            activeCard.level * 100
-                          } XP`}
+                <div className="flex flex-col text-sm text-black font-bold divide-y divide-gray-400">
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-row justify-center items-center">
+                      <div>
+                        <Image
+                          src={"/assets/icons/power.webp"}
+                          alt={"Power"}
+                          width={30}
+                          height={30}
+                          className="object-cover"
+                          priority
+                        />
+                      </div>
+                      <div className="flex flex-col w-1/2 p-2">
+                        <span className="text-xs">POWER</span>
+                        <span className="text-md">{activeCard.state.pow}</span>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-sm z-10">
-                      Max Level
+                    <div className="flex flex-row justify-center items-center">
+                      <div>
+                        <Image
+                          src={"/assets/icons/speed.webp"}
+                          alt={"Speed"}
+                          width={30}
+                          height={30}
+                          className="object-cover"
+                          priority
+                        />
+                      </div>
+                      <div className="flex flex-col w-1/2  p-2">
+                        <span className="text-xs">Speed</span>
+                        <span className="text-md">{activeCard.state.spd}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-
-                <div className="shrink-0 bg-[#2a3b3b] rounded-full p-1 flex items-center justify-between relative h-12 mt-1">
-                  {/* Level Text */}
-                  <div className="px-4 text-white font-bold text-sm z-10 flex flex-row gap-1 leading-none justify-center items-center h-full min-w-[80px]">
-                    <span>Lvl {activeCard.level}</span>
-                    {predictedLevel > activeCard.level && (
-                      <span className="text-[#6A9A6A]">➜ {predictedLevel}</span>
-                    )}
                   </div>
-
-                  {/* Action Button */}
-                  {!isAtPlayerCap ? (
-                    <button
-                      onClick={() => {
-                        if (isLevelingUp) {
-                          // Cancel: Reset selection
-                          setSelectedInstanceIds([]);
-                          setIsLevelingUp(false);
-                        } else {
-                          // Open
-                          setIsLevelingUp(true);
-                        }
-                      }}
-                      className={`relative z-10 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                        isLevelingUp
-                          ? "bg-white/10 text-white hover:bg-white/20"
-                          : "bg-[#6A9A6A] text-white hover:bg-[#588558] shadow-md"
-                      }`}
-                    >
-                      {isLevelingUp ? "Cancel" : "Level Up"}
-                    </button>
-                  ) : (
-                    <div className="relative z-10 px-6 py-2 text-xs font-bold text-white/40 uppercase tracking-wider cursor-not-allowed">
-                      Max Level
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-row justify-center items-center">
+                      <div>
+                        <Image
+                          src={"/assets/icons/defense.webp"}
+                          alt={"Defense"}
+                          width={30}
+                          height={30}
+                          className="object-cover"
+                          priority
+                        />
+                      </div>
+                      <div className="flex flex-col w-1/2  p-2">
+                        <span className="text-xs">Defense</span>
+                        <span className="text-md">{activeCard.state.def}</span>
+                      </div>
                     </div>
-                  )}
+                    <div className="flex flex-row justify-center items-center">
+                      <div>
+                        <Image
+                          src={"/assets/icons/defense.webp"}
+                          alt={"Type"}
+                          width={30}
+                          height={30}
+                          className="object-cover"
+                          priority
+                        />
+                      </div>
+                      <div className="flex flex-col w-1/2  p-2">
+                        <span className="text-xs">Type</span>
+                        <span className="text-md">{activeCard.setName}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -670,7 +683,8 @@ export default function CardDetailModal({
           />
         )}
       </AnimatePresence>
-    </div>
+    </div>,
+    portalTarget
   );
 }
 

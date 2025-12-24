@@ -53,12 +53,34 @@ const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
         Lv.{card.level}
       </div>
 
-      <div className="flex justify-between z-20 absolute bottom-1 left-0 right-0 bg-gradient-to-r from-[#F5EEDF] to-transparent p-1">
+      {/* <div className="flex justify-between z-20 absolute bottom-1 left-0 right-0 bg-gradient-to-r from-[#F5EEDF] to-transparent p-1">
         <div className="flex items-center">
           <span
             className="font-black text-white text-xl z-10 relative tracking-widest pl-1"
             style={{
               WebkitTextStroke: "5px black",
+              paintOrder: "stroke fill",
+            }}
+          >
+            {totalPower}
+          </span>
+        </div>
+      </div> */}
+      <div className="absolute right-2 bottom-2 z-30 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+        {/* Badge Circle Container */}
+        <div
+          className="w-[30px] h-[30px] rounded-full flex items-center justify-center relative"
+          style={{
+            // 3D Sphere Gradient
+            background: borderColor,
+            // Outer black ring using box-shadow
+            boxShadow: "0 0 0 1px black",
+          }}
+        >
+          <span
+            className="font-black text-white text-sm z-10 relative top-[1px]"
+            style={{
+              WebkitTextStroke: "4px black",
               paintOrder: "stroke fill",
             }}
           >

@@ -35,7 +35,10 @@ export default function GameLayout({
       </div>
 
       {/* Mobile Container */}
-      <main className="relative w-full h-full sm:h-[95vh] sm:aspect-[9/19.5] sm:max-w-[430px] sm:max-h-[932px] bg-black overflow-hidden flex flex-col shadow-2xl sm:rounded-4xl border-4 border-[#2a2a2a]">
+      <main
+        id="game-viewport"
+        className="relative w-full h-full sm:h-[95vh] sm:aspect-[9/19.5] sm:max-w-[430px] sm:max-h-[932px] bg-black overflow-hidden flex flex-col shadow-2xl sm:rounded-4xl border-4 border-[#2a2a2a]"
+      >
         <Background />
 
         {/* Main Content Area */}
