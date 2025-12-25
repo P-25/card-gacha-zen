@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +9,7 @@ import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 import BackButtonTopBar from "@/components/common/BackButtonTopBar";
 import LevelUpPopup from "./LevelUpPopup";
+import LevelUpAnimation from "./LevelUpAnimation";
 import CardInfoLevelProgressBar from "./CardInfoLevelProgressBar";
 
 // Helper for XP calculation
@@ -201,9 +203,9 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
     if (!activeCard) return;
 
     const currentLevel = activeCard.level;
-    const currentPow = activeCard.state.pow;
-    const currentSpd = activeCard.state.spd;
-    const currentDef = activeCard.state.def;
+    const currentPow = activeCard.state?.pow || 0;
+    const currentSpd = activeCard.state?.spd || 0;
+    const currentDef = activeCard.state?.def || 0;
 
     let tempLevel = currentLevel;
     let tempPow = currentPow;
@@ -253,11 +255,26 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
   const cost = selectedInstanceIds.length * 10;
 
   return (
-    <div className="relative w-full h-full bg-[#FFFFFF] flex flex-col overflow-hidden rounded-t-3xl">
-      <BackButtonTopBar onBack={onBack} />
+    <div className="relative w-full h-full flex flex-col overflow-hidden rounded-t-3xl">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 z-[-1] pointer-events-none bg-[#F5F2EB]"
+      >
+        <Image
+          src="/assets/background/light-bg.webp"
+          alt="Background"
+          fill
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/60" />
+      </motion.div>
+
+      <BackButtonTopBar onBack={onBack} showCoins={true} showGems={false} />
 
       {/* Fixed Header Section */}
-      <div className="p-4 pb-0 flex flex-col gap-6 shrink-0 z-10 bg-white shadow-sm">
+      <div className="p-4 pb-0 flex flex-col gap-6 shrink-0 z-10shadow-sm">
         {/* Header Card Info */}
         <div className="flex gap-4">
           <div
@@ -271,60 +288,96 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
               src={activeCard.image}
               alt={activeCard.name}
               fill
-              className="object-cover"
+              className="object-cover scale-90"
             />
           </div>
           <div className="flex-1 flex flex-col justify-center gap-2">
             <h2 className="text-xl font-bold text-[#1a2e2e]">
               {activeCard.name}
             </h2>
-            {/* Reverted to CardInfoLevelProgressBar */}
-            <CardInfoLevelProgressBar
-              level={isAtPlayerCap ? "MAX" : predictedLevel}
-              currentXp={
-                selectedInstanceIds.length > 0
-                  ? predictedXp
-                  : activeCard.experience
-              }
-              requiredXp={
-                selectedInstanceIds.length > 0
-                  ? predictedLevel * 100
-                  : activeCard.level * 100
-              }
-            />
+            <div className="flex justify-between items-center gap-2">
+              {/* Reverted to CardInfoLevelProgressBar */}
+              <div className="w-full">
+                <CardInfoLevelProgressBar
+                  level={isAtPlayerCap ? "MAX" : predictedLevel}
+                  currentXp={
+                    selectedInstanceIds.length > 0
+                      ? predictedXp
+                      : activeCard.experience
+                  }
+                  requiredXp={
+                    selectedInstanceIds.length > 0
+                      ? predictedLevel * 100
+                      : activeCard.level * 100
+                  }
+                />
+              </div>
+              <div className="relative">
+                <span>(+ 1000 xp)</span>
+              </div>
+            </div>
+            <button
+              disabled={selectedInstanceIds.length === 0 || gold < cost}
+              onClick={handleConfirmLevelUp}
+              className={`bg-[#6A0DAD] text-white rounded-xl py-2 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all relative overflow-hidden group ${
+                selectedInstanceIds.length === 0 || gold < cost
+                  ? "grayscale opacity-50 cursor-not-allowed pointer-events-none"
+                  : "cursor-pointer"
+              }`}
+              style={{
+                background: "linear-gradient(180deg, #4c2a85 0%, #3a1e69 100%)",
+                boxShadow:
+                  "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <span className="text-lg max-[400px]:text-sm text-[#FDB931] font-bold tracking-wider relative z-10">
+                LEVEL UP
+              </span>
+              <div className="flex items-center gap-1 bg-black/20 px-2 rounded-full mt-0.5">
+                <Image
+                  src="/assets/icons/gold-coin.webp"
+                  alt="gold"
+                  width={12}
+                  height={12}
+                />
+                <span className="text-white font-bold text-xs">
+                  {gold < cost ? "Not Enough Gold" : cost}
+                </span>
+              </div>
+            </button>
           </div>
         </div>
 
         <div className="h-px w-full bg-black/5" />
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pb-24 px-4">
-        {/* Filters - Reverted to Pill Style */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide sticky top-0 bg-white z-10 pt-2">
-          {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setRarityFilter(r as any)}
-              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                rarityFilter === r
-                  ? "bg-[#2a3b3b] text-white"
-                  : "bg-gray-200 text-gray-600"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
+      {/* Filters - Reverted to Pill Style */}
+      <div className="flex gap-2 overflow-x-auto py-2 px-4 scrollbar-hide sticky top-0 z-30 pt-2">
+        {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
           <button
-            onClick={() =>
-              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-            }
-            className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 ml-auto"
+            key={r}
+            onClick={() => setRarityFilter(r as any)}
+            className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+              rarityFilter === r
+                ? "bg-[#2a3b3b] text-white"
+                : "bg-gray-200 text-gray-600"
+            }`}
           >
-            XP {sortOrder === "asc" ? "↑" : "↓"}
+            {r}
           </button>
-        </div>
+        ))}
+        <button
+          onClick={() =>
+            setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+          }
+          className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 ml-auto"
+        >
+          XP {sortOrder === "asc" ? "↑" : "↓"}
+        </button>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto mb-2 px-4 scrollbar-hide">
         {/* Fodder Grid */}
         <div className="grid grid-cols-3 gap-3 mt-2">
           {availableCards.length === 0 ? (
@@ -356,40 +409,24 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
         </div>
       </div>
 
-      {/* Bottom Action Bar - New Button Style */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-black/5 shadow-lg z-10">
-        <button
-          disabled={selectedInstanceIds.length === 0 || gold < cost}
-          onClick={handleConfirmLevelUp}
-          className={`w-full py-2 rounded-lg border-b-4 active:border-b-0 active:translate-y-1 transition-all flex flex-col items-center justify-center leading-none shadow-lg ${
-            selectedInstanceIds.length > 0 && gold >= cost
-              ? "bg-[#4ade80] border-[#22c55e] hover:bg-[#22c55e]"
-              : "bg-gray-400 border-gray-500 cursor-not-allowed grayscale"
-          }`}
-        >
-          <span
-            className="text-white font-black text-lg italic uppercase drop-shadow-md"
-            style={{ textShadow: "1px 1px 0 #000" }}
-          >
-            LEVEL UP
-          </span>
-          <div className="flex items-center gap-1 bg-black/20 px-2 rounded-full mt-0.5">
-            <Image
-              src="/assets/icons/gold-coin.webp"
-              alt="gold"
-              width={12}
-              height={12}
-            />
-            <span className="text-white font-bold text-xs">{cost}</span>
-          </div>
-        </button>
-      </div>
-
       {/* Level Up Popup */}
+      {/* Level Up Animation */}
       <AnimatePresence>
         {showLevelUpPopup && (
-          <LevelUpPopup
-            {...levelUpStats}
+          <LevelUpAnimation
+            card={activeCard}
+            oldLevel={levelUpStats.oldLevel}
+            newLevel={levelUpStats.newLevel}
+            oldStats={{
+              pow: levelUpStats.oldPow,
+              spd: levelUpStats.oldSpd,
+              def: levelUpStats.oldDef,
+            }}
+            newStats={{
+              pow: levelUpStats.newPow,
+              spd: levelUpStats.newSpd,
+              def: levelUpStats.newDef,
+            }}
             onClose={() => {
               setShowLevelUpPopup(false);
             }}
@@ -446,34 +483,51 @@ const FodderCardComponent = ({
         Lvl {card.level}
       </div>
 
-      {/* Stars */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-0.5 z-10">
-        {"★"
-          .repeat(
-            card.rarity === "COMMON" ? 1 : card.rarity === "UNCOMMON" ? 2 : 3
-          )
-          .split("")
-          .map((s, i) => (
-            <span key={i} className="text-yellow-400 text-[8px]">
-              {s}
-            </span>
-          ))}
-      </div>
-
       {/* Selection Overlay */}
       {isSelected && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-yellow-500/30 animate-pulse" />
-          <div className="absolute inset-0 bg-gradient-to-t from-yellow-600/50 to-transparent" />
+        // <div className="absolute inset-0 z-20 flex items-center justify-center">
+        //   <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_top_right,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_bottom_left,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.5)_0%,_transparent_40%)]" />
+        //   {/* <div className="absolute inset-0 bg-yellow-500/30 animate-pulse" /> */}
+        //   {/* <div className="absolute inset-0 bg-gradient-to-t from-yellow-600/50 to-transparent" /> */}
+        //   <Image
+        //     src="/assets/icons/correct.webp"
+        //     alt="Selected"
+        //     width={40}
+        //     height={40}
+        //     className="relative z-10 no-global-filter"
+        //     style={{
+        //       filter:
+        //         // 1. Turn Black -> White
+        //         "invert(1) " +
+        //         // 2. Turn White -> Yellow/Gold
+        //         "sepia(1) saturate(500%) hue-rotate(5deg) " +
+        //         // 3. Add the Glow
+        //         "drop-shadow(0 0 3px #fbbf24) drop-shadow(0 0 10px #f59e0b)",
+        //     }}
+        //   />
+        // </div>
+
+        <div
+          /* 1. border-2 border-yellow-300: Creates the solid physical "gold frame" 
+    2. shadow-[...]: Two shadows combined:
+       - First part (0_0_15px...): OUTSIDE glow (makes the card pop)
+       - Second part (inset_0_0_30px...): INSIDE glow (the vignette effect you want)
+  */
+          className="absolute inset-0 z-20 flex items-center justify-center rounded-xl border-2 border-yellow-300 shadow-[0_0_15px_#fbbf24,inset_0_0_50px_rgba(251,191,36,0.6)]"
+        >
+          {/* Optional: A subtle gradient from bottom to top to match the "heavier" gold at the bottom of your reference */}
+          <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/20 via-transparent to-transparent" />
+
+          {/* Your Checkmark (Unchanged) */}
           <Image
             src="/assets/icons/correct.webp"
             alt="Selected"
             width={40}
             height={40}
-            className="relative z-10"
+            className="relative z-10 no-global-filter"
             style={{
               filter:
-                "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
+                "invert(1) sepia(1) saturate(500%) hue-rotate(5deg) drop-shadow(0 0 3px #fbbf24) drop-shadow(0 0 10px #f59e0b)",
             }}
           />
         </div>
@@ -508,11 +562,6 @@ const FodderCardComponent = ({
           )}
         </div>
       )}
-
-      {/* Unit Type Icon (Top Left) */}
-      <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-yellow-500 rounded-sm border border-black flex items-center justify-center z-10">
-        <span className="text-[8px] font-bold text-black">U</span>
-      </div>
     </motion.div>
   );
 };

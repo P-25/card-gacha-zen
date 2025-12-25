@@ -111,11 +111,11 @@ export const playerSlice = createSlice({
 
       state.inventory.forEach((c) => {
         if (consumedInstanceIds.includes(c.instanceId || "")) {
-          // XP Values: Common=100, Uncommon=300, Rare=1000
-          let baseXp = 100;
-          if (c.rarity === "COMMON") baseXp = 100;
-          else if (c.rarity === "UNCOMMON") baseXp = 300;
-          else if (c.rarity === "RARE") baseXp = 1000;
+          // XP Values: Common=50, Uncommon=100, Rare=200
+          let baseXp = 50;
+          if (c.rarity === "COMMON") baseXp = 50;
+          else if (c.rarity === "UNCOMMON") baseXp = 100;
+          else if (c.rarity === "RARE") baseXp = 200;
 
           // Scale by level
           const levelMultiplier = c.level || 1;
@@ -151,6 +151,9 @@ export const playerSlice = createSlice({
           currentXp -= xpNeeded;
           currentLevel++;
           // Increase stats by 2 points per level
+          if (!updatedTarget.state) {
+            updatedTarget.state = { pow: 0, spd: 0, def: 0 };
+          }
           updatedTarget.state.pow += 2;
           updatedTarget.state.spd += 2;
           updatedTarget.state.def += 2;

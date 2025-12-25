@@ -32,6 +32,7 @@ export default function CardDetailModal({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     return () => setMounted(false);
   }, []);
@@ -216,7 +217,9 @@ export default function CardDetailModal({
                       </div>
                       <div className="flex flex-col w-1/2 p-2">
                         <span className="text-xs">POWER</span>
-                        <span className="text-md">{activeCard.state.pow}</span>
+                        <span className="text-md">
+                          {activeCard.state?.pow || 0}
+                        </span>
                       </div>
                     </div>
                     <div className="flex flex-row justify-center items-center">
@@ -232,7 +235,9 @@ export default function CardDetailModal({
                       </div>
                       <div className="flex flex-col w-1/2  p-2">
                         <span className="text-xs">Speed</span>
-                        <span className="text-md">{activeCard.state.spd}</span>
+                        <span className="text-md">
+                          {activeCard.state?.spd || 0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -250,7 +255,9 @@ export default function CardDetailModal({
                       </div>
                       <div className="flex flex-col w-1/2  p-2">
                         <span className="text-xs">Defense</span>
-                        <span className="text-md">{activeCard.state.def}</span>
+                        <span className="text-md">
+                          {activeCard.state?.def || 0}
+                        </span>
                       </div>
                     </div>
                     <div className="flex flex-row justify-center items-center">

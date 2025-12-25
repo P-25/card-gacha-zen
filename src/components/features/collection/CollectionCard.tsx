@@ -12,7 +12,8 @@ interface CollectionCardProps {
 const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
   const borderColor = getRarityBorderColor(card.rarity);
 
-  const totalPower = card.state.pow + card.state.def + card.state.spd;
+  const totalPower =
+    (card.state?.pow || 0) + (card.state?.def || 0) + (card.state?.spd || 0);
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
