@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 interface LevelUpPopupProps {
   oldLevel: number;
   newLevel: number;
-  oldAtk: number;
-  newAtk: number;
-  oldHp: number;
-  newHp: number;
+  oldPow: number;
+  newPow: number;
+  oldSpd: number;
+  newSpd: number;
+  oldDef: number;
+  newDef: number;
   onClose: () => void;
 }
 
@@ -36,10 +38,12 @@ const RollingNumber = ({
 export default function LevelUpPopup({
   oldLevel,
   newLevel,
-  oldAtk,
-  newAtk,
-  oldHp,
-  newHp,
+  oldPow,
+  newPow,
+  oldSpd,
+  newSpd,
+  oldDef,
+  newDef,
   onClose,
 }: LevelUpPopupProps) {
   // Sound effect placeholder
@@ -92,20 +96,29 @@ export default function LevelUpPopup({
             color="text-[#1a2e2e]"
           />
 
-          {/* ATK */}
+          {/* POW */}
           <StatRow
-            label="ATK"
-            oldVal={oldAtk}
-            newVal={newAtk}
+            label="POW"
+            oldVal={oldPow}
+            newVal={newPow}
             delay={0.6}
             color="text-[#588558]"
           />
 
-          {/* HP */}
+          {/* SPD */}
           <StatRow
-            label="HP"
-            oldVal={oldHp}
-            newVal={newHp}
+            label="SPD"
+            oldVal={oldSpd}
+            newVal={newSpd}
+            delay={0.7}
+            color="text-[#588558]"
+          />
+
+          {/* DEF */}
+          <StatRow
+            label="DEF"
+            oldVal={oldDef}
+            newVal={newDef}
             delay={0.8}
             color="text-[#588558]"
           />

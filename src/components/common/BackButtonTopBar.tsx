@@ -1,14 +1,19 @@
 "use client";
 
 import Gems from "../features/topbar/Gems";
+import GoldCoin from "../features/topbar/GoldCoin";
 
 interface BackButtonTopBarProps {
   onBack: () => void;
+  showCoins?: boolean;
+  showGems?: boolean;
   disabled?: boolean;
 }
 
 export default function BackButtonTopBar({
   onBack,
+  showCoins = false,
+  showGems = true,
   disabled = false,
 }: BackButtonTopBarProps) {
   return (
@@ -25,8 +30,8 @@ export default function BackButtonTopBar({
         </button>
       </div>
       <div className="flex items-center gap-4 pointer-events-auto">
-        {/* Gems Counter */}
-        <Gems />
+        {showCoins && <GoldCoin />}
+        {showGems && <Gems />}
       </div>
     </div>
   );

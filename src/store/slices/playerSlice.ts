@@ -150,9 +150,10 @@ export const playerSlice = createSlice({
         if (currentXp >= xpNeeded) {
           currentXp -= xpNeeded;
           currentLevel++;
-          // Increase stats by 10% per level
-          updatedTarget.hp = Math.floor(updatedTarget.hp * 1.1);
-          updatedTarget.atk = Math.floor(updatedTarget.atk * 1.1);
+          // Increase stats by 2 points per level
+          updatedTarget.state.pow += 2;
+          updatedTarget.state.spd += 2;
+          updatedTarget.state.def += 2;
         } else {
           break;
         }

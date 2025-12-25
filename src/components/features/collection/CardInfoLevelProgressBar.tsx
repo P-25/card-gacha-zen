@@ -53,7 +53,7 @@ const CardInfoLevelProgressBar: React.FC<CardInfoLevelProgressBarProps> = ({
               </span> */}
 
               {/* XP Values */}
-              <span
+              {/* <span
                 className="font-black text-white text-sm tracking-wide"
                 style={{
                   WebkitTextStroke: "3px black",
@@ -61,7 +61,7 @@ const CardInfoLevelProgressBar: React.FC<CardInfoLevelProgressBarProps> = ({
                 }}
               >
                 {Math.floor(currentXp)} / {requiredXp}
-              </span>
+              </span> */}
             </div>
           </div>
 
