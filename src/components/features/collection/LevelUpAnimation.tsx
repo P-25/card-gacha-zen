@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
 import Image from "next/image";
 import { Card } from "@/types/game";
+import Background from "@/components/layout/Background";
+import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 
 // --- Types ---
 type GameState = "idle" | "feeding" | "burst" | "finished";
@@ -51,40 +53,50 @@ const AnimatedCard = ({
     containerClass = "scale-110 z-20";
     borderClass = "border-amber-500";
     glowEffect =
-      "shadow-[0_0_80px_rgba(245,158,11,0.8)] ring-8 ring-amber-400/30";
+      "shadow-[0_0_80px_rgba(148,137,45,0.8)] ring-1 ring-[#58E718]/30";
   }
+
+  const borderColor = getRarityBorderColor(card.rarity);
 
   return (
     <div
       key={impactKey} // Trigger shake on impact
-      className={`relative w-56 h-72 md:w-64 md:h-80 rounded-2xl bg-stone-900 border-[6px] ${borderClass} ${containerClass} ${glowEffect} ${
+      className={`relative w-56 h-72 rounded-2xl ${containerClass} ${glowEffect} ${
         state === "feeding" && impactKey > 0 ? "animate-thud" : ""
       }`}
+      style={{
+        boxShadow: `inset 0 0 0 4px ${borderColor}`,
+      }}
     >
       {/* Card Internal Art */}
-      <div className="absolute inset-0 bg-gradient-to-b from-stone-700 via-stone-800 to-stone-950 flex flex-col items-center justify-center overflow-hidden rounded-xl">
-        <div
-          className={`absolute w-full h-full bg-radial-gradient from-yellow-900/50 to-transparent transition-opacity duration-300 ${
-            state === "feeding" ? "opacity-100" : "opacity-0"
-          }`}
-        ></div>
-
+      <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden rounded-xl">
         {/* Character Art */}
         <div className="relative w-full h-full">
+          <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
+            <div className="relative w-full h-full scale-[1.1] opacity-60">
+              <Image
+                src={getStrokeImage(card.rarity)}
+                alt="brush stroke"
+                fill
+                className="object-contain no-global-filter"
+                sizes="(max-width: 768px) 50vw, 300px"
+              />
+            </div>
+          </div>
           <Image
             src={card.image}
             alt={card.name}
             fill
-            className="object-cover"
+            className="object-cover scale-[0.9]"
           />
         </div>
 
         {/* Overlay Flash */}
-        <div
+        {/* <div
           className={`absolute inset-0 bg-white pointer-events-none mix-blend-overlay transition-opacity duration-100 ${
             state === "burst" ? "opacity-100" : "opacity-0"
           }`}
-        ></div>
+        ></div> */}
       </div>
     </div>
   );
@@ -94,9 +106,11 @@ const AnimatedCard = ({
 const ParticleSystem = ({
   particles,
   className = "z-50",
+  cardRarityColor = "",
 }: {
   particles: Particle[];
   className?: string;
+  cardRarityColor?: string;
 }) => {
   return (
     <div
@@ -149,7 +163,7 @@ const ParticleSystem = ({
           return (
             <div
               key={p.id}
-              className="absolute left-1/2 top-1/2 text-amber-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]"
+              className="absolute left-1/2 top-1/2 text-[#EDFF36] drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]"
               style={{
                 marginLeft: p.x - 32,
                 marginTop: p.y,
@@ -157,9 +171,14 @@ const ParticleSystem = ({
                 animation: `floatUp ${p.duration}s ease-out forwards`,
                 animationDelay: `${p.delay}s`,
                 opacity: 0,
+                color: cardRarityColor ? cardRarityColor : "amber-500",
               }}
             >
-              <ArrowUp size={64} strokeWidth={5} fill="#f59e0b" />
+              <ArrowUp
+                size={64}
+                strokeWidth={5}
+                fill={cardRarityColor ? cardRarityColor : "amber-500"}
+              />
             </div>
           );
         }
@@ -169,12 +188,14 @@ const ParticleSystem = ({
           return (
             <div
               key={p.id}
-              className="absolute left-1/2 top-1/2 text-orange-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+              className="absolute left-1/2 top-1/2 text-[#EDFF36]/60 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
               style={{
                 marginLeft: p.x - 25,
                 marginTop: p.y,
                 animation: `shootUpFade ${p.duration}s ease-out forwards`,
                 animationDelay: `${p.delay}s`,
+                opacity: 0,
+                color: `color-mix(in srgb, ${cardRarityColor}, transparent 10%)`,
               }}
             >
               <ArrowUp size={50} strokeWidth={6} />
@@ -195,7 +216,7 @@ const ParticleSystem = ({
                 ["--ty" as any]: `${p.y}px`,
                 animation: `explode ${p.duration}s ease-out forwards`,
                 animationDelay: `${p.delay}s`,
-                backgroundColor: p.color || "white",
+                backgroundColor: cardRarityColor || "white",
               }}
             />
           );
@@ -216,7 +237,7 @@ const ParticleSystem = ({
                 animationDelay: `${p.delay}s`,
               }}
             >
-              <div className="w-6 h-8 bg-amber-700 rounded-sm opacity-90 border border-stone-900/50"></div>
+              <div className="w-6 h-8  rounded-sm opacity-90 border"></div>
             </div>
           );
         }
@@ -249,11 +270,20 @@ export default function LevelUpAnimation({
   const [bgParticles, setBgParticles] = useState<Particle[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [impactKey, setImpactKey] = useState(0);
+  const [isReady, setIsReady] = useState(false);
 
   const FEEDER_COUNT = 3;
   const FEEDER_INTERVAL = 600;
   const FLIGHT_DURATION = 0.5;
   const TOTAL_FEED_TIME = FEEDER_COUNT * FEEDER_INTERVAL + 500;
+
+  useEffect(() => {
+    // Defer heavy rendering to allow transition to start smoothly
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const spawnImpactParticles = (idBase: number) => {
     const newParticles: Particle[] = [];
@@ -267,7 +297,7 @@ export default function LevelUpAnimation({
         rotation: random(-10, 10),
         type: "impact-arrow",
         delay: 0,
-        duration: 0.8,
+        duration: 1.2,
       });
     }
 
@@ -282,7 +312,7 @@ export default function LevelUpAnimation({
         rotation: 0,
         type: "impact-spark",
         delay: 0,
-        duration: 0.6,
+        duration: 1,
         color: Math.random() > 0.5 ? "#fbbf24" : "#ffffff",
       });
     }
@@ -291,6 +321,8 @@ export default function LevelUpAnimation({
   };
 
   const startSequence = useCallback(() => {
+    if (!isReady) return;
+
     setGameState("feeding");
     setImpactKey(0);
     setParticles([]);
@@ -367,15 +399,23 @@ export default function LevelUpAnimation({
         setShowResults(true);
       }, 1500);
     }, TOTAL_FEED_TIME);
-  }, [TOTAL_FEED_TIME]);
+  }, [TOTAL_FEED_TIME, isReady]);
 
   useEffect(() => {
     // Auto-start sequence on mount
-    startSequence();
-  }, [startSequence]);
+    if (isReady) {
+      startSequence();
+    }
+  }, [startSequence, isReady]);
+
+  const cardRarityColor = getRarityBorderColor(card.rarity);
 
   return (
-    <div className="absolute inset-0 z-50 font-sans overflow-hidden select-none">
+    <div
+      id="AnimationScreen"
+      className="absolute inset-0 z-50 font-sans overflow-hidden select-none"
+    >
+      <Background />
       <style>{`
         @keyframes suckIn {
           0% { transform: translate(var(--sx), var(--sy)) rotate(var(--r)) scale(1); opacity: 1; }
@@ -427,159 +467,162 @@ export default function LevelUpAnimation({
       `}</style>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-md h-full bg-white shadow-2xl overflow-hidden flex flex-col items-center border-x-4 border-slate-200">
+      <div className="relative w-full h-full overflow-hidden flex flex-col items-center">
         {/* Ambient Background */}
         <div
-          className={`absolute inset-0 transition-colors duration-700 ${
-            gameState === "burst" || gameState === "finished"
-              ? "bg-amber-500/10"
-              : "bg-slate-100/50"
-          }`}
+          className={`absolute inset-0 transition-colors duration-700 bg-green-400/10`}
         ></div>
 
         {/* --- Animation Layer --- */}
-        <div className="relative z-10 w-full h-full flex flex-col items-center pt-24">
-          {/* Header Text */}
-          <div
-            className={`absolute top-16 transition-all duration-300 transform ${
-              showResults
-                ? "scale-100 opacity-100 translate-y-0"
-                : "scale-0 opacity-0 translate-y-10"
-            }`}
-          >
-            <h1
-              className="text-4xl font-black text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] tracking-widest text-stroke-3 stroke-amber-700"
-              style={{ WebkitTextStroke: "2px #b45309" }}
+        {isReady && (
+          <div className="relative z-10 w-full h-full flex flex-col items-center pt-24 max-[400px]:pt-4">
+            {/* Header Text */}
+            <div
+              className={`mb-2 transition-all duration-300 transform ${
+                showResults
+                  ? "scale-100 opacity-100 translate-y-0"
+                  : "scale-0 opacity-0 translate-y-10"
+              }`}
             >
-              LEVELED UP!
-            </h1>
-          </div>
-
-          {/* The Card Container with Layers */}
-          <div
-            className={`relative flex flex-col items-center transition-transform duration-500 ${
-              showResults ? "translate-y-4" : "translate-y-16"
-            }`}
-          >
-            <ParticleSystem particles={bgParticles} className="z-0" />
-            <AnimatedCard state={gameState} impactKey={impactKey} card={card} />
-            <ParticleSystem particles={particles} className="z-50" />
-          </div>
-
-          {/* Results Panel */}
-          <div
-            className={`absolute bottom-0 w-full transition-all duration-500 ease-out transform ${
-              showResults ? "translate-y-0" : "translate-y-full opacity-0"
-            }`}
-          >
-            <div className="flex flex-col items-center w-full bg-gradient-to-t from-[#1c1917] to-transparent pt-12 pb-8 px-6">
-              {/* Decorative RESULTS Divider */}
-              <div className="relative w-full flex items-center justify-center mb-6">
-                <div className="absolute w-full h-[3px] bg-black"></div>
-                <div className="relative z-10 bg-black px-8 py-1 rounded-full border border-stone-700/50">
-                  <span className="text-white font-black uppercase tracking-[0.2em] text-sm">
-                    Results
-                  </span>
-                </div>
-              </div>
-
-              {/* Stats Layout */}
-              <div className="w-full flex flex-col gap-6 mb-8">
-                {/* Level Stat */}
-                <div className="flex flex-col items-center">
-                  <span className="text-white font-bold uppercase tracking-wide text-sm mb-1 drop-shadow-md">
-                    Level
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-white font-black text-3xl drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
-                      {oldLevel}
-                    </span>
-                    <ArrowUp
-                      size={28}
-                      className="text-amber-500 stroke-[4px] animate-bounce"
-                    />
-                    <span className="text-amber-500 font-black text-3xl drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
-                      {newLevel}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-4 w-full">
-                  {/* Power */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-white font-bold uppercase tracking-wide text-xs mb-1 drop-shadow-md">
-                      POW
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-white font-bold text-xl">
-                        {oldStats.pow}
-                      </span>
-                      <ArrowUp
-                        size={16}
-                        className="text-amber-500 stroke-[3px]"
-                      />
-                      <span className="text-amber-500 font-bold text-xl">
-                        {newStats.pow}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Speed */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-white font-bold uppercase tracking-wide text-xs mb-1 drop-shadow-md">
-                      SPD
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-white font-bold text-xl">
-                        {oldStats.spd}
-                      </span>
-                      <ArrowUp
-                        size={16}
-                        className="text-amber-500 stroke-[3px]"
-                      />
-                      <span className="text-amber-500 font-bold text-xl">
-                        {newStats.spd}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Defense */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-white font-bold uppercase tracking-wide text-xs mb-1 drop-shadow-md">
-                      DEF
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-white font-bold text-xl">
-                        {oldStats.def}
-                      </span>
-                      <ArrowUp
-                        size={16}
-                        className="text-amber-500 stroke-[3px]"
-                      />
-                      <span className="text-amber-500 font-bold text-xl">
-                        {newStats.def}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* OK Button */}
-              <button
-                onClick={onClose}
-                className="w-48 bg-gradient-to-b from-yellow-300 to-yellow-500 border-b-[6px] border-yellow-700 active:border-b-0 active:translate-y-[6px] text-[#422006] font-black py-4 rounded-2xl text-xl uppercase tracking-wider transition-all shadow-xl hover:brightness-110"
+              <h2
+                className="text-4xl font-black text-white"
+                style={{ WebkitTextStroke: `2px ${cardRarityColor}` }}
               >
-                OK
-              </button>
+                LEVELED UP!
+              </h2>
+            </div>
+
+            {/* The Card Container with Layers */}
+            <div
+              className={`relative flex flex-col items-center transition-transform duration-500 ${
+                showResults ? "translate-y-4" : "translate-y-16"
+              }`}
+            >
+              <ParticleSystem
+                particles={bgParticles}
+                className="z-0"
+                cardRarityColor={cardRarityColor}
+              />
+              <AnimatedCard
+                state={gameState}
+                impactKey={impactKey}
+                card={card}
+              />
+              <ParticleSystem
+                particles={particles}
+                className="z-50"
+                cardRarityColor={cardRarityColor}
+              />
+            </div>
+
+            {/* Results Panel */}
+            <div
+              className={`absolute bottom-0 w-full transition-all duration-500 ease-out transform ${
+                showResults ? "translate-y-0" : "translate-y-full opacity-0"
+              }`}
+            >
+              <div className="flex flex-col items-center w-full bg-gradient-to-t from-[#1c1917] to-transparent pt-12 pb-8 px-6">
+                {/* Decorative RESULTS Divider */}
+                <div className="relative w-full flex items-center justify-center mb-6 max-[400px]:mb-4">
+                  <div className="absolute w-full h-[3px] bg-gradient-to-r from-transparent via-black to-transparent"></div>
+                  <div className="relative z-10 bg-black px-8 py-1 rounded-full border border-stone-700/50 shadow-lg">
+                    <span className="text-white font-black uppercase tracking-[0.2em] text-sm">
+                      Results
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stats Layout */}
+                <div className="w-full flex flex-col gap-6 mb-8 max-[400px]:mb-4">
+                  {/* Level Stat */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-white font-bold uppercase tracking-wide text-sm mb-1 drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                      Level
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-white font-black text-3xl drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                        {oldLevel}
+                      </span>
+                      <ArrowUp
+                        size={28}
+                        className="text-amber-500 stroke-[4px] animate-bounce"
+                      />
+                      <span className="text-amber-500 font-black text-3xl drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                        {newLevel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-3 gap-4 w-full max-[400px]:gap-2">
+                    {/* Power */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-white font-bold uppercase tracking-wide text-sm mb-1 drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                        POW
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-white font-bold text-xl">
+                          {oldStats.pow}
+                        </span>
+                        <ArrowUp
+                          size={16}
+                          className="text-amber-500 stroke-[3px]"
+                        />
+                        <span className="text-amber-500 font-bold text-xl">
+                          {newStats.pow}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Speed */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-white font-bold uppercase tracking-wide text-sm mb-1 drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                        SPD
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-white font-bold text-xl">
+                          {oldStats.spd}
+                        </span>
+                        <ArrowUp
+                          size={16}
+                          className="text-amber-500 stroke-[3px]"
+                        />
+                        <span className="text-amber-500 font-bold text-xl">
+                          {newStats.spd}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Defense */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-white font-bold uppercase tracking-wide text-sm mb-1 drop-shadow-[0_2px_0_rgba(0,0,0,1)]">
+                        DEF
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-white font-bold text-xl">
+                          {oldStats.def}
+                        </span>
+                        <ArrowUp
+                          size={16}
+                          className="text-amber-500 stroke-[3px]"
+                        />
+                        <span className="text-amber-500 font-bold text-xl">
+                          {newStats.def}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* OK Button */}
+                <button
+                  onClick={onClose}
+                  className="w-48 bg-gradient-to-b from-yellow-300 to-yellow-500 border-b-[6px] border-yellow-700 active:border-b-0 active:translate-y-[6px] text-[#422006] font-black py-4 rounded-2xl text-xl uppercase tracking-wider transition-all shadow-xl hover:brightness-110"
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Screen Flash */}
-        <div
-          className={`absolute inset-0 bg-white pointer-events-none transition-opacity duration-300 z-50 mix-blend-overlay ${
-            gameState === "burst" ? "opacity-60" : "opacity-0"
-          }`}
-        ></div>
+        )}
       </div>
     </div>
   );

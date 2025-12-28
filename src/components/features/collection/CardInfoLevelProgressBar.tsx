@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import ClickTooltip from "@/components/common/ClickTooltip";
+import React from "react";
 
 // --- Types ---
 interface CardInfoLevelProgressBarProps {
@@ -20,7 +21,7 @@ const CardInfoLevelProgressBar: React.FC<CardInfoLevelProgressBarProps> = ({
     Math.min(Math.max(currentXp / requiredXp, 0), 1) * 100;
 
   return (
-    <div className="p-1 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="p-1 flex flex-col items-center justify-center relative">
       <div className="relative z-10 w-full">
         <div
           className={`relative h-[40px] flex items-center select-none ${className}`}
@@ -67,27 +68,29 @@ const CardInfoLevelProgressBar: React.FC<CardInfoLevelProgressBarProps> = ({
 
           {/* 3. The Badge (Absolute Left) */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 z-30 filter">
-            {/* Badge Circle Container */}
-            <div
-              className="w-[40px] h-[40px] rounded-full flex items-center justify-center border-[2px] border-[#ffd700] relative"
-              style={{
-                // 3D Sphere Gradient
-                background:
-                  "radial-gradient(circle at 30% 30%, #d0a0ff 0%, #9d4edd 30%, #3c096c 100%)",
-                // Outer black ring using box-shadow
-                boxShadow: "0 0 0 2px black",
-              }}
-            >
-              <span
-                className="font-black text-white text-md z-10 relative top-[1px]"
+            <ClickTooltip content="Card Level">
+              {/* Badge Circle Container */}
+              <div
+                className="w-[40px] h-[40px] rounded-full flex items-center justify-center border-[2px] border-[#ffd700] relative"
                 style={{
-                  WebkitTextStroke: "4px black",
-                  paintOrder: "stroke fill",
+                  // 3D Sphere Gradient
+                  background:
+                    "radial-gradient(circle at 30% 30%, #d0a0ff 0%, #9d4edd 30%, #3c096c 100%)",
+                  // Outer black ring using box-shadow
+                  boxShadow: "0 0 0 2px black",
                 }}
               >
-                {level}
-              </span>
-            </div>
+                <span
+                  className="font-black text-white text-md z-10 relative top-[1px]"
+                  style={{
+                    WebkitTextStroke: "4px black",
+                    paintOrder: "stroke fill",
+                  }}
+                >
+                  {level}
+                </span>
+              </div>
+            </ClickTooltip>
           </div>
         </div>
       </div>

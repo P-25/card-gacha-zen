@@ -16,7 +16,7 @@ export interface PlayerState {
 
 const initialState: PlayerState = {
   gems: 1000, // Initial starting gems
-  gold: 0,
+  gold: 10000,
   inventory: [],
   level: 10,
   experience: 0,

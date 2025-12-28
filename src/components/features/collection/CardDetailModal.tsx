@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ClickTooltip from "@/components/common/ClickTooltip";
+import TypeIcon from "@/components/common/TypeIcon";
 import CardInfoLevelProgressBar from "@/components/features/collection/CardInfoLevelProgressBar";
 import { getRarityBorderColor } from "@/lib/rarityStyles";
 import { RootState } from "@/store/store";
 import { Card } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import CardInfoModal from "./CardInfoModal";
@@ -27,7 +29,6 @@ export default function CardDetailModal({
 
   const [showLevelUpScreen, setShowLevelUpScreen] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [showMaxLevelAlert, setShowMaxLevelAlert] = useState(false);
 
   const [mounted, setMounted] = useState(false);
 
@@ -154,186 +155,175 @@ export default function CardDetailModal({
                       requiredXp={activeCard.level * 100}
                     />
                   </div>
-                  {/* Level up button  */}
-                  <motion.div
-                    onClick={() => {
-                      if (isMaxLevel) {
-                        setShowMaxLevelAlert(true);
-                      } else {
-                        setShowLevelUpScreen(true);
-                      }
-                    }}
-                    whileTap={!isMaxLevel ? { scale: 0.9 } : {}}
-                    animate={
-                      !isMaxLevel
-                        ? {
-                            scale: [1, 1.1, 1],
-                            boxShadow: [
-                              "0 0 0px #ffd700",
-                              "0 0 10px #ffd700",
-                              "0 0 0px #ffd700",
-                            ],
-                          }
-                        : {}
-                    }
-                    transition={
-                      !isMaxLevel
-                        ? {
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                          }
-                        : {}
-                    }
-                    className={`w-10 h-10 border-[2px] p-2 border-black rounded-full ml-2 cursor-pointer flex items-center justify-center ${
-                      isMaxLevel
-                        ? "bg-gray-300 grayscale opacity-50 cursor-not-allowed"
-                        : "bg-[#ffd700]"
-                    }`}
-                  >
-                    <Image
-                      src={"/assets/icons/level-up.webp"}
-                      alt={"Level"}
-                      width={10}
-                      height={10}
-                      className="object-cover"
-                      priority
-                    />
-                  </motion.div>
                 </div>
 
                 <div className="flex flex-col text-sm text-black font-bold divide-y divide-gray-400">
                   <div className="flex flex-row justify-between">
-                    <div className="flex flex-row justify-center items-center">
-                      <div>
-                        <Image
-                          src={"/assets/icons/power.webp"}
-                          alt={"Power"}
-                          width={30}
-                          height={30}
-                          className="object-cover"
-                          priority
-                        />
+                    <ClickTooltip
+                      content="Attack Power"
+                      className="flex flex-row justify-center items-center w-full"
+                    >
+                      <div className="flex flex-row justify-center items-center">
+                        <div>
+                          <Image
+                            src={"/assets/icons/power.webp"}
+                            alt={"Power"}
+                            width={30}
+                            height={30}
+                            className="object-cover"
+                            priority
+                          />
+                        </div>
+                        <div className="flex flex-col w-1/2 p-2">
+                          <span className="text-xs">POWER</span>
+                          <span className="text-md">
+                            {activeCard.state?.pow || 0}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col w-1/2 p-2">
-                        <span className="text-xs">POWER</span>
-                        <span className="text-md">
-                          {activeCard.state?.pow || 0}
-                        </span>
+                    </ClickTooltip>
+                    <ClickTooltip
+                      content="Action Speed"
+                      className="flex flex-row justify-center items-center w-full"
+                    >
+                      <div className="flex flex-row justify-center items-center">
+                        <div>
+                          <Image
+                            src={"/assets/icons/speed.webp"}
+                            alt={"Speed"}
+                            width={30}
+                            height={30}
+                            className="object-cover"
+                            priority
+                          />
+                        </div>
+                        <div className="flex flex-col w-1/2  p-2">
+                          <span className="text-xs">Speed</span>
+                          <span className="text-md">
+                            {activeCard.state?.spd || 0}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-row justify-center items-center">
-                      <div>
-                        <Image
-                          src={"/assets/icons/speed.webp"}
-                          alt={"Speed"}
-                          width={30}
-                          height={30}
-                          className="object-cover"
-                          priority
-                        />
-                      </div>
-                      <div className="flex flex-col w-1/2  p-2">
-                        <span className="text-xs">Speed</span>
-                        <span className="text-md">
-                          {activeCard.state?.spd || 0}
-                        </span>
-                      </div>
-                    </div>
+                    </ClickTooltip>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <div className="flex flex-row justify-center items-center">
-                      <div>
-                        <Image
-                          src={"/assets/icons/defense.webp"}
-                          alt={"Defense"}
-                          width={30}
-                          height={30}
-                          className="object-cover"
-                          priority
-                        />
+                    <ClickTooltip
+                      content="Defense"
+                      className="flex flex-row justify-center items-center w-full"
+                    >
+                      <div className="flex flex-row justify-center items-center">
+                        <div>
+                          <Image
+                            src={"/assets/icons/defense.webp"}
+                            alt={"Defense"}
+                            width={30}
+                            height={30}
+                            className="object-cover"
+                            priority
+                          />
+                        </div>
+                        <div className="flex flex-col w-1/2  p-2">
+                          <span className="text-xs">Defense</span>
+                          <span className="text-md">
+                            {activeCard.state?.def || 0}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col w-1/2  p-2">
-                        <span className="text-xs">Defense</span>
-                        <span className="text-md">
-                          {activeCard.state?.def || 0}
-                        </span>
+                    </ClickTooltip>
+                    <ClickTooltip
+                      content="Card Element"
+                      className="flex flex-row justify-center items-center w-full"
+                    >
+                      <div className="flex flex-row justify-center items-center">
+                        <div>
+                          <TypeIcon type={activeCard.setName} size={30} />
+                        </div>
+                        <div className="flex flex-col w-1/2  p-2">
+                          <span className="text-xs">Type</span>
+                          <span className="text-md">{activeCard.setName}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-row justify-center items-center">
-                      <div>
-                        <Image
-                          src={"/assets/icons/defense.webp"}
-                          alt={"Type"}
-                          width={30}
-                          height={30}
-                          className="object-cover"
-                          priority
-                        />
-                      </div>
-                      <div className="flex flex-col w-1/2  p-2">
-                        <span className="text-xs">Type</span>
-                        <span className="text-md">{activeCard.setName}</span>
-                      </div>
-                    </div>
+                    </ClickTooltip>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Level up button  */}
+
+                  <ClickTooltip
+                    content="Max Level Reached. Increase Player Level to upgrade."
+                    disabled={!isMaxLevel}
+                  >
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        if (!isMaxLevel) {
+                          setShowLevelUpScreen(true);
+                        }
+                      }}
+                      className={` text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all relative overflow-hidden group cursor-pointer ${
+                        isMaxLevel
+                          ? "opacity-50 cursor-not-allowed bg-gray-300 grayscale"
+                          : "bg-[#6A0DAD]"
+                      }`}
+                      style={{
+                        background:
+                          "linear-gradient(180deg, #4c2a85 0%, #3a1e69 100%)",
+                        boxShadow:
+                          "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <span className="text-sm max-[400px]:text-xs text-[#FDB931] font-bold tracking-wider relative z-10 px-2">
+                        Level Up
+                      </span>
+
+                      {/* Sheen Effect */}
+                      <motion.div
+                        className="absolute top-0 left-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                        animate={{ x: ["-200%", "400%"] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                        }}
+                      />
+                    </motion.button>
+                  </ClickTooltip>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      console.log(`Debug - Rank up coming soon`);
+                    }}
+                    className={` text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059]  group cursor-pointer ${
+                      true
+                        ? "opacity-50 cursor-not-allowed bg-gray-300 grayscale"
+                        : "bg-[#388E3C]"
+                    }`}
+                    style={{
+                      boxShadow:
+                        "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <span className="text-sm max-[400px]:text-xs text-[#FDB931] font-bold tracking-wider relative z-10 px-2">
+                      Rank Up
+                    </span>
+
+                    {/* Sheen Effect */}
+                    <motion.div
+                      className="absolute top-0 left-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                      animate={{ x: ["-200%", "400%"] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                      }}
+                    />
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         </>
       )}
-
-      {/* Max Level Alert Modal */}
-      <AnimatePresence>
-        {showMaxLevelAlert && (
-          <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 pointer-events-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-              onClick={() => setShowMaxLevelAlert(false)}
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 text-center shadow-2xl"
-            >
-              <div className="w-16 h-16 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Max Level Reached
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Increase your <strong>Player Level</strong> to upgrade this card
-                further.
-              </p>
-              <button
-                onClick={() => setShowMaxLevelAlert(false)}
-                className="w-full py-3 rounded-xl font-bold text-white bg-[#2a3b3b] hover:bg-[#1a2e2e] shadow-lg transition-colors"
-              >
-                OK
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Card Info Modal */}
       <AnimatePresence>

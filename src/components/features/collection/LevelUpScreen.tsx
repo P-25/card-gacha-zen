@@ -11,6 +11,7 @@ import BackButtonTopBar from "@/components/common/BackButtonTopBar";
 import LevelUpPopup from "./LevelUpPopup";
 import LevelUpAnimation from "./LevelUpAnimation";
 import CardInfoLevelProgressBar from "./CardInfoLevelProgressBar";
+import CardInfoModal from "./CardInfoModal";
 
 // Helper for XP calculation
 const getXpValue = (c: Card) => {
@@ -41,6 +42,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
   // Local state
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
   const [showLevelUpPopup, setShowLevelUpPopup] = useState(false);
+  const [infoCard, setInfoCard] = useState<Card | null>(null);
   const [levelUpStats, setLevelUpStats] = useState({
     oldLevel: 1,
     newLevel: 1,
@@ -292,9 +294,14 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
             />
           </div>
           <div className="flex-1 flex flex-col justify-center gap-2">
-            <h2 className="text-xl font-bold text-[#1a2e2e]">
-              {activeCard.name}
-            </h2>
+            <div className="flex justify-between items-center gap-2">
+              <h2 className="text-xl font-bold text-[#1a2e2e]">
+                {activeCard.name}
+              </h2>
+              <span className="text-xs font-bold text-black/40">
+                Max LVL {playerLevel}
+              </span>
+            </div>
             <div className="flex justify-between items-center gap-2">
               {/* Reverted to CardInfoLevelProgressBar */}
               <div className="w-full">
@@ -312,8 +319,12 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
                   }
                 />
               </div>
-              <div className="relative">
-                <span>(+ 1000 xp)</span>
+              <div className="relative min-w-[60px]">
+                {selectedXp > 0 && (
+                  <span className="text-sm text-[#34a334]">
+                    (+{selectedXp})
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -395,6 +406,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
                   isDeck={deckInstanceIds.has(c.instanceId || "")}
                   isRankUp={c.id === activeCard.id}
                   onToggle={() => handleToggleCard(c)}
+                  onLongPress={() => setInfoCard(c)}
                 />
               ))
           )}
@@ -413,24 +425,49 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
       {/* Level Up Animation */}
       <AnimatePresence>
         {showLevelUpPopup && (
-          <LevelUpAnimation
-            card={activeCard}
-            oldLevel={levelUpStats.oldLevel}
-            newLevel={levelUpStats.newLevel}
-            oldStats={{
-              pow: levelUpStats.oldPow,
-              spd: levelUpStats.oldSpd,
-              def: levelUpStats.oldDef,
-            }}
-            newStats={{
-              pow: levelUpStats.newPow,
-              spd: levelUpStats.newSpd,
-              def: levelUpStats.newDef,
-            }}
-            onClose={() => {
-              setShowLevelUpPopup(false);
-            }}
-          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, filter: "brightness(0.5)" }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="absolute inset-0 z-50"
+          >
+            {/* Flash Overlay */}
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="absolute inset-0 bg-white z-[60] pointer-events-none mix-blend-overlay"
+            />
+
+            <LevelUpAnimation
+              card={activeCard}
+              oldLevel={levelUpStats.oldLevel}
+              newLevel={levelUpStats.newLevel}
+              oldStats={{
+                pow: levelUpStats.oldPow,
+                spd: levelUpStats.oldSpd,
+                def: levelUpStats.oldDef,
+              }}
+              newStats={{
+                pow: levelUpStats.newPow,
+                spd: levelUpStats.newSpd,
+                def: levelUpStats.newDef,
+              }}
+              onClose={() => {
+                setShowLevelUpPopup(false);
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Card Info Modal */}
+      <AnimatePresence>
+        {infoCard && (
+          <div className="relative z-[100] pointer-events-auto">
+            <CardInfoModal card={infoCard} onClose={() => setInfoCard(null)} />
+          </div>
         )}
       </AnimatePresence>
     </div>
@@ -444,31 +481,75 @@ const FodderCardComponent = ({
   isDeck,
   isRankUp,
   onToggle,
+  onLongPress,
 }: {
   card: Card;
   isSelected: boolean;
   isDeck: boolean;
   isRankUp: boolean;
   onToggle: () => void;
+  onLongPress: () => void;
 }) => {
   const borderColor = getRarityBorderColor(card.rarity);
   const isLocked = isDeck || isRankUp;
 
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const isLongPressTriggered = React.useRef(false);
+
+  const startPress = () => {
+    isLongPressTriggered.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPressTriggered.current = true;
+      onLongPress();
+    }, 1000); // 2 seconds
+  };
+
+  const endPress = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLongPressTriggered.current) {
+      e.stopPropagation();
+      return;
+    }
+    onToggle();
+  };
+
   return (
     <motion.div
       whileTap={!isLocked ? { scale: 0.95 } : {}}
-      onClick={onToggle}
-      className={`relative aspect-[2/3] rounded-lg cursor-pointer shadow-lg group bg-gray-800 overflow-hidden ${
+      onMouseDown={startPress}
+      onMouseUp={endPress}
+      onMouseLeave={endPress}
+      onTouchStart={startPress}
+      onTouchEnd={endPress}
+      onClick={handleClick}
+      className={`relative aspect-[2/3] rounded-lg cursor-pointer shadow-lg group overflow-hidden ${
         isLocked ? "opacity-80" : ""
       }`}
       style={{
         boxShadow: isSelected
           ? `0 0 0 3px #fbbf24, 0 0 15px #fbbf24` // Thicker border + Strong Glow
-          : `inset 0 0 0 2px ${borderColor}`,
+          : `inset 0 0 0 4px ${borderColor}`,
         transform: isSelected ? "scale(0.95)" : "scale(1)",
         transition: "all 0.2s ease-in-out",
       }}
     >
+      <div className="absolute inset-0 z-0 opacity-80 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-125 flex items-center justify-center">
+        <div className="relative w-full h-full scale-[1.1] opacity-60">
+          <Image
+            src={getStrokeImage(card.rarity)}
+            alt="brush stroke"
+            fill
+            className="object-contain no-global-filter"
+            sizes="(max-width: 768px) 50vw, 300px"
+          />
+        </div>
+      </div>
       {/* Card Image */}
       <Image
         src={card.image}
@@ -479,46 +560,19 @@ const FodderCardComponent = ({
       />
 
       {/* Level Badge */}
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-white text-[10px] font-bold drop-shadow-md z-10">
+      <div
+        className="absolute bottom-1 left-1/2 -translate-x-1/2 text-white text-[10px] font-bold drop-shadow-md z-10 rounded-md px-2 py-1"
+        style={{
+          backgroundColor: borderColor,
+        }}
+      >
         Lvl {card.level}
       </div>
 
       {/* Selection Overlay */}
       {isSelected && (
-        // <div className="absolute inset-0 z-20 flex items-center justify-center">
-        //   <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_top_right,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_bottom_left,_rgba(251,191,36,0.5)_0%,_transparent_40%),_radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.5)_0%,_transparent_40%)]" />
-        //   {/* <div className="absolute inset-0 bg-yellow-500/30 animate-pulse" /> */}
-        //   {/* <div className="absolute inset-0 bg-gradient-to-t from-yellow-600/50 to-transparent" /> */}
-        //   <Image
-        //     src="/assets/icons/correct.webp"
-        //     alt="Selected"
-        //     width={40}
-        //     height={40}
-        //     className="relative z-10 no-global-filter"
-        //     style={{
-        //       filter:
-        //         // 1. Turn Black -> White
-        //         "invert(1) " +
-        //         // 2. Turn White -> Yellow/Gold
-        //         "sepia(1) saturate(500%) hue-rotate(5deg) " +
-        //         // 3. Add the Glow
-        //         "drop-shadow(0 0 3px #fbbf24) drop-shadow(0 0 10px #f59e0b)",
-        //     }}
-        //   />
-        // </div>
-
-        <div
-          /* 1. border-2 border-yellow-300: Creates the solid physical "gold frame" 
-    2. shadow-[...]: Two shadows combined:
-       - First part (0_0_15px...): OUTSIDE glow (makes the card pop)
-       - Second part (inset_0_0_30px...): INSIDE glow (the vignette effect you want)
-  */
-          className="absolute inset-0 z-20 flex items-center justify-center rounded-xl border-2 border-yellow-300 shadow-[0_0_15px_#fbbf24,inset_0_0_50px_rgba(251,191,36,0.6)]"
-        >
-          {/* Optional: A subtle gradient from bottom to top to match the "heavier" gold at the bottom of your reference */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl border-2 border-yellow-300 shadow-[0_0_15px_#fbbf24,inset_0_0_50px_rgba(251,191,36,0.6)]">
           <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/20 via-transparent to-transparent" />
-
-          {/* Your Checkmark (Unchanged) */}
           <Image
             src="/assets/icons/correct.webp"
             alt="Selected"
