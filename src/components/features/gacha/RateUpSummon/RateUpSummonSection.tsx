@@ -110,7 +110,7 @@ export default function RateUpSummonSection({
 
   return (
     <div
-      className="w-full flex flex-col items-center relative overflow-hidden pb-2"
+      className="w-full flex flex-col items-center relative pb-2"
       id="rateupSummonSection"
     >
       {/* BACKGROUND LAYERS */}

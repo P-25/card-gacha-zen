@@ -3,11 +3,12 @@
 import { getRarityBorderColor } from "@/lib/rarityStyles";
 import { RootState } from "@/store/store";
 import { Card, Resource } from "@/types/game";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import RateUpHighlight from "@/components/effects/RateUpHighlight";
+import CosmicBackground from "./CosmicBackground";
 
 interface CardRevealProps {
   onReset: () => void;
@@ -51,6 +52,21 @@ export default function CardReveal({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center overflow-hidden">
+      <AnimatePresence>
+        {isRare && (
+          <motion.div
+            key="cosmic-bg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="absolute z-10 w-full h-full mix-blend-screen"
+            id="spark"
+          >
+            <CosmicBackground rarity={"blue"} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="flex-1 flex flex-col items-center justify-center w-full relative z-10 py-4">
         <motion.div
           key={currentIndex}
@@ -72,7 +88,7 @@ export default function CardReveal({
           className="flex flex-col items-center gap-2 w-full max-w-md px-6"
         >
           {/* Card Container */}
-          <div className="relative w-full aspect-3/4 max-h-[55vh] flex items-center justify-center">
+          <div className="relative w-full aspect-3/4 max-h-[55vh] flex items-center justify-center bg-white rounded-xl">
             {/* Ink Burst Halo */}
             <div className="absolute inset-0 z-0 scale-150 opacity-40 flex items-center justify-center">
               <div className="relative w-full h-full">
@@ -91,8 +107,6 @@ export default function CardReveal({
                 />
               </div>
             </div>
-
-            {/* Rate Up Highlight - Moved outside overflow-hidden */}
             {/* Rate Up Highlight - Moved outside overflow-hidden */}
             {isRare && (
               <>
