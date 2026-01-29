@@ -52,39 +52,12 @@ export default function CardReveal({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center overflow-hidden">
-      <AnimatePresence>
-        {isRare && (
-          <motion.div
-            key="cosmic-bg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute z-10 w-full h-full mix-blend-screen"
-            id="spark"
-          >
-            <CosmicBackground rarity={"blue"} />
-          </motion.div>
-        )}
-      </AnimatePresence>
       <div className="flex-1 flex flex-col items-center justify-center w-full relative z-10 py-4">
         <motion.div
           key={currentIndex}
-          initial={
-            isRare
-              ? { scale: 0, opacity: 0, rotate: -10 }
-              : { scale: 0.9, opacity: 0 }
-          }
-          animate={
-            isRare
-              ? { scale: 1, opacity: 1, rotate: 0 }
-              : { scale: 1, opacity: 1 }
-          }
-          transition={
-            isRare
-              ? { type: "spring", damping: 12, stiffness: 200, mass: 1.5 }
-              : { type: "spring", damping: 20, stiffness: 100 }
-          }
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 20, stiffness: 100 }}
           className="flex flex-col items-center gap-2 w-full max-w-md px-6"
         >
           {/* Card Container */}
@@ -97,8 +70,8 @@ export default function CardReveal({
                     cardItem.rarity === "RARE"
                       ? "/assets/icons/rare_stroke.webp"
                       : cardItem.rarity === "UNCOMMON"
-                      ? "/assets/icons/uncommon_stroke.webp"
-                      : "/assets/icons/common_stroke.webp"
+                        ? "/assets/icons/uncommon_stroke.webp"
+                        : "/assets/icons/common_stroke.webp"
                   }
                   alt="brush stroke"
                   fill
@@ -107,21 +80,6 @@ export default function CardReveal({
                 />
               </div>
             </div>
-            {/* Rate Up Highlight - Moved outside overflow-hidden */}
-            {isRare && (
-              <>
-                <div className="absolute inset-0 z-0">
-                  <RateUpHighlight />
-                </div>
-                {/* Impact Flash */}
-                <motion.div
-                  className="absolute inset-0 z-50 bg-white pointer-events-none mix-blend-overlay"
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: 0 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                />
-              </>
-            )}
 
             <motion.div
               className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer shadow-2xl group"
@@ -144,6 +102,19 @@ export default function CardReveal({
                 fetchPriority="high"
                 loading="eager"
               />
+              {isRare && (
+                <div className="absolute inset-0 z-0 flex items-center justify-center">
+                  <div className="relative w-full h-full">
+                    <motion.img
+                      src={"/assets/extra/sparkle.png"}
+                      alt="sparkle"
+                      className="z-5 object-cover w-full h-full"
+                      fetchPriority="high"
+                      loading="eager"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Rarity Badge */}
               <div

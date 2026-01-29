@@ -281,6 +281,15 @@ const SingleCardForResult = ({
             className="object-contain no-global-filter"
             sizes="(max-width: 768px) 50vw, 300px"
           />
+          {isRare && (
+            <Image
+              src={"/assets/extra/blue-spark.png"}
+              alt="sparkle"
+              fill
+              className=" no-global-filter"
+              sizes="(max-width: 768px) 50vw, 300px"
+            />
+          )}
         </div>
       </div>
 
@@ -295,6 +304,20 @@ const SingleCardForResult = ({
           className="object-cover transition-transform duration-300 group-hover:scale-110"
         />
       </div>
+
+      {isRare && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="relative w-full h-full">
+            <Image
+              src={"/assets/extra/sparkle.png"}
+              alt="sparkle"
+              fill
+              className="object-contain no-global-filter"
+              sizes="(max-width: 768px) 50vw, 300px"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Level Badge */}
       <div className="absolute top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
