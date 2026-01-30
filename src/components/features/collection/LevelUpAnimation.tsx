@@ -278,10 +278,11 @@ export default function LevelUpAnimation({
   const TOTAL_FEED_TIME = FEEDER_COUNT * FEEDER_INTERVAL + 500;
 
   useEffect(() => {
-    // Defer heavy rendering to allow transition to start smoothly
+    // Defer heavy rendering to allow entrance transition to complete first
+    // Spring animation takes about 300-400ms to settle
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 100);
+    }, 450);
     return () => clearTimeout(timer);
   }, []);
 

@@ -8,7 +8,7 @@
         "rates": {
             "COMMON": 0.8540,
             "UNCOMMON": 0.1320,
-            "RARE": 0.5
+            "RARE": 0.0140
         },
         "pity": {
             "targetRarity": "RARE",

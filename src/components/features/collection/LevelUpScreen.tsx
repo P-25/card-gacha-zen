@@ -5,7 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { RootState } from "@/store/store";
 import { Card, Rarity } from "@/types/game";
-import { consumeCardsForXp, spendGold } from "@/store/slices/playerSlice";
+import {
+  consumeCardsForXp,
+  spendGold,
+  addGold,
+} from "@/store/slices/playerSlice";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 import BackButtonTopBar from "@/components/common/BackButtonTopBar";
 import LevelUpPopup from "./LevelUpPopup";
@@ -56,7 +60,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
 
   // Deck State
   const [deckInstanceIds, setDeckInstanceIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   // Load Deck
@@ -67,7 +71,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
         const parsed = JSON.parse(savedDeck);
         if (Array.isArray(parsed)) {
           const ids = new Set(
-            parsed.map((c: any) => c.instanceId).filter(Boolean) as string[]
+            parsed.map((c: any) => c.instanceId).filter(Boolean) as string[],
           );
           setDeckInstanceIds(ids);
         }
@@ -93,7 +97,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
     if (!activeCard) return [];
 
     let result = inventory.filter(
-      (c) => c.instanceId !== activeCard.instanceId
+      (c) => c.instanceId !== activeCard.instanceId,
     );
 
     if (rarityFilter !== "ALL") {
@@ -137,7 +141,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
           setVisibleFodderCount((prev) => prev + FODDER_INCREMENT);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (observerTarget.current) {
@@ -242,7 +246,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
       consumeCardsForXp({
         targetInstanceId: activeCard.instanceId || "",
         consumedInstanceIds: selectedInstanceIds,
-      })
+      }),
     );
     setSelectedInstanceIds([]);
 
@@ -356,6 +360,13 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
                 </span>
               </div>
             </button>
+            {/* DEV BUTTON: Add Gold */}
+            <button
+              onClick={() => dispatch(addGold(10000))}
+              className="mt-2 text-xs text-blue-500 underline opacity-50 hover:opacity-100"
+            >
+              [DEV] Add 10,000 Gold
+            </button>
           </div>
         </div>
 
@@ -388,7 +399,9 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto mb-2 px-4 scrollbar-hide">
+      <div
+        className={`flex-1 overflow-y-auto mb-2 px-4 scrollbar-hide ${showLevelUpPopup ? "invisible" : ""}`}
+      >
         {/* Fodder Grid */}
         <div className="grid grid-cols-3 gap-3 mt-2">
           {availableCards.length === 0 ? (
