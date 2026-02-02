@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CardReveal from "@/components/features/gacha/CardReveal";
-import { shopItems, ShopItem } from "@/config/shopConfig";
+import { shopItems, ShopItem, featuredShopConfig } from "@/config/shopConfig";
 import { RootState } from "@/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -84,9 +84,31 @@ export default function ShopScreen({ title }: { title: string }) {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [rewardMessage, setRewardMessage] = useState("");
 
-  const specificCards = shopItems.filter((i) => i.type === "SPECIFIC_CARD");
+  const specificCards = shopItems.filter((i) => i.type === "SPECIFIC_CARD"); // Keep strictly for legacy or specific overrides if any
   const randomPacks = shopItems.filter((i) => i.type === "RANDOM_PACK");
   const gemPacks = shopItems.filter((i) => i.type === "GEM_PACK");
+
+  // Process Featured Cards
+  const featuredCards: ShopItem[] = featuredShopConfig.cards.map(
+    (featuredItem, index) => {
+      // Find the card data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cardData = (cardsData as any[]).find(
+        (c) => c.id === featuredItem.cardId,
+      );
+
+      return {
+        id: `featured_${index}_${featuredItem.cardId}`,
+        type: "SPECIFIC_CARD",
+        name: cardData ? cardData.name : "Unknown Card",
+        cost: featuredItem.goldPrice,
+        currency: "GOLD",
+        image: cardData ? cardData.image : "/assets/placeholder.png",
+        cardId: featuredItem.cardId,
+        rarity: cardData ? cardData.rarity : "COMMON",
+      };
+    },
+  );
 
   const handleItemClick = (item: ShopItem) => {
     setSelectedItem(item);
@@ -148,7 +170,11 @@ export default function ShopScreen({ title }: { title: string }) {
   if (showReveal) {
     return (
       <div className="fixed inset-0 z-50">
-        <CardReveal results={revealResults} onReset={handleRevealReset} />
+        <CardReveal
+          results={revealResults}
+          onReset={handleRevealReset}
+          onFinish={handleRevealReset}
+        />
       </div>
     );
   }
@@ -161,23 +187,51 @@ export default function ShopScreen({ title }: { title: string }) {
       {/* <div className="flex-1 overflow-y-auto scrollbar-hide pb-24"> */}
       <div className="flex-1 container mx-auto max-w-7xl px-2 pt-2 pb-[10rem] relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         <div className="p-6 space-y-8 max-w-4xl mx-auto" id="shop-content">
-          <div className="flex items-center justify-center mb-4">
-            <h2 className="text-[#1a2e2e] font-bold uppercase tracking-widest text-md">
-              Cards
-            </h2>
-            <InfoTooltip text="Get the selected card" placement="bottom" />
-          </div>
+          {/* Featured Cards Section */}
+          <div className="w-full mb-8">
+            {/* Header + Timer + Tooltip */}
+            <div className="flex flex-col items-center mb-6 gap-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[#1a2e2e] font-bold uppercase tracking-widest text-xl">
+                  FEATURED Cards
+                </h2>
+                <InfoTooltip
+                  text="Directly purchase specific units. The selection refreshes automatically when the timer ends."
+                  placement="bottom"
+                />
+              </div>
 
-          {/* Specific Cards */}
-          <div className="grid grid-cols-2 gap-4">
-            {specificCards.map((item) => (
-              <ShopItemCard
-                key={item.id}
-                item={item}
-                onBuy={handleItemClick}
-                canAfford={item.currency === "GOLD" ? gold >= item.cost : true}
-              />
-            ))}
+              {/* Countdown Timer */}
+              <div className="bg-[#1a2e2e] text-[#FDB931] text-xs font-bold px-3 py-1 rounded-full shadow-inner flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-3 h-3"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>Ends in 2d 4h</span>{" "}
+                {/* Static for now, can implement dynamic hook if needed */}
+              </div>
+            </div>
+
+            {/* Featured Cards Grid (3 Columns) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 px-2">
+              {featuredCards.map((item) => (
+                <ShopItemCard
+                  key={item.id}
+                  item={item}
+                  onBuy={handleItemClick}
+                  canAfford={gold >= item.cost}
+                  showRarityStyle={true}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Random Packs */}

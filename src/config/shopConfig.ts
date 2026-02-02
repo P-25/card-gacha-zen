@@ -124,3 +124,33 @@ export const shopItems: ShopItem[] = [
     gemAmount: 1000,
   },
 ];
+
+export interface ShopFeaturedConfig {
+  startDate: string; // ISO Date string
+  endDate: string; // ISO Date string
+  cards: {
+    cardId: string;
+    goldPrice: number;
+  }[];
+}
+
+export const featuredShopConfig: ShopFeaturedConfig = {
+  startDate: new Date().toISOString(), // Starts now
+  endDate: new Date(
+    Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000,
+  ).toISOString(), // Ends in ~2d 4h
+  cards: [
+    {
+      cardId: "rare_card_001", // Horizon Keeper
+      goldPrice: 12000,
+    },
+    {
+      cardId: "uncommon_card_001", // Celestial Serpent
+      goldPrice: 3000,
+    },
+    {
+      cardId: "common_card_001", // Clay Golem
+      goldPrice: 500,
+    },
+  ],
+};
