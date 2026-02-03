@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Card, Resource } from "../../types/game";
+import { TIER_REWARD_GEMS, TIER_REWARD_GOLD } from "../../config/tierConfig";
 
 export interface PlayerState {
   gems: number;
@@ -12,6 +13,8 @@ export interface PlayerState {
   tag: string;
   activeProfilePicId: string;
   unlockedProfilePicIds: string[];
+  // Battle Tier
+  battleTier: number;
 }
 
 const initialState: PlayerState = {
@@ -25,6 +28,7 @@ const initialState: PlayerState = {
   tag: "#1234",
   activeProfilePicId: "default_1",
   unlockedProfilePicIds: ["default_1"],
+  battleTier: 1,
 };
 
 export const playerSlice = createSlice({
@@ -64,6 +68,7 @@ export const playerSlice = createSlice({
         newState.activeProfilePicId = "default_1";
       if (!newState.unlockedProfilePicIds)
         newState.unlockedProfilePicIds = ["default_1"];
+      if (!newState.battleTier) newState.battleTier = 1;
 
       return newState;
     },
@@ -96,13 +101,13 @@ export const playerSlice = createSlice({
       action: PayloadAction<{
         targetInstanceId: string;
         consumedInstanceIds: string[];
-      }>
+      }>,
     ) => {
       const { targetInstanceId, consumedInstanceIds } = action.payload;
 
       // 1. Find target card
       const targetCard = state.inventory.find(
-        (c) => c.instanceId === targetInstanceId
+        (c) => c.instanceId === targetInstanceId,
       );
       if (!targetCard) return;
 
@@ -125,7 +130,7 @@ export const playerSlice = createSlice({
 
       // 3. Remove consumed cards
       state.inventory = state.inventory.filter(
-        (c) => !consumedInstanceIds.includes(c.instanceId || "")
+        (c) => !consumedInstanceIds.includes(c.instanceId || ""),
       );
 
       // 4. Apply XP and Level Up Logic
@@ -134,7 +139,7 @@ export const playerSlice = createSlice({
 
       // Re-find target card in the new inventory array (safe for Immer)
       const updatedTarget = state.inventory.find(
-        (c) => c.instanceId === targetInstanceId
+        (c) => c.instanceId === targetInstanceId,
       );
       if (!updatedTarget) return;
 
@@ -168,7 +173,7 @@ export const playerSlice = createSlice({
     },
     setProfileInfo: (
       state,
-      action: PayloadAction<{ name: string; tag: string }>
+      action: PayloadAction<{ name: string; tag: string }>,
     ) => {
       state.name = action.payload.name;
       state.tag = action.payload.tag;
@@ -180,6 +185,12 @@ export const playerSlice = createSlice({
       if (!state.unlockedProfilePicIds.includes(action.payload)) {
         state.unlockedProfilePicIds.push(action.payload);
       }
+    },
+    increaseBattleTier: (state) => {
+      // Logic: Verified by selector in UI, here we just execute
+      state.battleTier += 1;
+      state.gems += TIER_REWARD_GEMS;
+      state.gold += TIER_REWARD_GOLD;
     },
   },
 });
@@ -195,5 +206,6 @@ export const {
   setProfileInfo,
   setActiveProfilePic,
   unlockProfilePic,
+  increaseBattleTier,
 } = playerSlice.actions;
 export default playerSlice.reducer;

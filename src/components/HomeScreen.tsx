@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 interface HomeScreenProps {
   onNavigate: (
-    screen: "gacha" | "quests" | "collection" | "battle" | "deck"
+    screen: "gacha" | "quests" | "collection" | "battle" | "deck" | "tier",
   ) => void;
 }
 
@@ -41,7 +41,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
 
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
-      <TopBar title="Home" />
+      <TopBar title="Home" onNavigate={onNavigate} />
       <HomeBanner />
 
       {/* {windowSize.width ? (
