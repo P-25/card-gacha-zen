@@ -25,7 +25,7 @@ export const getStrokeImage = (rarity: string) => {
 };
 
 export const generateRandomPlayerName = (
-  useNumbers: boolean = true
+  useNumbers: boolean = true,
 ): string => {
   const adjectives = [
     // -- Short Adjectives (Max 3 chars) --
@@ -345,5 +345,6 @@ export function generateRandomPlayerInfo(level: number) {
     tag: "#1234",
     activeProfilePicId: "default_1",
     unlockedProfilePicIds: ["default_1", "default_2"],
+    battleTier: 1,
   };
 }

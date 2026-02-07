@@ -31,6 +31,7 @@ interface BattleFlowProps {
   onNavigate: (screen: AppState) => void;
   onBack: () => void;
   setBattleNavVisible: (visible: boolean) => void;
+  selectedBattleModeId?: string | null;
 }
 
 const DECK_STORAGE_KEY = "player_deck_v1";
@@ -39,7 +40,12 @@ export default function BattleFlow({
   onNavigate,
   onBack,
   setBattleNavVisible,
+  selectedBattleModeId,
 }: BattleFlowProps) {
+  console.log(
+    "BattleFlow render - selectedBattleModeId:",
+    selectedBattleModeId,
+  );
   const [phase, setPhase] = useState<BattlePhaseType>("DECK");
   const [playerDeck, setPlayerDeck] = useState<Card[]>([]);
 
@@ -52,7 +58,7 @@ export default function BattleFlow({
         if (Array.isArray(parsed)) {
           // Validate cards
           const validCards = parsed.filter(
-            (c) => c && typeof c === "object" && c.state
+            (c) => c && typeof c === "object" && c.state,
           );
           setPlayerDeck(validCards);
         }
@@ -64,7 +70,7 @@ export default function BattleFlow({
 
   useEffect(() => {
     if (phase === "DECK") {
-      setBattleNavVisible(true);
+      setBattleNavVisible(false);
     } else {
       setBattleNavVisible(false);
     }
@@ -157,6 +163,7 @@ export default function BattleFlow({
             onStartBattle={handleStartBattle}
             onAutoForm={handleAutoForm}
             onBack={onBack}
+            selectedBattleModeId={selectedBattleModeId}
           />
         )}
         {phase === "SELECT" && (
@@ -172,6 +179,7 @@ export default function BattleFlow({
             key="matchmaking"
             onMatchFound={handleMatchFound}
             playerDeck={playerDeck}
+            selectedBattleModeId={selectedBattleModeId}
           />
         )}
         {phase === "VERSUS" && (
@@ -196,6 +204,7 @@ export default function BattleFlow({
             opponentDeck={opponentDeck}
             playerInfo={playerInfo}
             opponentInfo={opponentInfo}
+            onComplete={onBack}
           />
         )}
         {phase === "RESULT" && (

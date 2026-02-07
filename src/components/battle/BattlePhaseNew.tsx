@@ -8,6 +8,8 @@ import DefeatScreen from "./DefeatScreen";
 import DrawScreen from "./DrawScreen";
 import RoundResultOverlay from "./RoundResultOverlay";
 import profileIcons from "@/config/profileIcons.json";
+import { useDispatch } from "react-redux";
+import { addRewards } from "@/store/slices/playerSlice";
 
 // --- Types & Interfaces ---
 
@@ -66,13 +68,101 @@ interface CardBattleProps {
   opponentDeck?: Card[];
   playerInfo: BattlePlayerInfo;
   opponentInfo: BattlePlayerInfo;
+  onComplete?: () => void;
 }
+
+// --- Helper Component for Result Logic ---
+const BattleResultHandler = ({
+  userScore,
+  oppScore,
+  onContinue,
+  playerDeck,
+}: {
+  userScore: number;
+  oppScore: number;
+  onContinue: () => void;
+  playerDeck: Card[];
+}) => {
+  const dispatch = useDispatch();
+  const [rewardsCalculated, setRewardsCalculated] = useState(false);
+  const [rewards, setRewards] = useState<{
+    exp: number;
+    gold: number;
+    gems: number;
+  }>({ exp: 0, gold: 0, gems: 0 });
+
+  useEffect(() => {
+    if (rewardsCalculated) return;
+
+    let exp = 0;
+    let gold = 0;
+    let gems = 0;
+
+    if (userScore > oppScore) {
+      // Victory
+      if (oppScore === 0) {
+        // Perfect Win (3-0 or similar dominance if max score varies, assuming 3 for now based on context or just 0 opp score)
+        // User request: "Perfect WIn (win with 3-0)"
+        exp = 20;
+        gold = 30;
+        gems = 5;
+      } else {
+        // Normal Win
+        exp = 10;
+        gold = 20;
+      }
+    } else if (userScore < oppScore) {
+      // Defeat
+      gold = 10;
+    } else {
+      // Draw: Same as Normal Win but no Gems
+      exp = 10;
+      gold = 20;
+    }
+
+    setRewards({ exp, gold, gems });
+    dispatch(addRewards({ experience: exp, gold, gems }));
+    setRewardsCalculated(true);
+  }, [userScore, oppScore, dispatch, rewardsCalculated]);
+
+  if (userScore > oppScore) {
+    return (
+      <VictoryScreen
+        score={userScore}
+        opponentScore={oppScore}
+        onContinue={onContinue}
+        playerDeck={playerDeck}
+        rewards={rewards}
+      />
+    );
+  }
+  if (userScore < oppScore) {
+    return (
+      <DefeatScreen
+        score={userScore}
+        opponentScore={oppScore}
+        onContinue={onContinue}
+        playerDeck={playerDeck}
+        rewards={rewards}
+      />
+    );
+  }
+  return (
+    <DrawScreen
+      score={userScore}
+      opponentScore={oppScore}
+      onContinue={onContinue}
+      rewards={rewards}
+    />
+  );
+};
 
 export default function CardBattle({
   playerDeck = [],
   opponentDeck = [],
   playerInfo,
   opponentInfo,
+  onComplete,
 }: CardBattleProps) {
   // Derive Profiles
   const getAvatarUrl = (info: BattlePlayerInfo) => {
@@ -447,7 +537,7 @@ export default function CardBattle({
                 />
               ) : (
                 <div key={`empty-opp-${i}`} className="w-1/3 aspect-2/3" />
-              )
+              ),
             )}
           </div>
           <div
@@ -565,7 +655,7 @@ export default function CardBattle({
                 />
               ) : (
                 <div key={`empty-user-${i}`} className="w-1/3 aspect-2/3" />
-              )
+              ),
             )}
           </div>
         </div>
@@ -645,19 +735,19 @@ export default function CardBattle({
                             (i === 0
                               ? -50
                               : i === 1
-                              ? 50
-                              : i === 2
-                              ? 50
-                              : -50) *
+                                ? 50
+                                : i === 2
+                                  ? 50
+                                  : -50) *
                             (Math.random() + 0.5),
                           y:
                             (i === 0
                               ? -50
                               : i === 1
-                              ? -50
-                              : i === 2
-                              ? 50
-                              : 50) *
+                                ? -50
+                                : i === 2
+                                  ? 50
+                                  : 50) *
                             (Math.random() + 0.5),
                           rotate: (Math.random() - 0.5) * 45,
                           scale: 0.8,
@@ -750,19 +840,19 @@ export default function CardBattle({
                             (i === 0
                               ? -50
                               : i === 1
-                              ? 50
-                              : i === 2
-                              ? 50
-                              : -50) *
+                                ? 50
+                                : i === 2
+                                  ? 50
+                                  : -50) *
                             (Math.random() + 0.5),
                           y:
                             (i === 0
                               ? -50
                               : i === 1
-                              ? -50
-                              : i === 2
-                              ? 50
-                              : 50) *
+                                ? -50
+                                : i === 2
+                                  ? 50
+                                  : 50) *
                             (Math.random() + 0.5),
                           rotate: (Math.random() - 0.5) * 45,
                           scale: 0.8,
@@ -839,31 +929,18 @@ export default function CardBattle({
 
       {/* --- END SCREEN --- */}
       {gameState === "END" && (
-        <>
-          {userScore > oppScore && (
-            <VictoryScreen
-              score={userScore}
-              opponentScore={oppScore}
-              onContinue={startNewGame}
-              playerDeck={userHand.filter((c): c is Card => c !== null)}
-            />
-          )}
-          {userScore < oppScore && (
-            <DefeatScreen
-              score={userScore}
-              opponentScore={oppScore}
-              onContinue={startNewGame}
-              playerDeck={userHand.filter((c): c is Card => c !== null)}
-            />
-          )}
-          {userScore === oppScore && (
-            <DrawScreen
-              score={userScore}
-              opponentScore={oppScore}
-              onContinue={startNewGame}
-            />
-          )}
-        </>
+        <BattleResultHandler
+          userScore={userScore}
+          oppScore={oppScore}
+          onContinue={() => {
+            if (onComplete) {
+              onComplete();
+            } else {
+              startNewGame();
+            }
+          }}
+          playerDeck={userHand.filter((c): c is Card => c !== null)}
+        />
       )}
 
       {/* --- CSS ANIMATION KEYFRAMES --- */}

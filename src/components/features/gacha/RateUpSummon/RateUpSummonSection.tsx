@@ -9,6 +9,7 @@ import {
   addCardToInventory,
   addGold,
   spendGems,
+  addPlayerExp,
 } from "@/store/slices/playerSlice";
 import { RootState } from "@/store/store";
 import { AnimatePresence, motion } from "framer-motion";
@@ -32,6 +33,7 @@ export default function RateUpSummonSection({
     "idle" | "charging" | "summoning"
   >("idle");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [showLowGemWarning, setShowLowGemWarning] = useState(false);
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
@@ -48,7 +50,7 @@ export default function RateUpSummonSection({
     const cost = count === 1 ? banner.singlePrice : banner.multiPrice;
 
     if (gems < cost) {
-      alert("Not enough Gems!");
+      setShowLowGemWarning(true);
       setSummonState("idle");
       onSummonStateChange?.(false);
       return;
@@ -76,6 +78,10 @@ export default function RateUpSummonSection({
       dispatch(updatePity({ bannerId: banner.id, pityState: tempPity }));
     }
 
+    // Award Player XP (10 per summon)
+    // count is either 1 or 10
+    dispatch(addPlayerExp(count * 10));
+
     onSummon("gem", count, results);
   };
 
@@ -84,7 +90,7 @@ export default function RateUpSummonSection({
 
     const cost = count === 1 ? banner.singlePrice : banner.multiPrice;
     if (gems < cost) {
-      alert("Not enough Gems!");
+      setShowLowGemWarning(true);
       return;
     }
 
@@ -410,6 +416,41 @@ export default function RateUpSummonSection({
             </motion.button>
           </div>
         </motion.div>
+      </AnimatePresence>
+
+      {/* Low Gem Warning Popup */}
+      <AnimatePresence>
+        {showLowGemWarning && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border-4 border-[#C5A059] relative overflow-hidden"
+            >
+              {/* Decorative Top Bar */}
+              <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-purple-500 via-pink-500 to-purple-500" />
+
+              <h3 className="text-xl font-black text-[#2D3748] uppercase tracking-wide mb-2 text-center mt-2 flex items-center justify-center gap-2">
+                <span className="text-2xl">💎</span> Insufficient Gems
+              </h3>
+
+              <p className="text-[#4A5568] text-sm font-medium text-center mb-6 leading-relaxed px-2">
+                You don't have enough Gems to perform this summon. Complete
+                daily missions or purchase more from the shop!
+              </p>
+
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowLowGemWarning(false)}
+                  className="bg-[#3E206D] text-white px-8 py-3 rounded-xl font-bold uppercase tracking-wider shadow-lg hover:bg-[#2D1650] active:scale-95 transition-all border-2 border-[#C5A059]"
+                >
+                  Okay
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );

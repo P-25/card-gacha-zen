@@ -7,9 +7,10 @@ import React from "react";
 interface CollectionCardProps {
   card: Card;
   onClick: (card: Card) => void;
+  hideInfo?: boolean;
 }
 
-const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
+const CollectionCard = ({ card, onClick, hideInfo }: CollectionCardProps) => {
   const borderColor = getRarityBorderColor(card.rarity);
 
   const totalPower =
@@ -50,9 +51,11 @@ const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
       </div>
 
       {/* Level Badge */}
-      <div className="absolute top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
-        Lv.{card.level}
-      </div>
+      {!hideInfo && (
+        <div className="absolute top-0 left-0 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 border-r border-b border-white/10">
+          Lv.{card.level}
+        </div>
+      )}
 
       {/* <div className="flex justify-between z-20 absolute bottom-1 left-0 right-0 bg-gradient-to-r from-[#F5EEDF] to-transparent p-1">
         <div className="flex items-center">
@@ -67,28 +70,30 @@ const CollectionCard = ({ card, onClick }: CollectionCardProps) => {
           </span>
         </div>
       </div> */}
-      <div className="absolute right-2 bottom-2 z-30 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
-        {/* Badge Circle Container */}
-        <div
-          className="w-[30px] h-[30px] rounded-full flex items-center justify-center relative"
-          style={{
-            // 3D Sphere Gradient
-            background: borderColor,
-            // Outer black ring using box-shadow
-            boxShadow: "0 0 0 1px black",
-          }}
-        >
-          <span
-            className="font-black text-white text-sm z-10 relative top-[1px]"
+      {!hideInfo && (
+        <div className="absolute right-2 bottom-2 z-30 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+          {/* Badge Circle Container */}
+          <div
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center relative"
             style={{
-              WebkitTextStroke: "4px black",
-              paintOrder: "stroke fill",
+              // 3D Sphere Gradient
+              background: borderColor,
+              // Outer black ring using box-shadow
+              boxShadow: "0 0 0 1px black",
             }}
           >
-            {totalPower}
-          </span>
+            <span
+              className="font-black text-white text-sm z-10 relative top-[1px]"
+              style={{
+                WebkitTextStroke: "4px black",
+                paintOrder: "stroke fill",
+              }}
+            >
+              {totalPower}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 };

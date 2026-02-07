@@ -15,14 +15,17 @@ export interface PlayerState {
   unlockedProfilePicIds: string[];
   // Battle Tier
   battleTier: number;
+  // Level Up Tracking
+  lastSeenLevel: number;
 }
 
 const initialState: PlayerState = {
-  gems: 1000, // Initial starting gems
-  gold: 10000,
+  gems: 900, // Initial starting gems
+  gold: 100,
   inventory: [],
-  level: 10,
+  level: 1,
   experience: 0,
+  lastSeenLevel: 1,
   // Default Profile
   name: "Trainer",
   tag: "#1234",
@@ -60,6 +63,8 @@ export const playerSlice = createSlice({
       // Ensure level and experience exist (migration for old saves)
       if (newState.level === undefined) newState.level = 1;
       if (newState.experience === undefined) newState.experience = 0;
+      if (newState.lastSeenLevel === undefined)
+        newState.lastSeenLevel = newState.level;
 
       // Ensure Profile Info exists (migration)
       if (!newState.name) newState.name = "Trainer";
@@ -133,9 +138,8 @@ export const playerSlice = createSlice({
         (c) => !consumedInstanceIds.includes(c.instanceId || ""),
       );
 
-      // 4. Apply XP and Level Up Logic
-      // XP Required per Level = CurrentLevel * 100
-      // Max Level = state.level (Player Level)
+      // 4. Update XP but prevent Card Level > Player Level
+      // Logic: Max Level = state.level (Player Level)
 
       // Re-find target card in the new inventory array (safe for Immer)
       const updatedTarget = state.inventory.find(
@@ -192,6 +196,52 @@ export const playerSlice = createSlice({
       state.gems += TIER_REWARD_GEMS;
       state.gold += TIER_REWARD_GOLD;
     },
+    addPlayerExp: (state, action: PayloadAction<number>) => {
+      state.experience += action.payload;
+
+      // Level Up Logic
+      let nextLevelXp = state.level * 100;
+
+      while (state.experience >= nextLevelXp) {
+        state.experience -= nextLevelXp;
+        state.level += 1;
+        // Recalculate for next iteration if multiple levels gained
+        nextLevelXp = state.level * 100;
+      }
+    },
+    addRewards: (
+      state,
+      action: PayloadAction<{
+        gold?: number;
+        gems?: number;
+        experience?: number;
+      }>,
+    ) => {
+      const { gold, gems, experience } = action.payload;
+      if (gold) state.gold += gold;
+      if (gems) state.gems += gems;
+      if (experience) {
+        state.experience += experience;
+        let nextLevelXp = state.level * 100;
+        while (state.experience >= nextLevelXp) {
+          state.experience -= nextLevelXp;
+          state.level += 1;
+          nextLevelXp = state.level * 100;
+        }
+      }
+    },
+    acknowledgeLevelUp: (state) => {
+      // Sync the levels
+      const levelsGained = state.level - state.lastSeenLevel;
+      if (levelsGained > 0) {
+        state.lastSeenLevel = state.level;
+        // Grant rewards: 100 Gems, 300 Gold per level?
+        // The prompt says "reward the user with 100Gems and 300 Gold".
+        // Let's assume this fixed amount per level up.
+        state.gems += 100 * levelsGained;
+        state.gold += 300 * levelsGained;
+      }
+    },
   },
 });
 
@@ -207,5 +257,8 @@ export const {
   setActiveProfilePic,
   unlockProfilePic,
   increaseBattleTier,
+  addPlayerExp,
+  addRewards,
+  acknowledgeLevelUp,
 } = playerSlice.actions;
 export default playerSlice.reducer;
