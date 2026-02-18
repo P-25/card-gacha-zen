@@ -12,6 +12,7 @@ import QuestScreen from "@/components/QuestScreen";
 import OfferingRatesScreen from "@/components/OfferingRatesScreen";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
 import BattleTierScreen from "@/components/features/tier/BattleTierScreen";
+import SettingsScreen from "@/components/SettingsScreen";
 
 const CRITICAL_ASSETS = [
   "/assets/background/full-background.webp",
@@ -79,6 +80,9 @@ export default function GamePage() {
       )}
       {!isGlobalLoading && appState === "tier" && (
         <BattleTierScreen onBack={() => navigateTo("home")} />
+      )}
+      {!isGlobalLoading && appState === "settings" && (
+        <SettingsScreen onBack={() => navigateTo("home")} />
       )}
     </GameLayout>
   );

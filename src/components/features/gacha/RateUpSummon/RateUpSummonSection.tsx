@@ -17,6 +17,7 @@ import Image from "next/image";
 import { AppState } from "@/hooks/useGameState";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSound } from "@/hooks/useSound";
 
 interface RateUpSummonSectionProps {
   onSummon: (type: "gem", count: number, results?: (Card | Resource)[]) => void;
@@ -37,6 +38,7 @@ export default function RateUpSummonSection({
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
+  const { playClick } = useSound();
 
   const banner = summonsData[0];
 
@@ -225,7 +227,10 @@ export default function RateUpSummonSection({
                 {banner.pity.targetRarity} Rift Meter
               </span>
               <button
-                onClick={() => onNavigate("offering-rates")}
+                onClick={() => {
+                  playClick();
+                  onNavigate("offering-rates");
+                }}
                 disabled={summonState !== "idle"}
                 className={`px-2 py-1 transition-colors ${
                   summonState !== "idle"
@@ -346,7 +351,10 @@ export default function RateUpSummonSection({
             {/* Single Summon */}
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleSummonClick(1)}
+              onClick={() => {
+                playClick();
+                handleSummonClick(1);
+              }}
               className="flex-1 bg-[#FDF5E6] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all cursor-pointer relative overflow-hidden"
               style={{
                 boxShadow:
@@ -374,7 +382,10 @@ export default function RateUpSummonSection({
             {/* Multi Summon */}
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleSummonClick(10)}
+              onClick={() => {
+                playClick();
+                handleSummonClick(10);
+              }}
               className="flex-1 bg-[#6A0DAD] text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all relative overflow-hidden group cursor-pointer"
               style={{
                 background: "linear-gradient(180deg, #4c2a85 0%, #3a1e69 100%)",

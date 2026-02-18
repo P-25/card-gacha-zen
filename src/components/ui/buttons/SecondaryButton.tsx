@@ -1,7 +1,7 @@
 import React from "react";
+import { useSound } from "@/hooks/useSound";
 
-interface SecondaryButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SecondaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
@@ -10,8 +10,13 @@ export default function SecondaryButton({
   className = "",
   ...props
 }: SecondaryButtonProps) {
+  const { playClick } = useSound();
   return (
     <button
+      onClick={(e) => {
+        playClick();
+        props.onClick?.(e);
+      }}
       className={`
         relative px-6 py-2.5
         bg-white/10 backdrop-blur-sm

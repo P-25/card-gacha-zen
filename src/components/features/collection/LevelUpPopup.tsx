@@ -1,5 +1,7 @@
 import { motion, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface LevelUpPopupProps {
   oldLevel: number;
@@ -46,12 +48,16 @@ export default function LevelUpPopup({
   newDef,
   onClose,
 }: LevelUpPopupProps) {
+  const { isSfxMuted } = useSelector((state: RootState) => state.settings);
+
   // Sound effect placeholder
   useEffect(() => {
-    // In a real app, we would play a sound here
-    // const audio = new Audio('/sounds/levelup.mp3');
-    // audio.play();
-  }, []);
+    if (!isSfxMuted) {
+      // In a real app, we would play a sound here
+      // const audio = new Audio('/sounds/levelup.mp3');
+      // audio.play();
+    }
+  }, [isSfxMuted]);
 
   return (
     <div className="fixed inset-0 z-150 flex items-center justify-center p-4">

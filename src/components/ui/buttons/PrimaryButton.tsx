@@ -1,7 +1,7 @@
 import React from "react";
+import { useSound } from "@/hooks/useSound";
 
-interface PrimaryButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface PrimaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
@@ -10,8 +10,13 @@ export default function PrimaryButton({
   className = "",
   ...props
 }: PrimaryButtonProps) {
+  const { playClick } = useSound();
   return (
     <button
+      onClick={(e) => {
+        playClick();
+        props.onClick?.(e);
+      }}
       className={`
         relative px-8 py-3 
         bg-linear-to-r from-blue-600 to-blue-500 

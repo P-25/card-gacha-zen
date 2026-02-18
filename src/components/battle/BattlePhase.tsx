@@ -15,7 +15,7 @@ interface BattlePhaseProps {
   opponentDeck: Card[];
   onComplete: (
     result: "VICTORY" | "DEFEAT" | "DRAW",
-    score: { player: number; opponent: number }
+    score: { player: number; opponent: number },
   ) => void;
 }
 
@@ -42,7 +42,7 @@ export default function BattlePhase({
   const [animPhase, setAnimPhase] = useState<AnimPhase>("IDLE");
 
   const { name: playerName, activeProfilePicId } = useSelector(
-    (state: RootState) => state.player
+    (state: RootState) => state.player,
   );
 
   const playerIcon =
@@ -134,9 +134,13 @@ export default function BattlePhase({
     if (roundState === "REVEAL" && playerSelection && opponentSelection) {
       // Calculate winner
       const playerVal =
-        currentStat === "ATK" ? playerSelection.atk : playerSelection.hp;
+        currentStat === "ATK"
+          ? playerSelection.state?.pow || 0
+          : playerSelection.state?.def || 0;
       const opponentVal =
-        currentStat === "ATK" ? opponentSelection.atk : opponentSelection.hp;
+        currentStat === "ATK"
+          ? opponentSelection.state?.pow || 0
+          : opponentSelection.state?.def || 0;
 
       let winner: "PLAYER" | "OPPONENT" | "DRAW" = "DRAW";
       if (playerVal > opponentVal) winner = "PLAYER";
@@ -189,10 +193,10 @@ export default function BattlePhase({
       const timer = setTimeout(() => {
         // Remove played cards
         setPlayerHand((prev) =>
-          prev.filter((c) => c.id !== playerSelection?.id)
+          prev.filter((c) => c.id !== playerSelection?.id),
         );
         setOpponentHand((prev) =>
-          prev.filter((c) => c.id !== opponentSelection?.id)
+          prev.filter((c) => c.id !== opponentSelection?.id),
         );
 
         setPlayerSelection(null);
@@ -318,8 +322,8 @@ export default function BattlePhase({
              `}
               >
                 {currentStat === "ATK"
-                  ? opponentSelection.atk
-                  : opponentSelection.hp}
+                  ? opponentSelection.state?.pow || 0
+                  : opponentSelection.state?.def || 0}
               </div>
             </div>
 
@@ -390,8 +394,8 @@ export default function BattlePhase({
              `}
               >
                 {currentStat === "ATK"
-                  ? playerSelection.atk
-                  : playerSelection.hp}
+                  ? playerSelection.state?.pow || 0
+                  : playerSelection.state?.def || 0}
               </div>
             </div>
 
@@ -584,7 +588,7 @@ export default function BattlePhase({
                           : "text-slate-400"
                       }`}
                     >
-                      ⚔ {card.atk}
+                      ⚔ {card.state?.pow || 0}
                     </div>
                     <div
                       className={`${
@@ -593,7 +597,7 @@ export default function BattlePhase({
                           : "text-slate-400"
                       }`}
                     >
-                      🛡 {card.hp}
+                      🛡 {card.state?.def || 0}
                     </div>
                   </div>
                 </div>

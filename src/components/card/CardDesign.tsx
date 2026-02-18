@@ -12,7 +12,7 @@ export default function CardDesign({
   hideStates = true,
   className = "",
 }: CardDesignProps) {
-  const { name, level, hp, atk, image, design_type, textColor } = card;
+  const { name, level, state, image, design_type, textColor } = card;
 
   // Optimized Layout Map
   const getLayout = () => {
@@ -113,9 +113,9 @@ export default function CardDesign({
             }}
           >
             <span>•</span>
-            <span className="whitespace-nowrap">{hp || 100} HP</span>
+            <span className="whitespace-nowrap">{state?.def || 100} HP</span>
             <span>•</span>
-            <span className="whitespace-nowrap">{atk || 10} ATK</span>
+            <span className="whitespace-nowrap">{state?.pow || 10} ATK</span>
             <span>•</span>
           </div>
         </div>

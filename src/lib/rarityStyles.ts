@@ -346,5 +346,6 @@ export function generateRandomPlayerInfo(level: number) {
     activeProfilePicId: "default_1",
     unlockedProfilePicIds: ["default_1", "default_2"],
     battleTier: 1,
+    lastSeenLevel: level,
   };
 }

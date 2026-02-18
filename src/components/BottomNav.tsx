@@ -2,15 +2,17 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useSound } from "@/hooks/useSound";
 
 interface BottomNavProps {
   activeTab: "home" | "collection" | "shop" | "social" | "quests" | string;
   onNavigate: (
-    tab: "home" | "collection" | "shop" | "social" | "quests"
+    tab: "home" | "collection" | "shop" | "social" | "quests",
   ) => void;
 }
 
 export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
+  const { playClick } = useSound();
   const navItems = [
     {
       id: "home",
@@ -32,6 +34,11 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
       label: "QUESTS",
       icon: "/assets/icons/quest.webp",
     },
+    {
+      id: "settings",
+      label: "SETTINGS",
+      icon: "/assets/icons/info.webp", // Using info icon as placeholder/settings icon
+    },
   ] as const;
 
   return (
@@ -44,7 +51,10 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
             <button
               key={item.id}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={() => onNavigate(item.id as any)}
+              onClick={() => {
+                playClick();
+                onNavigate(item.id as any);
+              }}
               className="relative flex flex-col items-center justify-center w-16 h-full gap-1 cursor-pointer"
             >
               <div

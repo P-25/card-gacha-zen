@@ -11,7 +11,8 @@ export type AppState =
   | "shop"
   | "social"
   | "offering-rates"
-  | "tier";
+  | "tier"
+  | "settings";
 
 export interface GameResources {
   gold: number;

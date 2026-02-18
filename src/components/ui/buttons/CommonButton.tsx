@@ -1,7 +1,7 @@
 import React from "react";
+import { useSound } from "@/hooks/useSound";
 
-interface CommonButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface CommonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
@@ -10,6 +10,8 @@ export default function CommonButton({
   className = "",
   ...props
 }: CommonButtonProps) {
+  const { playClick } = useSound();
+
   return (
     <button
       className={`
@@ -23,6 +25,10 @@ export default function CommonButton({
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}
+      onClick={(e) => {
+        playClick();
+        props.onClick?.(e);
+      }}
       {...props}
     >
       {children}

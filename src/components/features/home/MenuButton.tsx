@@ -1,3 +1,4 @@
+import { useSound } from "@/hooks/useSound";
 import Image from "next/image";
 
 interface MenuButtonProps {
@@ -13,9 +14,13 @@ export default function MenuButton({
   iconSrc,
   onClick,
 }: MenuButtonProps) {
+  const { playClick } = useSound();
   return (
     <button
-      onClick={onClick}
+      onClick={() => {
+        playClick();
+        onClick?.();
+      }}
       className="relative w-full aspect-square bg-wh rounded-4xl shadow-[0_10px_30px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center p-4 group active:scale-95 transition-transform duration-200 border cursor-pointer min-w-[160px] bg-white/20 backdrop-blur-xl border border-white/30 shadow-xl bg-gradient-to-b from-white/40 to-white/10"
     >
       {/* Icon */}

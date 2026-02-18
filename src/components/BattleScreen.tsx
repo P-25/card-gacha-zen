@@ -7,6 +7,7 @@ import TopBar from "@/components/features/home/TopBar";
 import { AppState } from "@/hooks/useGameState";
 import BattleFlow from "./battle/BattleFlow";
 import StepUpBattle from "./battle/StepUpBattle";
+import { useSound } from "@/hooks/useSound";
 
 interface BattleScreenProps {
   onNavigate: (screen: AppState) => void;
@@ -17,6 +18,7 @@ export default function BattleScreen({
   onNavigate,
   setBattleNavVisible,
 }: BattleScreenProps) {
+  const { playClick } = useSound();
   const [mode, setMode] = useState<"MENU" | "1V1" | "STEP_UP">("MENU");
   const [returnLocation, setReturnLocation] = useState<"MENU" | "STEP_UP">(
     "MENU",
@@ -63,7 +65,10 @@ export default function BattleScreen({
       <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-5 pb-24 z-10">
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => console.log("Story Mode")}
+          onClick={() => {
+            playClick();
+            console.log("Story Mode");
+          }}
           className="bg-[#F5EEDF] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059] active:border-b-2 active:translate-y-1 transition-all cursor-pointer relative overflow-hidden"
           style={{
             boxShadow: "0 4px 0 #C5A059, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
@@ -87,7 +92,10 @@ export default function BattleScreen({
 
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => setMode("STEP_UP")}
+          onClick={() => {
+            playClick();
+            setMode("STEP_UP");
+          }}
           className="bg-[#F7F5E9] text-[#2D3748] rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#907D93] active:border-b-2 active:translate-y-1 transition-all cursor-pointer relative overflow-hidden"
           style={{
             boxShadow: "0 4px 0 #907D93, 0 10px 15px -3px rgba(0, 0, 0, 0.1)",
@@ -111,6 +119,7 @@ export default function BattleScreen({
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => {
+            playClick();
             setReturnLocation("MENU");
             setSelectedBattleModeId("wild");
             setMode("1V1");
