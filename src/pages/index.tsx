@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import GameLayout from "@/components/layout/GameLayout";
-import Loader from "@/components/Loader";
 import HomeScreen from "@/components/HomeScreen";
 import GachaScreen from "@/components/GachaScreen";
 import BattleScreen from "@/components/BattleScreen";
@@ -47,7 +46,7 @@ export default function GamePage() {
 
   return (
     <GameLayout appState={appState} onNavigate={navigateTo} showNav={showNav}>
-      {isGlobalLoading && <Loader />}
+      {/* Loader removed as it's now handled in StartScreen */}
       {!isGlobalLoading && appState === "home" && (
         <HomeScreen onNavigate={navigateTo} />
       )}

@@ -37,7 +37,7 @@ export default function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
     {
       id: "settings",
       label: "SETTINGS",
-      icon: "/assets/icons/info.webp", // Using info icon as placeholder/settings icon
+      icon: "/assets/icons/setting.webp", // Using info icon as placeholder/settings icon
     },
   ] as const;
 

@@ -21,7 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ReduxProvider>
       <Head>
-        <title>EchoRift</title>
+        <title>RIFTGARD</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <div className={`${luckiestGuy.className} ${luckiestGuy.variable}`}>
