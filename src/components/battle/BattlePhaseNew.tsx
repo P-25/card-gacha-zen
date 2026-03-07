@@ -10,6 +10,7 @@ import RoundResultOverlay from "./RoundResultOverlay";
 import profileIcons from "@/config/profileIcons.json";
 import { useDispatch } from "react-redux";
 import { addRewards } from "@/store/slices/playerSlice";
+import { updateQuestProgress } from "@/store/slices/questSlice";
 
 // --- Types & Interfaces ---
 
@@ -111,6 +112,7 @@ const BattleResultHandler = ({
         exp = 10;
         gold = 20;
       }
+      dispatch(updateQuestProgress({ type: "BATTLE_WIN", amount: 1 }));
     } else if (userScore < oppScore) {
       // Defeat
       gold = 10;

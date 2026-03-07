@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import CardInfoModal from "./CardInfoModal";
 import LevelUpScreen from "./LevelUpScreen";
+import { useSound } from "@/hooks/useSound";
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -24,11 +25,12 @@ export default function CardDetailModal({
   onClose,
 }: CardDetailModalProps) {
   const { inventory, level: playerLevel } = useSelector(
-    (state: RootState) => state.player
+    (state: RootState) => state.player,
   );
 
   const [showLevelUpScreen, setShowLevelUpScreen] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const { playClick } = useSound();
 
   const [mounted, setMounted] = useState(false);
 
@@ -126,7 +128,10 @@ export default function CardDetailModal({
                   aspectRatio: "2/3",
                   boxShadow: `inset 0 0 0 4px ${borderColor}`,
                 }}
-                onClick={() => setShowInfoModal(true)}
+                onClick={() => {
+                  playClick();
+                  setShowInfoModal(true);
+                }}
               >
                 <Image
                   src={activeCard.image}
@@ -257,6 +262,7 @@ export default function CardDetailModal({
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
                         if (!isMaxLevel) {
+                          playClick();
                           setShowLevelUpScreen(true);
                         }
                       }}
@@ -291,6 +297,7 @@ export default function CardDetailModal({
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
+                      playClick();
                       console.log(`Debug - Rank up coming soon`);
                     }}
                     className={` text-white rounded-xl py-4 px-2 flex flex-col items-center justify-center shadow-lg border-2 border-[#C5A059]  group cursor-pointer ${
@@ -337,6 +344,6 @@ export default function CardDetailModal({
         )}
       </AnimatePresence>
     </div>,
-    portalTarget
+    portalTarget,
   );
 }

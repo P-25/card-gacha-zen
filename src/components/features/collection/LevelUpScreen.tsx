@@ -10,12 +10,14 @@ import {
   spendGold,
   addGold,
 } from "@/store/slices/playerSlice";
+import { updateQuestProgress } from "@/store/slices/questSlice";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 import BackButtonTopBar from "@/components/common/BackButtonTopBar";
 import LevelUpPopup from "./LevelUpPopup";
-import LevelUpAnimation from "./LevelUpAnimation";
 import CardInfoLevelProgressBar from "./CardInfoLevelProgressBar";
 import CardInfoModal from "./CardInfoModal";
+import LevelUpAnimation from "./LevelUpAnimation";
+import { useSound } from "@/hooks/useSound";
 
 // Helper for XP calculation
 const getXpValue = (c: Card) => {
@@ -42,6 +44,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
     level: playerLevel,
     gold,
   } = useSelector((state: RootState) => state.player);
+  const { playClick } = useSound();
 
   // Local state
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
@@ -196,6 +199,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
     if (deckInstanceIds.has(id)) return; // In Deck
     if (c.id === activeCard.id) return; // Rank Up (Duplicate)
 
+    playClick();
     if (selectedInstanceIds.includes(id)) {
       setSelectedInstanceIds((prev) => prev.filter((i) => i !== id));
     } else {
@@ -207,6 +211,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
 
   const handleConfirmLevelUp = () => {
     if (!activeCard) return;
+    playClick();
 
     const currentLevel = activeCard.level;
     const currentPow = activeCard.state?.pow || 0;
@@ -251,6 +256,7 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
     setSelectedInstanceIds([]);
 
     if (levelsGained > 0) {
+      dispatch(updateQuestProgress({ type: "CARD_LEVEL_UP", amount: 1 }));
       setShowLevelUpPopup(true);
     }
   };
@@ -362,7 +368,10 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
             </button>
             {/* DEV BUTTON: Add Gold */}
             <button
-              onClick={() => dispatch(addGold(10000))}
+              onClick={() => {
+                playClick();
+                dispatch(addGold(10000));
+              }}
               className="mt-2 text-xs text-blue-500 underline opacity-50 hover:opacity-100"
             >
               [DEV] Add 10,000 Gold
@@ -378,7 +387,10 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
         {["ALL", "COMMON", "UNCOMMON", "RARE"].map((r) => (
           <button
             key={r}
-            onClick={() => setRarityFilter(r as any)}
+            onClick={() => {
+              playClick();
+              setRarityFilter(r as any);
+            }}
             className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
               rarityFilter === r
                 ? "bg-[#2a3b3b] text-white"
@@ -389,9 +401,10 @@ export default function LevelUpScreen({ card, onBack }: LevelUpScreenProps) {
           </button>
         ))}
         <button
-          onClick={() =>
-            setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-          }
+          onClick={() => {
+            playClick();
+            setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+          }}
           className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 ml-auto"
         >
           XP {sortOrder === "asc" ? "↑" : "↓"}
@@ -508,6 +521,7 @@ const FodderCardComponent = ({
 
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
   const isLongPressTriggered = React.useRef(false);
+  const { playClick } = useSound();
 
   const startPress = () => {
     isLongPressTriggered.current = false;
@@ -529,6 +543,7 @@ const FodderCardComponent = ({
       e.stopPropagation();
       return;
     }
+    playClick();
     onToggle();
   };
 

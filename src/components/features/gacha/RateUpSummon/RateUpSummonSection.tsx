@@ -11,6 +11,7 @@ import {
   spendGems,
   addPlayerExp,
 } from "@/store/slices/playerSlice";
+import { updateQuestProgress } from "@/store/slices/questSlice";
 import { RootState } from "@/store/store";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
@@ -38,7 +39,7 @@ export default function RateUpSummonSection({
   const dispatch = useDispatch();
   const { gems } = useSelector((state: RootState) => state.player);
   const pityState = useSelector((state: RootState) => state.pity);
-  const { playClick } = useSound();
+  const { playClick, playSummon } = useSound();
 
   const banner = summonsData[0];
 
@@ -83,6 +84,7 @@ export default function RateUpSummonSection({
     // Award Player XP (10 per summon)
     // count is either 1 or 10
     dispatch(addPlayerExp(count * 10));
+    dispatch(updateQuestProgress({ type: "SUMMON", amount: count }));
 
     onSummon("gem", count, results);
   };
@@ -99,6 +101,7 @@ export default function RateUpSummonSection({
     // Step 1: Input & Fade Out
     setSummonState("charging");
     onSummonStateChange?.(true);
+    playSummon();
 
     // Step 2: Charge Up (200ms - 1500ms)
     // We wait for the charge animation

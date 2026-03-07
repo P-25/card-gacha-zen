@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { checkResets, updateQuestProgress } from "@/store/slices/questSlice";
 import { useGameState } from "@/hooks/useGameState";
 import GameLayout from "@/components/layout/GameLayout";
 import HomeScreen from "@/components/HomeScreen";
@@ -29,6 +31,13 @@ const CRITICAL_ASSETS = [
 
 export default function GamePage() {
   const { appState, navigateTo, resources } = useGameState();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkResets());
+    dispatch(updateQuestProgress({ type: "LOGIN", amount: 1 }));
+  }, [dispatch]);
+
   const [isGachaSelectionMode, setIsGachaSelectionMode] = useState(true);
   const [isBattleNavVisible, setBattleNavVisible] = useState(true);
 

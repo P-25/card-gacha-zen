@@ -1,0 +1,133 @@
+{
+  "quests": [
+    {
+      "id": "daily_login_1",
+      "type": "DAILY",
+      "title": "Daily Supporter",
+      "description": "Log into the game today.",
+      "requirementType": "LOGIN",
+      "targetCount": 1,
+      "reward": {
+        "gold": 50,
+        "exp": 10
+      }
+    },
+    {
+      "id": "daily_battle_1",
+      "type": "DAILY",
+      "title": "Sparring Partner",
+      "description": "Win 1 Battle.",
+      "requirementType": "BATTLE_WIN",
+      "targetCount": 1,
+      "reward": {
+        "gold": 100,
+        "exp": 20
+      }
+    },
+    {
+      "id": "daily_battle_3",
+      "type": "DAILY",
+      "title": "Arena Challenger",
+      "description": "Win 3 Battles.",
+      "requirementType": "BATTLE_WIN",
+      "targetCount": 3,
+      "reward": {
+        "gold": 200,
+        "gems": 10,
+        "exp": 50
+      }
+    },
+    {
+      "id": "daily_summon_1",
+      "type": "DAILY",
+      "title": "Seeker of Heroes",
+      "description": "Perform 1 Summon.",
+      "requirementType": "SUMMON",
+      "targetCount": 1,
+      "reward": {
+        "gems": 20,
+        "exp": 30
+      }
+    },
+    {
+      "id": "daily_level_1",
+      "type": "DAILY",
+      "title": "Training regimen",
+      "description": "Level up a card 1 time.",
+      "requirementType": "CARD_LEVEL_UP",
+      "targetCount": 1,
+      "reward": {
+        "gold": 150,
+        "exp": 25
+      }
+    },
+    {
+      "id": "weekly_battle_10",
+      "type": "WEEKLY",
+      "title": "Weekly Warrior",
+      "description": "Win 10 Battles.",
+      "requirementType": "BATTLE_WIN",
+      "targetCount": 10,
+      "reward": {
+        "gold": 500,
+        "gems": 50,
+        "exp": 200
+      }
+    },
+    {
+      "id": "weekly_summon_5",
+      "type": "WEEKLY",
+      "title": "Astra's Favorite",
+      "description": "Perform 5 Summons.",
+      "requirementType": "SUMMON",
+      "targetCount": 5,
+      "reward": {
+        "gems": 100,
+        "exp": 150
+      }
+    },
+    {
+      "id": "all_battle_100",
+      "type": "ALL",
+      "title": "Centurion",
+      "description": "Win 100 Battles total.",
+      "requirementType": "BATTLE_WIN",
+      "targetCount": 100,
+      "reward": {
+        "gems": 500,
+        "gold": 5000,
+        "exp": 1000
+      }
+    }
+  ],
+  "progressRewards": [
+    {
+      "id": "daily_prog_3",
+      "type": "DAILY",
+      "requiredCompletedCount": 3,
+      "reward": {
+        "gems": 30,
+        "gold": 300
+      }
+    },
+    {
+      "id": "daily_prog_5",
+      "type": "DAILY",
+      "requiredCompletedCount": 5,
+      "reward": {
+        "gems": 50,
+        "gold": 500,
+        "exp": 100
+      }
+    },
+    {
+      "id": "weekly_prog_2",
+      "type": "WEEKLY",
+      "requiredCompletedCount": 2,
+      "reward": {
+        "gems": 150,
+        "gold": 1500
+      }
+    }
+  ]
+}

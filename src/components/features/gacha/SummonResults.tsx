@@ -9,6 +9,7 @@ import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
 
 import { AnimatePresence, motion } from "framer-motion";
 import CardInfoModal from "../collection/CardInfoModal";
+import { useSound } from "@/hooks/useSound";
 
 interface SummonResultsProps {
   results: (Card | Resource)[];
@@ -17,6 +18,7 @@ interface SummonResultsProps {
 
 export default function SummonResults({ results, onBack }: SummonResultsProps) {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const { playClick } = useSound();
 
   const row1 = results.slice(0, 3);
   const row2 = results.slice(3, 7);
@@ -227,7 +229,10 @@ export default function SummonResults({ results, onBack }: SummonResultsProps) {
         </>
 
         <button
-          onClick={onBack}
+          onClick={() => {
+            playClick();
+            onBack();
+          }}
           className="px-4 bg-[#3E206D] text-[#FDB931] font-bold text-xl py-3 rounded-xl border-2 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer hover:brightness-110"
         >
           <span className="relative z-10">Claim All</span>

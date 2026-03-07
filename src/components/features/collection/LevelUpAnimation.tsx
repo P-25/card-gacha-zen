@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
 import Image from "next/image";
-import { Card } from "@/types/game";
 import Background from "@/components/layout/Background";
 import { getRarityBorderColor, getStrokeImage } from "@/lib/rarityStyles";
+import { useSound } from "@/hooks/useSound";
+import { Card } from "@/types/game";
 
 // --- Types ---
 type GameState = "idle" | "feeding" | "burst" | "finished";
@@ -271,6 +272,7 @@ export default function LevelUpAnimation({
   const [showResults, setShowResults] = useState(false);
   const [impactKey, setImpactKey] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const { playClick } = useSound();
 
   const FEEDER_COUNT = 3;
   const FEEDER_INTERVAL = 600;
@@ -615,7 +617,10 @@ export default function LevelUpAnimation({
 
                 {/* OK Button */}
                 <button
-                  onClick={onClose}
+                  onClick={() => {
+                    playClick();
+                    onClose();
+                  }}
                   className="w-48 bg-gradient-to-b from-yellow-300 to-yellow-500 border-b-[6px] border-yellow-700 active:border-b-0 active:translate-y-[6px] text-[#422006] font-black py-4 rounded-2xl text-xl uppercase tracking-wider transition-all shadow-xl hover:brightness-110"
                 >
                   OK

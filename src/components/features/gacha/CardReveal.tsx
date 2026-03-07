@@ -5,10 +5,11 @@ import { RootState } from "@/store/store";
 import { Card, Resource } from "@/types/game";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import RateUpHighlight from "@/components/effects/RateUpHighlight";
 import CosmicBackground from "./CosmicBackground";
+import { useSound } from "@/hooks/useSound";
 
 interface CardRevealProps {
   onReset: () => void;
@@ -24,9 +25,22 @@ export default function CardReveal({
   console.log(`Debug - results`, results);
   const [currentIndex, setCurrentIndex] = useState(0);
   const item = results[currentIndex];
+  const { stopSummon, playRevealCard, playClick } = useSound();
 
   // Get inventory to check for duplicates (New Badge Logic)
   const inventory = useSelector((state: RootState) => state.player.inventory);
+
+  useEffect(() => {
+    if (results.length > 0) {
+      stopSummon();
+      const currentItem = results[currentIndex];
+      const isRareItem =
+        currentItem &&
+        currentItem.type === "CARD" &&
+        (currentItem as Card).rarity === "RARE";
+      playRevealCard(isRareItem);
+    }
+  }, [currentIndex, stopSummon, playRevealCard, results]);
 
   if (!item) return null;
 
@@ -193,20 +207,29 @@ export default function CardReveal({
             {/* Share / Skip Button */}
             {results.length > 1 && currentIndex < results.length - 1 ? (
               <button
-                onClick={onReset}
+                onClick={() => {
+                  playClick();
+                  onReset();
+                }}
                 className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider"
               >
                 SKIP ALL
               </button>
             ) : (
-              <button className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider">
+              <button
+                onClick={playClick}
+                className="flex-1 bg-transparent text-gray-500 font-bold text-lg py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 hover:text-gray-700 active:scale-95 transition-all uppercase tracking-wider"
+              >
                 SHARE
               </button>
             )}
 
             {/* Claim/Next Button (Primary) */}
             <button
-              onClick={handleNext}
+              onClick={() => {
+                playClick();
+                handleNext();
+              }}
               className="flex-2 bg-[#3E206D] text-[#FDB931] font-bold text-xl py-3 rounded-xl border-2 border-[#C5A059] shadow-lg active:scale-95 transition-transform uppercase tracking-widest relative overflow-hidden group cursor-pointer hover:brightness-110"
             >
               <span className="relative z-10">

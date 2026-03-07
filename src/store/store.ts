@@ -2,6 +2,7 @@ import { configureStore, Middleware } from "@reduxjs/toolkit";
 import playerReducer, { setPlayerState } from "./slices/playerSlice";
 import pityReducer, { setPityState } from "./slices/pitySlice";
 import settingsReducer, { setSettings } from "./slices/settingsSlice";
+import questReducer, { setQuestState } from "./slices/questSlice";
 import { saveSecureData, loadSecureData } from "../lib/storage";
 
 // Middleware to save state on changes
@@ -13,6 +14,7 @@ const persistenceMiddleware: Middleware = (store) => (next) => (action) => {
   saveSecureData("player_state", state.player);
   saveSecureData("pity_state", state.pity);
   saveSecureData("settings_state", state.settings);
+  saveSecureData("quest_state", state.quest);
 
   return result;
 };
@@ -22,6 +24,7 @@ export const store = configureStore({
     player: playerReducer,
     pity: pityReducer,
     settings: settingsReducer,
+    quest: questReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(persistenceMiddleware),
@@ -29,19 +32,25 @@ export const store = configureStore({
 
 // Function to hydrate store from storage
 export const hydrateStore = () => {
+  // Load everything from local storage FIRST before dispatching any actions.
+  // Because our persistence middleware triggers on ANY action and saves ALL state slices,
+  // we must ensure that no slice is prematurely overwritten with its initialState before it is loaded.
   const savedPlayer = loadSecureData<any>("player_state");
+  const savedPity = loadSecureData<any>("pity_state");
+  const savedSettings = loadSecureData<any>("settings_state");
+  const savedQuest = loadSecureData<any>("quest_state");
+
   if (savedPlayer) {
     store.dispatch(setPlayerState(savedPlayer));
   }
-
-  const savedPity = loadSecureData<any>("pity_state");
   if (savedPity) {
     store.dispatch(setPityState(savedPity));
   }
-
-  const savedSettings = loadSecureData<any>("settings_state");
   if (savedSettings) {
     store.dispatch(setSettings(savedSettings));
+  }
+  if (savedQuest) {
+    store.dispatch(setQuestState(savedQuest));
   }
 };
 

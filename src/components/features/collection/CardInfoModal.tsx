@@ -2,6 +2,7 @@ import { getRarityBorderColor } from "@/lib/rarityStyles";
 import { Card } from "@/types/game";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useSound } from "@/hooks/useSound";
 
 interface CardInfoModalProps {
   card: Card;
@@ -10,6 +11,7 @@ interface CardInfoModalProps {
 
 export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
   const borderColor = getRarityBorderColor(card.rarity);
+  const { playClick } = useSound();
   return (
     <div className="fixed inset-0 z-120 flex items-center justify-center">
       {/* Lightweight Background for Performance */}
@@ -52,7 +54,10 @@ export default function CardInfoModal({ card, onClose }: CardInfoModalProps) {
 
           {/* Close Button */}
           <button
-            onClick={onClose}
+            onClick={() => {
+              playClick();
+              onClose();
+            }}
             className="absolute top-6 right-6 text-[#1a2e2e]/50 hover:text-[#1a2e2e] transition-colors"
           >
             <svg

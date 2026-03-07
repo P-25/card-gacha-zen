@@ -9,6 +9,7 @@ import { Card, Rarity } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useSound } from "@/hooks/useSound";
 
 interface CollectionScreenProps {
   onNavigate: (screen: AppState) => void;
@@ -19,6 +20,7 @@ export default function CollectionScreen({
 }: CollectionScreenProps) {
   const { inventory } = useSelector((state: RootState) => state.player);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const { playClick } = useSound();
 
   // Filter States
   const [rarityFilter, setRarityFilter] = useState<Rarity | "ALL">("ALL");
@@ -65,13 +67,14 @@ export default function CollectionScreen({
     if (scrollHeight - scrollTop <= clientHeight + 100) {
       if (visibleCount < filteredCards.length) {
         setVisibleCount((prev) =>
-          Math.min(prev + SCROLL_INCREMENT, filteredCards.length)
+          Math.min(prev + SCROLL_INCREMENT, filteredCards.length),
         );
       }
     }
   };
 
   const handleSortToggle = () => {
+    playClick();
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
@@ -117,7 +120,10 @@ export default function CollectionScreen({
             {(["ALL", "RARE", "UNCOMMON", "COMMON"] as const).map((r) => (
               <button
                 key={r}
-                onClick={() => setRarityFilter(r)}
+                onClick={() => {
+                  playClick();
+                  setRarityFilter(r);
+                }}
                 className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                   r === rarityFilter
                     ? "bg-gray-800 text-white"
@@ -178,7 +184,10 @@ export default function CollectionScreen({
       >
         <CollectionGrid
           cards={visibleCards}
-          onCardClick={setSelectedCard}
+          onCardClick={(c) => {
+            playClick();
+            setSelectedCard(c);
+          }}
           onNavigate={onNavigate}
         />
         {visibleCount < filteredCards.length && (
